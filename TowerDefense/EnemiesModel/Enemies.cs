@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Media.Animation;
 
-namespace TowerDefense.Enemies
+namespace TowerDefense.EnemiesModel
 {
-    internal class Enemies
+    public class Enemies
     {
         public int Speed { get; set; }
         public int Life { get; set; }
