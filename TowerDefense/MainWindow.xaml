@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TowerDefense"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+        Title="MainWindow" Height="1080" Width="1920"
+        WindowState="Maximized">
+    <Grid x:Name="MainGrid">
+        <Button x:Name="Start" Width="400" Height="200" Background="Orange" Content="Start Map 1" FontFamily="Arial" FontSize="40" Click="Start_Click"/>
     </Grid>
 </Window>
