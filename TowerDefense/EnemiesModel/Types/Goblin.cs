@@ -1,4 +1,4 @@
-﻿namespace TowerDefense.Enemies.Types
+﻿namespace TowerDefense.EnemiesModel.Types
 {
     internal class Giblin : Enemies
     {
