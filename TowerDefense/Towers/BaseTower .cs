@@ -4,6 +4,8 @@ using System.Windows;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TowerDefense.Grid;
+using TowerDefense.EnemiesModel;
 
 namespace TowerDefense.Towers
 {
@@ -29,18 +31,39 @@ namespace TowerDefense.Towers
         public void Attack()
         {
         }
-        public Enemies GetTarget(List<Enemy> enemies)
+        public Enemies GetTarget(SpatialGrid grid, int cellSize)
         {
+            var enemiesInRange = GetEnemiesInRange(grid, cellSize);
+
+            if (enemiesInRange.Count == 0)
+            {
+                return null;
+            }
+
+            Enemies closestEnemy = enemiesInRange[0];
+
+            foreach (var enemy in enemiesInRange)
+            {
+                double currentDistance = Point.Subtract(Position, enemy.Position).Length;
+                double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+
+                if (currentDistance < closestDistance)
+                {
+                    closestEnemy = enemy;
+                }
+            }
+
+            return closestEnemy;
         }
 
-        public bool IsInRange(Enemy enemy)
+        public bool IsInRange(Enemies enemy)
         {
-            float distance = Point.Subtract(Position, enemy.Position).Length();
+            double distance = Point.Subtract(Position, enemy.Position).Length;
             return distance <= AttackRange;
         }
-        public List<EnemiesInRange> EnemiesInRange(Spatial grid, int cellSize)
+        public List<Enemies> GetEnemiesInRange(SpatialGrid grid, int cellSize)
         {
-            var enemiesInRange = new List<Enemy>();
+            var enemiesInRange = new List<Enemies>();
 
             var cellsToCheck = GetCellsInRange(cellSize);
 
