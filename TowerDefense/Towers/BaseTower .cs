@@ -1,7 +1,7 @@
-﻿using System.Windows;
-using TowerDefense.Grid;
+﻿using TowerDefense.Grid;
 using TowerDefense.EnemiesModel;
 using TowerDefense.Projectils;
+using System.Windows;
 
 namespace TowerDefense.Towers
 {
@@ -31,7 +31,7 @@ namespace TowerDefense.Towers
         public void Attack(Enemies target)
         {
             if (target == null) return;
-
+            
             Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed);
             projectile.Animate(gameCanvas, (proj) =>
             {
