@@ -29,37 +29,37 @@ namespace TowerDefense.Towers
         public void Attack()
         {
         }
-        public Enemies GetTarget(List<Enemy> enemies)
-        {
-        }
+        //public Enemies GetTarget(List<Enemy> enemies)
+        //{
+        //}
 
-        public bool IsInRange(Enemy enemy)
-        {
-            float distance = Point.Subtract(Position, enemy.Position).Length();
-            return distance <= AttackRange;
-        }
-        public List<EnemiesInRange> EnemiesInRange(Spatial grid, int cellSize)
-        {
-            var enemiesInRange = new List<Enemy>();
+        //public bool IsInRange(Enemy enemy)
+        //{
+        //    float distance = Point.Subtract(Position, enemy.Position).Length();
+        //    return distance <= AttackRange;
+        //}
+        //public List<EnemiesInRange> EnemiesInRange(Spatial grid, int cellSize)
+        //{
+        //    var enemiesInRange = new List<Enemy>();
 
-            var cellsToCheck = GetCellsInRange(cellSize);
+        //    var cellsToCheck = GetCellsInRange(cellSize);
 
-            foreach (var cell in cellsToCheck)
-            {
-                var enemiesInCell = grid.GetEnemiesInCell(cell);
-                if (enemiesInCell != null)
-                {
-                    foreach (var enemy in enemiesInRange)
-                    {
-                        if (IsInRange(enemy))
-                        {
-                            enemiesInRange.Add(enemy);
-                        }
-                    }
-                }
-            }
-            return enemiesInRange;
-        }
+        //    foreach (var cell in cellsToCheck)
+        //    {
+        //        var enemiesInCell = grid.GetEnemiesInCell(cell);
+        //        if (enemiesInCell != null)
+        //        {
+        //            foreach (var enemy in enemiesInRange)
+        //            {
+        //                if (IsInRange(enemy))
+        //                {
+        //                    enemiesInRange.Add(enemy);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return enemiesInRange;
+        //}
 
         public List<(int, int)> GetCellsInRange(int cellSize)
         {

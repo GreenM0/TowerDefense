@@ -12,8 +12,8 @@ namespace TowerDefense
         private void Start_Click(object sender, RoutedEventArgs e)
         {
             GameHandler gameHandler = new();
-            gameHandler.Width = MainGrid.ActualWidth;
-            gameHandler.Height = MainGrid.ActualHeight;
+            gameHandler.Width = 1920;
+            gameHandler.Height = 1080;
             MainGrid.Children.Add(gameHandler);
         }
     }

@@ -12,6 +12,8 @@
             <ColumnDefinition Width="25*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid x:Name="GameField" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Rectangle Grid.Column="1" Fill="Blue"/>
+
+        <Canvas x:Name="GameField" Grid.Column="0"/>
     </Grid>
 </UserControl>
