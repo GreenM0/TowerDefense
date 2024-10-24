@@ -1,8 +1,6 @@
-﻿using System.Windows.Media.Animation;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Controls;
-using System.Net;
-using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace TowerDefense.EnemiesModel
 {
@@ -20,7 +18,7 @@ namespace TowerDefense.EnemiesModel
             Coins = coins;
         }
 
-        public void Movement(Point[] _gameWay, Canvas _gameField, Image img)
+        public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
         {
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
@@ -40,9 +38,19 @@ namespace TowerDefense.EnemiesModel
                     To = endPoint.Y,
                     Duration = TimeSpan.FromSeconds(2)
                 };
+                // Erstelle eine TaskCompletionSource für das Ende der Animation
+                TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
+                TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
+
+                // Event-Handler für das Ende der X-Animation
+                animationX.Completed += (s, e) => tcsX.SetResult(true);
+                // Event-Handler für das Ende der Y-Animation
+                animationY.Completed += (s, e) => tcsY.SetResult(true);
 
                 img.BeginAnimation(Canvas.LeftProperty, animationX);
                 img.BeginAnimation(Canvas.TopProperty, animationY);
+
+                await Task.WhenAll(tcsX.Task, tcsY.Task);
             }
         }
 
