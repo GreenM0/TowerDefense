@@ -45,7 +45,7 @@ namespace TowerDefense
             Canvas.SetLeft(ImageControl, _gameWay[0].X);
             Canvas.SetTop(ImageControl, _gameWay[0].Y);
             GameField.Children.Add(ImageControl);
-            goblin.Movement(_gameWay, _mainCanvas, ImageControl);
+            Task movement = goblin.Movement(_gameWay, _mainCanvas, ImageControl);
         }
     }
 }
