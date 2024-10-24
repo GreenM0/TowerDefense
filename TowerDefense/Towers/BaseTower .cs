@@ -4,6 +4,8 @@ using System.Windows;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TowerDefense.Grid;
+using TowerDefense.EnemiesModel;
 
 namespace TowerDefense.Towers
 {
@@ -79,6 +81,5 @@ namespace TowerDefense.Towers
                 
             return cellsInRange;
         }
-
     }   
 }

@@ -10,7 +10,7 @@ namespace TowerDefense
     {
         private DispatcherTimer ?_gameTick;
         private Point[] _gameWay = new Point[3];
-        private Canvas _mainCanvas;
+        private Canvas _mainCanvas = null!;
 
         public GameHandler()
         {
