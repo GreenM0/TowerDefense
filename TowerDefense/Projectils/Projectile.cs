@@ -13,7 +13,7 @@ namespace TowerDefense.Projectils
         public double Speed { get; private set; }
         public UIElement UIElement { get; private set; } 
 
-        public Projectile(Point startPosition, Point targetPosition, double speed, double damage)
+        public Projectile(Point startPosition, Point targetPosition, double speed)
         {
             StartPosition = startPosition;
             TargetPosition = targetPosition;

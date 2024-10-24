@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows;
 using TowerDefense.Grid;
 using TowerDefense.EnemiesModel;
+using TowerDefense.Projectils;
 
 namespace TowerDefense.Towers
 {
@@ -17,8 +13,10 @@ namespace TowerDefense.Towers
         public int AttackDamage { get; private set; }
         public int Costs { get; private set; }
         public float Size { get; private set; }
+        public int ProjectileimageId {  get; private set; }
+        public int ProjectileSpeed { get; private set; }
 
-        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size)
+        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -26,22 +24,31 @@ namespace TowerDefense.Towers
             Position = position;
             Costs = costs;
             Size = size;
+            ProjectileimageId = projectileimageId;
+            ProjectileSpeed = projectilespeed;
         }
 
-        public void Attack()
+        public void Attack(Enemies target)
         {
+            if (target == null) return;
+
+            Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed);
+            projectile.Animate(gameCanvas, (proj) =>
+            {
+                target.GetHit(AttackDamage);
+            });
         }
 
-        public Enemies GetTarget(SpatialGrid grid, int cellSize)
+        public void GetTarget(SpatialGrid grid, int cellSize)
         {
             var enemiesInRange = GetEnemiesInRange(grid, cellSize);
 
+            Enemies closestEnemy = enemiesInRange[0];
+
             if (enemiesInRange.Count == 0)
             {
-                return null;
+                Attack(closestEnemy);
             }
-
-            Enemies closestEnemy = enemiesInRange[0];
 
             foreach (var enemy in enemiesInRange)
             {
@@ -54,7 +61,7 @@ namespace TowerDefense.Towers
                 }
             }
 
-            return closestEnemy;
+            Attack(closestEnemy);
         }
 
         public bool IsInRange(Enemies enemy)
