@@ -31,6 +31,7 @@ namespace TowerDefense.Towers
         public void Attack()
         {
         }
+
         public Enemies GetTarget(SpatialGrid grid, int cellSize)
         {
             var enemiesInRange = GetEnemiesInRange(grid, cellSize);
@@ -61,6 +62,7 @@ namespace TowerDefense.Towers
             double distance = Point.Subtract(Position, enemy.Position).Length;
             return distance <= AttackRange;
         }
+
         public List<Enemies> GetEnemiesInRange(SpatialGrid grid, int cellSize)
         {
             var enemiesInRange = new List<Enemies>();
@@ -102,6 +104,5 @@ namespace TowerDefense.Towers
                 
             return cellsInRange;
         }
-
     }   
 }
