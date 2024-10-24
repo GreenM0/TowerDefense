@@ -28,8 +28,8 @@ namespace TowerDefense.Maps
 
             _corner1 = new Point
             {
-                X = Convert.ToInt32(Line2.X2),
-                Y = Convert.ToInt32(Line2.Y2)
+                X = Convert.ToInt32(Line1.X2),
+                Y = Convert.ToInt32(Line1.Y2)
             };
 
             _endPoint = new Point
