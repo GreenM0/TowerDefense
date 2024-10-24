@@ -31,60 +31,37 @@ namespace TowerDefense.Towers
         public void Attack()
         {
         }
+        //public Enemies GetTarget(List<Enemy> enemies)
+        //{
+        //}
 
-        public Enemies GetTarget(SpatialGrid grid, int cellSize)
-        {
-            var enemiesInRange = GetEnemiesInRange(grid, cellSize);
+        //public bool IsInRange(Enemy enemy)
+        //{
+        //    float distance = Point.Subtract(Position, enemy.Position).Length();
+        //    return distance <= AttackRange;
+        //}
+        //public List<EnemiesInRange> EnemiesInRange(Spatial grid, int cellSize)
+        //{
+        //    var enemiesInRange = new List<Enemy>();
 
-            if (enemiesInRange.Count == 0)
-            {
-                return null;
-            }
+        //    var cellsToCheck = GetCellsInRange(cellSize);
 
-            Enemies closestEnemy = enemiesInRange[0];
-
-            foreach (var enemy in enemiesInRange)
-            {
-                double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
-
-                if (currentDistance < closestDistance)
-                {
-                    closestEnemy = enemy;
-                }
-            }
-
-            return closestEnemy;
-        }
-
-        public bool IsInRange(Enemies enemy)
-        {
-            double distance = Point.Subtract(Position, enemy.Position).Length;
-            return distance <= AttackRange;
-        }
-
-        public List<Enemies> GetEnemiesInRange(SpatialGrid grid, int cellSize)
-        {
-            var enemiesInRange = new List<Enemies>();
-
-            var cellsToCheck = GetCellsInRange(cellSize);
-
-            foreach (var cell in cellsToCheck)
-            {
-                var enemiesInCell = grid.GetEnemiesInCell(cell);
-                if (enemiesInCell != null)
-                {
-                    foreach (var enemy in enemiesInRange)
-                    {
-                        if (IsInRange(enemy))
-                        {
-                            enemiesInRange.Add(enemy);
-                        }
-                    }
-                }
-            }
-            return enemiesInRange;
-        }
+        //    foreach (var cell in cellsToCheck)
+        //    {
+        //        var enemiesInCell = grid.GetEnemiesInCell(cell);
+        //        if (enemiesInCell != null)
+        //        {
+        //            foreach (var enemy in enemiesInRange)
+        //            {
+        //                if (IsInRange(enemy))
+        //                {
+        //                    enemiesInRange.Add(enemy);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return enemiesInRange;
+        //}
 
         public List<(int, int)> GetCellsInRange(int cellSize)
         {

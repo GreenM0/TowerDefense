@@ -1,13 +1,13 @@
 ﻿using System.Drawing;
-using System.Net;
 using System.Windows.Controls;
 
 namespace TowerDefense.Maps
 {
     public partial class TestMap : UserControl
     {
-        private Point[] _way = new Point[3];
+        public Canvas MainCanvas { get { return this.GameCanvas; } }
 
+        private Point[] _way = new Point[3];
         private Point _startPoint { get; set; }
         private Point _endPoint { get; set; }
         private Point _corner1 { get; set; }
@@ -28,8 +28,8 @@ namespace TowerDefense.Maps
 
             _corner1 = new Point
             {
-                X = Convert.ToInt32(Line1.X2),
-                Y = Convert.ToInt32(Line1.Y2)
+                X = Convert.ToInt32(Line2.X2),
+                Y = Convert.ToInt32(Line2.Y2)
             };
 
             _endPoint = new Point

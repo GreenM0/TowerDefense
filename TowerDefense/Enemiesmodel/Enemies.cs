@@ -1,5 +1,8 @@
-﻿using System.Windows;
-using System.Windows.Media.Animation;
+﻿using System.Windows.Media.Animation;
+using System.Drawing;
+using System.Windows.Controls;
+using System.Net;
+using System.Windows.Media;
 
 namespace TowerDefense.EnemiesModel
 {
@@ -15,16 +18,31 @@ namespace TowerDefense.EnemiesModel
             Speed = speed;
             Life = life;
             Coins = coins;
-
-            Movement();
         }
 
-        public void Movement()
+        public void Movement(Point[] _gameWay, Canvas _gameField, Image img)
         {
-            for(int i = 1; i < GameHandler.CornerPoints; i++)
+            for (int i = 0; i < _gameWay.Length - 1; i++)
             {
-                moveAnimation(Position, GameHandler.CornerPoints[i]);
-                Position = GameHandler.CornerPoints[i];
+                Point startPoint = _gameWay[i];
+                Point endPoint = _gameWay[i + 1];
+
+                DoubleAnimation animationX = new DoubleAnimation
+                {
+                    From = Canvas.GetLeft(img),
+                    To = endPoint.X,
+                    Duration = TimeSpan.FromSeconds(2)
+                };
+
+                DoubleAnimation animationY = new DoubleAnimation
+                {
+                    From = Canvas.GetTop(img),
+                    To = endPoint.Y,
+                    Duration = TimeSpan.FromSeconds(2)
+                };
+
+                img.BeginAnimation(Canvas.LeftProperty, animationX);
+                img.BeginAnimation(Canvas.TopProperty, animationY);
             }
         }
 
@@ -38,19 +56,9 @@ namespace TowerDefense.EnemiesModel
             }
         }
 
-        public void MoveAnimation(Point PositionA, Point PosotionB)
-        {
-            DoubleAnimation animation = new DoubleAnimation
-            {
-                From = PositionA,
-                To = PosotionB,
-                Duration = 2
-            };
-        }
-
         public void GetKilled()
         {
-            GameHandler.AddCoins(Coins);
+            //GameHandler.AddCoins(Coins);
         }
     }
 }
