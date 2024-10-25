@@ -1,8 +1,8 @@
-﻿using System.Windows.Media.Animation;
-using System.Drawing;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
-using System.Net;
-using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 
 namespace TowerDefense.EnemiesModel
 {
