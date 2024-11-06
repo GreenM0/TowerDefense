@@ -12,6 +12,7 @@ namespace TowerDefense.EnemiesModel
         public int Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
+        public Image Image { get; set; }
 
         public Enemies(int speed, int life, int coins)
         {
@@ -22,6 +23,8 @@ namespace TowerDefense.EnemiesModel
 
         public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
         {
+            Image = img;
+
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
                 Point startPoint = _gameWay[i];
@@ -29,14 +32,14 @@ namespace TowerDefense.EnemiesModel
 
                 DoubleAnimation animationX = new DoubleAnimation
                 {
-                    From = Canvas.GetLeft(img),
+                    From = Canvas.GetLeft(Image),
                     To = endPoint.X,
                     Duration = TimeSpan.FromSeconds(2)
                 };
 
                 DoubleAnimation animationY = new DoubleAnimation
                 {
-                    From = Canvas.GetTop(img),
+                    From = Canvas.GetTop(Image),
                     To = endPoint.Y,
                     Duration = TimeSpan.FromSeconds(2)
                 };
@@ -49,8 +52,8 @@ namespace TowerDefense.EnemiesModel
                 // Event-Handler für das Ende der Y-Animation
                 animationY.Completed += (s, e) => tcsY.SetResult(true);
 
-                img.BeginAnimation(Canvas.LeftProperty, animationX);
-                img.BeginAnimation(Canvas.TopProperty, animationY);
+                Image.BeginAnimation(Canvas.LeftProperty, animationX);
+                Image.BeginAnimation(Canvas.TopProperty, animationY);
 
                 await Task.WhenAll(tcsX.Task, tcsY.Task);
             }
@@ -69,6 +72,15 @@ namespace TowerDefense.EnemiesModel
         public void GetKilled()
         {
             //GameHandler.AddCoins(Coins);
+        }
+
+        public Point GetEnemyPosition()
+        {
+            Point currentPosition;
+            currentPosition.X = Canvas.GetLeft(Image);
+            currentPosition.Y = Canvas.GetTop(Image);
+
+            return currentPosition;
         }
     }
 }
