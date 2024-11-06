@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using TowerDefense.EnemiesModel.Types;
