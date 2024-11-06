@@ -40,9 +40,19 @@ namespace TowerDefense.EnemiesModel
                     To = endPoint.Y,
                     Duration = TimeSpan.FromSeconds(2)
                 };
+                // Erstelle eine TaskCompletionSource für das Ende der Animation
+                TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
+                TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
+
+                // Event-Handler für das Ende der X-Animation
+                animationX.Completed += (s, e) => tcsX.SetResult(true);
+                // Event-Handler für das Ende der Y-Animation
+                animationY.Completed += (s, e) => tcsY.SetResult(true);
 
                 img.BeginAnimation(Canvas.LeftProperty, animationX);
                 img.BeginAnimation(Canvas.TopProperty, animationY);
+
+                await Task.WhenAll(tcsX.Task, tcsY.Task);
             }
         }
 
