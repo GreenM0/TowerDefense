@@ -33,10 +33,10 @@ namespace TowerDefense.Towers
             if (target == null) return;
             
             Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed);
-            projectile.Animate(gameCanvas, (proj) =>
-            {
-                target.GetHit(AttackDamage);
-            });
+            //projectile.Animate(gameCanvas, (proj) =>
+            //{
+            //    target.GetHit(AttackDamage);
+            //});
         }
 
         public void GetTarget(SpatialGrid grid, int cellSize)

@@ -20,7 +20,7 @@ namespace TowerDefense.EnemiesModel
             Coins = coins;
         }
 
-        public void Movement(Point[] _gameWay, Canvas _gameField, Image img)
+        public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
         {
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
