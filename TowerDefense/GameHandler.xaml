@@ -12,8 +12,10 @@
             <ColumnDefinition Width="25*"/>
         </Grid.ColumnDefinitions>
 
-        <Rectangle Grid.Column="1" Fill="Blue"/>
+        <StackPanel Width="470" HorizontalAlignment="Left" Background="LightGray" Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock Text="Towers:" FontWeight="Bold" Margin="10" Height="18"/>
+        </StackPanel>
 
-        <Canvas x:Name="GameField" Grid.Column="0"/>
+        <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" Drop="GameField_Drop"></Canvas>
     </Grid>
 </UserControl>

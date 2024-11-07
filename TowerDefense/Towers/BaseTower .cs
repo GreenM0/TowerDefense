@@ -2,6 +2,10 @@
 using TowerDefense.EnemiesModel;
 using TowerDefense.Projectils;
 using System.Windows;
+using TowerDefense.Helper;
+using System.IO;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace TowerDefense.Towers
 {
@@ -15,8 +19,10 @@ namespace TowerDefense.Towers
         public float Size { get; private set; }
         public int ProjectileimageId {  get; private set; }
         public int ProjectileSpeed { get; private set; }
+        public string TowerName { get; private set; }
+        public string PathtoImage { get; private set; } 
 
-        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed)
+        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed, string towerName, string pathtoImage)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -26,6 +32,8 @@ namespace TowerDefense.Towers
             Size = size;
             ProjectileimageId = projectileimageId;
             ProjectileSpeed = projectilespeed;
+            TowerName = towerName;
+            PathtoImage = pathtoImage;
         }
 
         public void Attack(Enemies target)
@@ -110,6 +118,13 @@ namespace TowerDefense.Towers
             }
                 
             return cellsInRange;
+        }
+        public Image GetEntityPic()
+        {
+            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
+
+            ImageHelper imageHelper = new();
+            return imageHelper.GetEntityPic(imagePath);
         }
     }   
 }

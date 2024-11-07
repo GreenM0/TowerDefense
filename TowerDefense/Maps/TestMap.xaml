@@ -7,7 +7,9 @@
              mc:Ignorable="d"
              Width="1440" Height="1080">
     <Canvas x:Name="GameCanvas">
-        <Rectangle Fill="Red" Width="1440" Height="1080"/>
+        <Canvas.Background>
+            <ImageBrush ImageSource="C:\Users\lunis\Source\Repos\TowerDefense\TowerDefense\Maps\Assets\Map.png" />
+        </Canvas.Background>
         <Line x:Name="Line1" X1="50" Y1="540" X2="700" Y2="540" Stroke="Black" StrokeThickness="2" />
         <Line x:Name="Line2" X1="700" Y1="540" X2="700" Y2="100" Stroke="Black" StrokeThickness="2" />
     </Canvas>
