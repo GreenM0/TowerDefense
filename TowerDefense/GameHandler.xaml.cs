@@ -18,6 +18,7 @@ namespace TowerDefense
         private Canvas _mainCanvas = null!;
         private List<Enemies> _enemyList = new List<Enemies>();
         private List<BaseTower> _towers = new List<BaseTower>();
+        private int cash;
 
         public GameHandler()
         {
@@ -28,6 +29,7 @@ namespace TowerDefense
             DisplayTowerMenu();
             InitializeSpawner();
             InitializeGridHandler();
+            Cashhandler();
         }
 
         private void InitializeMap()
@@ -87,7 +89,8 @@ namespace TowerDefense
                 Image towerImage = tower.GetEntityPic();
                 towerImage.Width = 100;
                 towerImage.Margin = new Thickness(10);
-                towerImage.Tag = tower; 
+                towerImage.Tag = tower;
+                towerImage.Tag = tower.Costs;
 
                 towerImage.MouseMove += TowerImage_MouseMove;
 
@@ -121,7 +124,14 @@ namespace TowerDefense
                 Canvas.SetTop(towerImage, dropPosition.Y - (towerImage.Height / 2));
 
                 GameField.Children.Add(towerImage);
+                cash -= tower.Costs;
             }
+        }
+
+        private void Cashhandler()
+        {
+            cash = 1000;
+            Cashbar.Text = Convert.ToString(cash);
         }
     }
 }
