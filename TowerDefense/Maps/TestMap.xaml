@@ -10,7 +10,16 @@
         <Canvas.Background>
             <ImageBrush ImageSource="@..\..\..\Maps\Assets\Map.png" />
         </Canvas.Background>
-        <Line x:Name="Line1" X1="50" Y1="540" X2="700" Y2="540" Stroke="Black" StrokeThickness="2" />
-        <Line x:Name="Line2" X1="700" Y1="540" X2="700" Y2="100" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line1" X1="0" Y1="740" X2="260" Y2="740" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line2" X1="260" Y1="740" X2="260" Y2="230" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line3" X1="260" Y1="230" X2="610" Y2="230" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line4" X1="610" Y1="230" X2="610" Y2="390" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line5" X1="610" Y1="390" X2="950" Y2="390" Stroke="Black" StrokeThickness="2" HorizontalAlignment="Left" VerticalAlignment="Center" Width="954" />
+        <Line x:Name="Line6" X1="950" Y1="390" X2="950" Y2="680" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line7" X1="950" Y1="680" X2="670" Y2="680" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line8" X1="670" Y1="680" X2="670" Y2="920" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line9" X1="670" Y1="920" X2="1210" Y2="920" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line10" X1="1210" Y1="920" X2="1210" Y2="230" Stroke="Black" StrokeThickness="2" />
+        <Line x:Name="Line11" X1="1210" Y1="230" X2="1500" Y2="230" Stroke="Black" StrokeThickness="2" />
     </Canvas>
 </UserControl>
