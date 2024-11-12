@@ -90,7 +90,6 @@ namespace TowerDefense
                 towerImage.Width = 100;
                 towerImage.Margin = new Thickness(10);
                 towerImage.Tag = tower;
-                towerImage.Tag = tower.Costs;
 
                 towerImage.MouseMove += TowerImage_MouseMove;
 
@@ -101,11 +100,11 @@ namespace TowerDefense
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                Image draggedImage = sender as Image;
-                BaseTower selectedTower = draggedImage.Tag as BaseTower;
-
-                DataObject dataObject = new DataObject("Tower", selectedTower);
-                DragDrop.DoDragDrop(draggedImage, dataObject, DragDropEffects.Copy);
+                if (sender is Image draggedImage && draggedImage.Tag is BaseTower selectedTower)
+                {
+                    DataObject dataObject = new DataObject("Tower", selectedTower);
+                    DragDrop.DoDragDrop(draggedImage, dataObject, DragDropEffects.Copy);
+                }
             }
         }
 
@@ -113,18 +112,19 @@ namespace TowerDefense
         {
             if (e.Data.GetDataPresent("Tower"))
             {
-                BaseTower tower = e.Data.GetData("Tower") as BaseTower;
+                if (e.Data.GetData("Tower") is BaseTower tower)
+                {
+                    Point dropPosition = e.GetPosition(GameField);
 
-                Point dropPosition = e.GetPosition(GameField);
+                    Image towerImage = tower.GetEntityPic();
+                    towerImage.Width = tower.Size + 2000;
 
-                Image towerImage = tower.GetEntityPic();
-                towerImage.Width = tower.Size + 2000; 
+                    Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
+                    Canvas.SetTop(towerImage, dropPosition.Y - (towerImage.Height / 2));
 
-                Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
-                Canvas.SetTop(towerImage, dropPosition.Y - (towerImage.Height / 2));
-
-                GameField.Children.Add(towerImage);
-                cash -= tower.Costs;
+                    GameField.Children.Add(towerImage);
+                    cash -= tower.Costs;
+                }
             }
         }
 
