@@ -27,11 +27,11 @@ namespace TowerDefense
 
         private void InitializeMap()
         {
-            TestMap TestMapUserControl = new TestMap();
-            GameField.Children.Add(TestMapUserControl);
+            Map1 Map1 = new Map1();
+            GameField.Children.Add(Map1);
 
-            _mainCanvas = TestMapUserControl.MainCanvas;
-            _gameWay = TestMapUserControl.Way();
+            _mainCanvas = Map1.MainCanvas;
+            _gameWay = Map1.Way();
         }
 
         private void InitializeGridHandler()
