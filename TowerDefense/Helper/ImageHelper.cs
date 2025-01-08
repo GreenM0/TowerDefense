@@ -9,20 +9,20 @@ namespace TowerDefense.Helper
         public ImageHelper() { }
 
         //imagepath übergeben (beispiel in Goblin.cs)
-        public Image GetEntityPic(string imagePath)
+        public Image GetEntityPic(string imagePath, int imageWidth = 50, int imageHeight = 50)
         {
             BitmapImage img = new BitmapImage();
             img.BeginInit();
             img.UriSource = new Uri(imagePath);
-            img.DecodePixelHeight = 50;
-            img.DecodePixelWidth = 50;
+            img.DecodePixelHeight = imageHeight;
+            img.DecodePixelWidth = imageWidth;
             img.EndInit();
 
             Image imageControl = new Image
             {
                 Source = img,
-                Width = 50,
-                Height = 50
+                Width = 75,
+                Height = 75
             };
 
             return imageControl;

@@ -5,16 +5,16 @@ using TowerDefense.Helper;
 
 namespace TowerDefense.EnemiesModel.Types
 {
-    internal class Goblin : Enemies
+    internal class Mage : Enemies
     {
-        public Goblin() : base(speed: 10, life: 2, coins: 2, imagewidth: 50, imageheight: 75)
+        public Mage() : base(speed: 30, life: 5, coins: 5, imagewidth: 50, imageheight: 75)
         {
 
         }
 
         public Image GetEntityPic()
         {
-            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\goblin.png");
+            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\mage.png");
 
             ImageHelper imageHelper = new();
             return imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);

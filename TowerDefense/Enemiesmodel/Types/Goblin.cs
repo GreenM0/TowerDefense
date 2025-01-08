@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Goblin : Enemies
     {
-        public Goblin() : base(speed: 10, life: 2, coins: 2)
+        public Goblin() : base(speed: 10, life: 2, coins: 2, imagewidth: 50, imageheight: 75)
         {
 
         }
@@ -17,7 +17,7 @@ namespace TowerDefense.EnemiesModel.Types
             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\goblin.png");
 
             ImageHelper imageHelper = new();
-            return imageHelper.GetEntityPic(imagePath);
+            return imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);
         }
     }
 }
