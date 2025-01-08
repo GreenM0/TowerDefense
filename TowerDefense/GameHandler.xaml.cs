@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using TowerDefense.EnemiesModel;
 using TowerDefense.EnemiesModel.Types;
-using TowerDefense.Grid;
 using TowerDefense.Maps;
 
 namespace TowerDefense
@@ -15,6 +14,7 @@ namespace TowerDefense
         private Point[] _gameWay = new Point[3];
         private Canvas _mainCanvas = null!;
         private List<Enemies> _enemyList = new List<Enemies>();
+        private int _Health = 10;
 
         public GameHandler()
         {
@@ -58,15 +58,41 @@ namespace TowerDefense
 
         private void GameTick(object? sender, EventArgs e)
         {
-            Goblin goblin = new Goblin();
-            _enemyList.Add(goblin);
+            health.Content = _Health;
 
-            Image ImageControl = goblin.GetEntityPic();
+            SpawnEnemy();
+
+            //Leben abziehen
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy.ReachedEnd)
+                {
+                    _Health -= enemy.Life;
+                    enemy.ReachedEnd = false;
+                }
+            }
+
+            //Spieler tot
+            if (_Health < 0)
+            {
+                _gameTick.Stop();
+                lost.Content = "GAME OVER";
+                lost.Visibility = Visibility.Visible;
+                health.Content = "0";
+            }
+        }
+
+        private void SpawnEnemy()
+        {
+            Werwolf mage = new Werwolf();
+            _enemyList.Add(mage);
+
+            Image ImageControl = mage.GetEntityPic();
 
             Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
             Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
             GameField.Children.Add(ImageControl);
-            _ = goblin.Movement(_gameWay, _mainCanvas, ImageControl);
+            _ = mage.Movement(_gameWay, _mainCanvas, ImageControl);
         }
     }
 }
