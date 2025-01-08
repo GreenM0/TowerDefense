@@ -17,6 +17,6 @@
             <TextBlock Text="Towers:" FontWeight="Bold" Margin="10" Height="18"/>
         </StackPanel>
 
-        <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" Drop="GameField_Drop"></Canvas>
+        <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseLeave="GameField_MouseLeave"></Canvas>
     </Grid>
 </UserControl>

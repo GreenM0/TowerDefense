@@ -1,12 +1,15 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using TowerDefense.EnemiesModel;
 using TowerDefense.EnemiesModel.Types;
 using TowerDefense.Grid;
 using TowerDefense.Maps;
 using TowerDefense.Towers;
+
 
 namespace TowerDefense
 {
@@ -18,7 +21,12 @@ namespace TowerDefense
         private Canvas _mainCanvas = null!;
         private List<Enemies> _enemyList = new List<Enemies>();
         private List<BaseTower> _towers = new List<BaseTower>();
+        private List<BaseTower> _deployedTowers = new List<BaseTower>();
         private int cash;
+        private SpatialGrid<BaseTower> _towerGrid = new SpatialGrid<BaseTower>(100);
+        private SpatialGrid<Enemies> _enemyGrid = new SpatialGrid<Enemies>(50);
+        private List<Line> _lineList = new List<Line>();
+        private Image? ghostTower;
 
         public GameHandler()
         {
@@ -39,6 +47,7 @@ namespace TowerDefense
 
             _mainCanvas = Map1.MainCanvas;
             _gameWay = Map1.Way();
+            cash = 1000;
         }
 
         private void InitializeGridHandler()
@@ -57,12 +66,6 @@ namespace TowerDefense
             _gameTick.Start();
         }
 
-        private void GridHandlerTick(object? sender, EventArgs e)
-        {
-            //SpatialGrid spatialGrid = new();
-            //gridobject = spatialGrid.GetGrid(_mainCanvas, _enemyList);
-        }
-
         private void GameTick(object? sender, EventArgs e)
         {
             Goblin goblin = new Goblin();
@@ -79,7 +82,7 @@ namespace TowerDefense
         {
             _towers = new List<BaseTower>
             {
-                new TestTower1(new Point(0, 0)), 
+                new TestTower1(new Point(0, 0)),
             };
         }
         private void DisplayTowerMenu()
@@ -96,42 +99,126 @@ namespace TowerDefense
                 TowerMenu.Children.Add(towerImage);
             }
         }
+
         private void TowerImage_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && sender is Image draggedImage && draggedImage.Tag is BaseTower selectedTower)
             {
-                if (sender is Image draggedImage && draggedImage.Tag is BaseTower selectedTower)
+                if (ghostTower == null)
                 {
-                    DataObject dataObject = new DataObject("Tower", selectedTower);
-                    DragDrop.DoDragDrop(draggedImage, dataObject, DragDropEffects.Copy);
+                    // Erstelle das Geistermodell
+                    ghostTower = new Image
+                    {
+                        Source = draggedImage.Source,
+                        Width = selectedTower.Size,
+                        Height = selectedTower.Size,
+                        Opacity = 0.5,
+                        IsHitTestVisible = false
+                    };
+                    GameField.Children.Add(ghostTower);
+                }
+
+                // Bewege das Geistermodell mit der Maus
+                Point mousePosition = e.GetPosition(GameField);
+                Canvas.SetLeft(ghostTower, mousePosition.X - (ghostTower.Width / 2));
+                Canvas.SetTop(ghostTower, mousePosition.Y - (ghostTower.Height / 2));
+            }
+        }
+
+        private void GameField_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (ghostTower != null && ghostTower.Tag is BaseTower tower && cash >= tower.Costs)
+            {
+                Point dropPosition = e.GetPosition(GameField);
+
+                var cell = _towerGrid.GetCell(dropPosition);
+                var nearbyTowers = _towerGrid.GetObjectsInCell(cell);
+
+                if (!tower.IsPositionValid(dropPosition, tower.Size, nearbyTowers, _lineList))
+                {
+                    // Abbrechen, wenn die Position ungültig ist
+                    return;
+                }
+
+                // Platziere den Turm
+                Image towerImage = tower.GetEntityPic();
+                towerImage.Width = tower.Size;
+                towerImage.Height = tower.Size;
+
+                Ellipse towerRadiusVisual = new Ellipse
+                {
+                    Width = tower.Size,
+                    Height = tower.Size,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1,
+                    Opacity = 0.5,
+                    IsHitTestVisible = false
+                };
+
+                Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
+                Canvas.SetTop(towerImage, dropPosition.Y - (towerImage.Height / 2));
+
+                Canvas.SetLeft(towerRadiusVisual, dropPosition.X - (towerRadiusVisual.Width / 2));
+                Canvas.SetTop(towerRadiusVisual, dropPosition.Y - (towerRadiusVisual.Height / 2));
+
+                GameField.Children.Add(towerImage);
+                GameField.Children.Add(towerRadiusVisual);
+
+                tower.Position = dropPosition;
+                _towerGrid.AddObject(tower);
+
+                cash -= tower.Costs;
+                Cashhandler();
+
+                // Entferne das Geistermodell
+                GameField.Children.Remove(ghostTower);
+                ghostTower = null;
+            }
+        }
+
+        private void GridHandlerTick(object? sender, EventArgs e)
+        {
+            foreach (var tower in _deployedTowers)
+            {
+                var cell = _towerGrid.GetCell(tower.Position);
+                var nearbyEnemies = _enemyGrid.GetObjectsInCell(cell);
+
+                if (nearbyEnemies != null)
+                {
+                    foreach (var enemy in nearbyEnemies)
+                    {
+                        double distance = Math.Sqrt(Math.Pow(tower.Position.X - enemy.Position.X, 2) + Math.Pow(tower.Position.Y - enemy.Position.Y, 2));
+                        if (distance <= tower.AttackRange)
+                        {
+                            tower.Attack(enemy);
+                        }
+                    }
                 }
             }
         }
 
-        private void GameField_Drop(object sender, DragEventArgs e)
+        private void GameField_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (e.Data.GetDataPresent("Tower"))
+            if (ghostTower != null)
             {
-                if (e.Data.GetData("Tower") is BaseTower tower)
-                {
-                    Point dropPosition = e.GetPosition(GameField);
-
-                    Image towerImage = tower.GetEntityPic();
-                    towerImage.Width = tower.Size + 2000;
-
-                    Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
-                    Canvas.SetTop(towerImage, dropPosition.Y - (towerImage.Height / 2));
-
-                    GameField.Children.Add(towerImage);
-                    cash -= tower.Costs;
-                }
+                GameField.Children.Remove(ghostTower);
+                ghostTower = null;
             }
         }
 
         private void Cashhandler()
         {
-            cash = 1000;
             Cashbar.Text = Convert.ToString(cash);
+        }
+
+        private void GameField_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (ghostTower != null)
+            {
+                Point mousePosition = e.GetPosition(GameField);
+                Canvas.SetLeft(ghostTower, mousePosition.X - (ghostTower.Width / 2));
+                Canvas.SetTop(ghostTower, mousePosition.Y - (ghostTower.Height / 2));
+            }
         }
     }
 }
