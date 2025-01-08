@@ -33,14 +33,14 @@ namespace TowerDefense.EnemiesModel
                 DoubleAnimation animationX = new DoubleAnimation
                 {
                     From = Canvas.GetLeft(Image),
-                    To = endPoint.X,
+                    To = endPoint.X - Image.Height / 2,
                     Duration = TimeSpan.FromSeconds(2)
                 };
 
                 DoubleAnimation animationY = new DoubleAnimation
                 {
                     From = Canvas.GetTop(Image),
-                    To = endPoint.Y,
+                    To = endPoint.Y - Image.Height / 2,
                     Duration = TimeSpan.FromSeconds(2)
                 };
                 // Erstelle eine TaskCompletionSource für das Ende der Animation
