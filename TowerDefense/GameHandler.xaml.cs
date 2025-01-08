@@ -34,8 +34,8 @@ namespace TowerDefense
 
         //Spieleinstellungen
         private int _Health = 100;
-        private int _waveSpawnInterval = 1000; // Zeit in Millisekunden zwischen Waves
-        private int _enemySpawnInterval = 5; // Zeit in Millisekunden zwischen Gegner-Spawns
+        private int _waveSpawnInterval = 5000; // Zeit in Millisekunden zwischen Waves
+        private int _enemySpawnInterval = 1000; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler()
         {
@@ -60,7 +60,7 @@ namespace TowerDefense
 
             while (currentWaveIndex < 5 && !_gameOver)
             {
-                wave.Content = "Wave: " + currentWaveIndex + 1 + "/5";
+                wave.Content = "Wave: " + (currentWaveIndex + 1) + "/5";
                 currentEnemyType = 0;
 
                 while (currentEnemyType < 3 && !_gameOver)
@@ -81,12 +81,12 @@ namespace TowerDefense
                     {
                         currentEnemyType = 0;
                         currentWaveIndex++;
-                        wave.Content = "Wave: " + currentWaveIndex + "/5";
 
                         if (currentWaveIndex < 5)
                         {
                             currentWave = waves.GetWave(currentWaveIndex);
                             await Task.Delay(_waveSpawnInterval);
+                            wave.Content = "Wave: " + (currentWaveIndex + 1) + "/5";
                         }
                         else
                         {
