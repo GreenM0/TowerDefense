@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -8,6 +10,7 @@ using TowerDefense.EnemiesModel;
 using TowerDefense.EnemiesModel.Types;
 using TowerDefense.Maps;
 using TowerDefense.Towers;
+using TowerDefense.Waves;
 
 
 namespace TowerDefense
@@ -26,7 +29,11 @@ namespace TowerDefense
         private SpatialGrid<Enemies> _enemyGrid = new SpatialGrid<Enemies>(50);
         private List<Line> _lineList = new List<Line>();
         private Image? ghostTower;
-        private int _Health = 10;
+        private int _Health = 500;
+        private int _currentWaveIndex = 0;
+        private int[] _currentWave;
+        private int _currentEnemyCount = 0;
+        private int _currentEnemyType = 0;
 
         public GameHandler()
         {
@@ -61,7 +68,7 @@ namespace TowerDefense
         private void InitializeSpawner()
         {
             _gameTick = new DispatcherTimer();
-            _gameTick.Interval = TimeSpan.FromSeconds(1);
+            _gameTick.Interval = TimeSpan.FromSeconds(0.2);
             _gameTick.Tick += GameTick;
             _gameTick.Start();
         }
@@ -70,7 +77,29 @@ namespace TowerDefense
         {
             health.Content = _Health;
 
-            SpawnEnemy();
+
+
+            //Waves spawnen
+            Wave waves = new Wave();
+            //erste Wave holen
+            if (_currentWaveIndex == 0)
+            {
+                _currentWave = waves.GetWave(_currentWaveIndex); // Setze die erste Wave
+            }
+
+            //wenn enemys da dann spawnen
+            if (_currentEnemyCount < _currentWave[_currentEnemyType])
+            {
+                SpawnEnemy(_currentEnemyType);
+                _currentEnemyCount++;
+            }
+
+            //wenn alle waves durch dann spiel enden
+            if (_currentWaveIndex >= 5)
+            {
+                _gameTick.Stop();
+                lost.Content = "GAME WON";
+            }
 
             //Leben abziehen
             foreach (var enemy in _enemyList)
@@ -92,18 +121,35 @@ namespace TowerDefense
             }
         }
 
-        private void SpawnEnemy()
+        private void SpawnEnemy(int EnemyType)
         {
-            Werwolf mage = new Werwolf();
-            _enemyList.Add(mage);
+            if (EnemyType == 0)
+            {
+                Mage mage = new Mage();
+                CreateEnemy(mage);
+            }
+            else if (EnemyType == 1)
+            {
+                Goblin goblin = new Goblin();
+                CreateEnemy(goblin);
+            }
+            else if (EnemyType == 2)
+            {
+                Werwolf werwolf = new Werwolf();
+                CreateEnemy(werwolf);
+            }
 
-            Image ImageControl = mage.GetEntityPic();
-
-            Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
-            Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
-            GameField.Children.Add(ImageControl);
-            _ = mage.Movement(_gameWay, _mainCanvas, ImageControl);
+            void CreateEnemy(Enemies enemy)
+            {
+                _enemyList.Add(enemy);
+                Image ImageControl = enemy.GetEntityPic();
+                Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
+                Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
+                GameField.Children.Add(ImageControl);
+                _ = enemy.Movement(_gameWay, _mainCanvas, ImageControl);
+            }
         }
+
         private void LoadTowers()
         {
             _towers = new List<BaseTower>
