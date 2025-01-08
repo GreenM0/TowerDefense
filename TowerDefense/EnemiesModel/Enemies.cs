@@ -13,6 +13,9 @@ namespace TowerDefense.EnemiesModel
         public int Coins { get; set; }
         public Point Position { get; set; }
         public Image Image { get; set; }
+        private double _totalLength = 0;
+        private double _lineLength = 0;
+        private double _lineDuration = 0;
 
         public Enemies(int speed, int life, int coins)
         {
@@ -27,22 +30,36 @@ namespace TowerDefense.EnemiesModel
 
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
+                double dx = _gameWay[i + 1].X - _gameWay[i].X;
+                double dy = _gameWay[i + 1].Y - _gameWay[i].Y;
+                double segmentLength = Math.Sqrt(dx * dx + dy * dy);
+
+                _totalLength += segmentLength;
+            }
+
+            for (int i = 0; i < _gameWay.Length - 1; i++)
+            {
                 Point startPoint = _gameWay[i];
                 Point endPoint = _gameWay[i + 1];
+
+                _lineLength = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
+
+                _lineDuration = (_lineLength / _totalLength) * this.Speed;
 
                 DoubleAnimation animationX = new DoubleAnimation
                 {
                     From = Canvas.GetLeft(Image),
                     To = endPoint.X - Image.Height / 2,
-                    Duration = TimeSpan.FromSeconds(2)
+                    Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
 
                 DoubleAnimation animationY = new DoubleAnimation
                 {
                     From = Canvas.GetTop(Image),
                     To = endPoint.Y - Image.Height / 2,
-                    Duration = TimeSpan.FromSeconds(2)
+                    Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
+
                 // Erstelle eine TaskCompletionSource für das Ende der Animation
                 TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
                 TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
