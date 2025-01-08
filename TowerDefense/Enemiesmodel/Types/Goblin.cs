@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Goblin : Enemies
     {
-        public Goblin() : base(speed: 10, life: 2, coins: 2, imagewidth: 50, imageheight: 75)
+        public Goblin() : base(speed: 15, life: 3, coins: 10, imagewidth: 50, imageheight: 75)
         {
 
         }
