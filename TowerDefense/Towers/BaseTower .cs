@@ -139,18 +139,18 @@ namespace TowerDefense.Towers
 
             return numerator / denominator;
         }
-        public bool IsPositionValid(Point dropPosition, double towerRadius, List<BaseTower> nearbyTowers, List<Line> lines)
-        {
+        //public bool IsPositionValid(Point dropPosition, double towerRadius, List<BaseTower> nearbyTowers, List<Line> lines)
+        //{
 
-            foreach (var line in lines)
-            {
-                if (DistanceToLine(dropPosition, line) + 40 < towerRadius || nearbyTowers != null && nearbyTowers.Any(t => Math.Sqrt(Math.Pow(t.Position.X - dropPosition.X, 2) + Math.Pow(t.Position.Y - dropPosition.Y, 2)) < towerRadius + ((BaseTower)t).Size))
-                {
-                    return false;
-                }
-            }
+        //    foreach (var line in lines)
+        //    {
+        //        if (DistanceToLine(dropPosition, line) + 40 < towerRadius || nearbyTowers != null && nearbyTowers.Any(t => Math.Sqrt(Math.Pow(t.Position.X - dropPosition.X, 2) + Math.Pow(t.Position.Y - dropPosition.Y, 2)) < towerRadius + ((BaseTower)t).Size))
+        //        {
+        //            return false;
+        //        }
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
     }
 }
