@@ -28,7 +28,7 @@ namespace TowerDefense.EnemiesModel
         {
             Image = img;
 
-            for (int i = 0; i < _gameWay.Length; i++)
+            for (int i = 0; i < _gameWay.Length - 1; i++)
             {
                 double dx = _gameWay[i + 1].X - _gameWay[i].X;
                 double dy = _gameWay[i + 1].Y - _gameWay[i].Y;
@@ -44,7 +44,7 @@ namespace TowerDefense.EnemiesModel
 
                 _lineLength = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
 
-                _lineDuration = (_lineLength / _totalLength) * 2;
+                _lineDuration = (_lineLength / _totalLength) * this.Speed;
 
                 DoubleAnimation animationX = new DoubleAnimation
                 {
@@ -59,6 +59,7 @@ namespace TowerDefense.EnemiesModel
                     To = endPoint.Y - Image.Height / 2,
                     Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
+
                 // Erstelle eine TaskCompletionSource für das Ende der Animation
                 TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
                 TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
