@@ -34,11 +34,11 @@ namespace TowerDefense
 
         private void InitializeMap()
         {
-            TestMap TestMapUserControl = new TestMap();
-            GameField.Children.Add(TestMapUserControl);
+            Map1 Map1 = new Map1();
+            GameField.Children.Add(Map1);
 
-            _mainCanvas = TestMapUserControl.MainCanvas;
-            _gameWay = TestMapUserControl.Way();
+            _mainCanvas = Map1.MainCanvas;
+            _gameWay = Map1.Way();
         }
 
         private void InitializeGridHandler()
@@ -70,8 +70,8 @@ namespace TowerDefense
 
             Image ImageControl = goblin.GetEntityPic();
 
-            Canvas.SetLeft(ImageControl, _gameWay[0].X);
-            Canvas.SetTop(ImageControl, _gameWay[0].Y);
+            Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
+            Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
             GameField.Children.Add(ImageControl);
             _ = goblin.Movement(_gameWay, _mainCanvas, ImageControl);
         }
