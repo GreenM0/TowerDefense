@@ -13,7 +13,7 @@ namespace TowerDefense
 
     public class SpatialGrid<T> where T : IPositionable
     {
-        private int cellSize;
+        public int cellSize;
         private Dictionary<(int, int), List<T>> grid = new Dictionary<(int, int), List<T>>();
 
         public SpatialGrid(int cellSize)

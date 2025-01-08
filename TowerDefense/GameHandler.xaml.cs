@@ -113,7 +113,8 @@ namespace TowerDefense
                         Width = selectedTower.Size,
                         Height = selectedTower.Size,
                         Opacity = 0.5,
-                        IsHitTestVisible = false
+                        IsHitTestVisible = false,
+                        Tag = selectedTower
                     };
                     GameField.Children.Add(ghostTower);
                 }
@@ -131,14 +132,12 @@ namespace TowerDefense
             {
                 Point dropPosition = e.GetPosition(GameField);
 
-                var cell = _towerGrid.GetCell(dropPosition);
-                var nearbyTowers = _towerGrid.GetObjectsInCell(cell);
-
-                if (!tower.IsPositionValid(dropPosition, tower.Size, nearbyTowers, _lineList))
+                if (!tower.IsPositionValid(dropPosition, _deployedTowers))
                 {
-                    // Abbrechen, wenn die Position ungültig ist
                     return;
                 }
+
+                BaseTower newTower = TowerFactory.CreateTower("TestTower1", dropPosition);
 
                 // Platziere den Turm
                 Image towerImage = tower.GetEntityPic();
@@ -147,8 +146,8 @@ namespace TowerDefense
 
                 Ellipse towerRadiusVisual = new Ellipse
                 {
-                    Width = tower.Size,
-                    Height = tower.Size,
+                    Width = tower.TowerRadius,
+                    Height = tower.TowerRadius,
                     Stroke = Brushes.Black,
                     StrokeThickness = 1,
                     Opacity = 0.5,
@@ -165,7 +164,8 @@ namespace TowerDefense
                 GameField.Children.Add(towerRadiusVisual);
 
                 tower.Position = dropPosition;
-                _towerGrid.AddObject(tower);
+                _towerGrid.AddObject(newTower);
+                _deployedTowers.Add(newTower);
 
                 cash -= tower.Costs;
                 Cashhandler();

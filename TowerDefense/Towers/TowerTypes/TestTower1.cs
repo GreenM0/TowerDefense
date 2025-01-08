@@ -15,11 +15,12 @@ namespace TowerDefense.Towers
                 attackDamage: 50, 
                 position: position,
                 costs: 200,
-                size: 1.0f, 
+                size: 100, 
                 projectileimageId: 1,
                 projectilespeed: 5,   
                 towerName: "TestTower",
-                pathtoImage: @"..\..\..\Towers\Assets\icetower.png"
+                pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
+                towerRadius: 100
             )
         {
 

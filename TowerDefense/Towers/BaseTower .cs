@@ -22,8 +22,9 @@ namespace TowerDefense.Towers
         public int ProjectileSpeed { get; private set; }
         public string TowerName { get; private set; }
         public string PathtoImage { get; private set; }
+        public double TowerRadius { get; private set; }
 
-        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed, string towerName, string pathtoImage)
+        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed, string towerName, string pathtoImage, double towerRadius)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -35,6 +36,7 @@ namespace TowerDefense.Towers
             ProjectileSpeed = projectilespeed;
             TowerName = towerName;
             PathtoImage = pathtoImage;
+            TowerRadius = towerRadius;
         }
 
         public void Attack(Enemies target)
@@ -139,18 +141,20 @@ namespace TowerDefense.Towers
 
             return numerator / denominator;
         }
-        //public bool IsPositionValid(Point dropPosition, double towerRadius, List<BaseTower> nearbyTowers, List<Line> lines)
-        //{
+        public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers)
+        {
+            if(depolyedTowers != null)
+            {
+                foreach (var t in depolyedTowers)
+                {
+                    if (Math.Sqrt(Math.Pow(t.Position.X - dropPosition.X, 2) + Math.Pow(t.Position.Y - dropPosition.Y, 2)) < TowerRadius)
+                    {
+                        return false; 
+                    }
+                }
+            }
+            return true; // Wenn keine Kollision mit anderen Türmen festgestellt wird
 
-        //    foreach (var line in lines)
-        //    {
-        //        if (DistanceToLine(dropPosition, line) + 40 < towerRadius || nearbyTowers != null && nearbyTowers.Any(t => Math.Sqrt(Math.Pow(t.Position.X - dropPosition.X, 2) + Math.Pow(t.Position.Y - dropPosition.Y, 2)) < towerRadius + ((BaseTower)t).Size))
-        //        {
-        //            return false;
-        //        }
-        //    }
-
-        //    return true;
-        //}
+        }
     }
 }
