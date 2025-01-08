@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Net.Security;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -16,6 +18,7 @@ namespace TowerDefense.EnemiesModel
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
+        public bool ReachedEnd { get; set; }
         private double _totalLength = 0;
         private double _lineLength = 0;
         private double _lineDuration = 0;
@@ -66,7 +69,7 @@ namespace TowerDefense.EnemiesModel
                     To = endPoint.Y - img.Height / 2,
                     Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
-
+                
                 // Erstelle eine TaskCompletionSource für das Ende der Animation
                 TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
                 TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
@@ -82,6 +85,17 @@ namespace TowerDefense.EnemiesModel
 
                 await Task.WhenAll(tcsX.Task, tcsY.Task);
             }
+
+            if (Life > 0)
+            {
+                ReachedEnd = true;
+            }
+            else
+            {
+                ReachedEnd = false;
+            }
+
+            img.Visibility = Visibility.Collapsed;
         }
 
         private void FlipImageDirection(Image img, bool movingRight)

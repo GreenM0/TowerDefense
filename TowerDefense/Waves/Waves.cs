@@ -10,9 +10,9 @@ namespace TowerDefense.Waves
         public int[,] WaveList { get; set; }
         // [ X, Y] X = Count of Wave, Y = Amount of Enemies of that type
         //
-        // [ X, 0] = Slimes
-        // [ X, 1] = Goblins
-        // [ X, 2] = Dragons,
+        // [ X, 0] = Mage
+        // [ X, 1] = Goblin
+        // [ X, 2] = Werwolf,
 
         public Wave()
         {
