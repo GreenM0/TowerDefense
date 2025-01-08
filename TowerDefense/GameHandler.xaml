@@ -12,10 +12,15 @@
             <ColumnDefinition Width="25*"/>
         </Grid.ColumnDefinitions>
 
+        <StackPanel Width="470" HorizontalAlignment="Left" Background="LightGray" Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock x:Name="Cashbar" FontWeight="Bold" Text="" Margin="10" Height="18" />
+            <TextBlock Text="Towers:" FontWeight="Bold" Margin="10" Height="18"/>
+        </StackPanel>
+
+        <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseLeave="GameField_MouseLeave"></Canvas>
         <Rectangle Grid.Column="1" Fill="Blue"/>
         <Label Width="100" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Arial" FontSize="25" Content="Health:" Panel.ZIndex="5"/>
         <Label x:Name="health"  Width="100" Height="50" Margin="100,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Arial" FontSize="25" Panel.ZIndex="5"/>
         <Label x:Name="lost"  Width="600" Height="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="80" Panel.ZIndex="5" Visibility="Hidden"/>
-        <Canvas x:Name="GameField" Grid.Column="0"/>
     </Grid>
 </UserControl>

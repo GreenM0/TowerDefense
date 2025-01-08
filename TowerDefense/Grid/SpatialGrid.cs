@@ -1,64 +1,74 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
 using TowerDefense.EnemiesModel;
+using TowerDefense.EnemiesModel.Types;
+using TowerDefense.Grid;
+using TowerDefense.Maps;
+using TowerDefense.Towers;
 
-namespace TowerDefense.Grid
+namespace TowerDefense
 {
-    public class SpatialGrid
+
+    public class SpatialGrid<T> where T : IPositionable
     {
-        private int cellSize;
-        private Dictionary<(int, int), List<Enemies>> grid = new Dictionary<(int, int), List<Enemies>>();
+        public int cellSize;
+        private Dictionary<(int, int), List<T>> grid = new Dictionary<(int, int), List<T>>();
 
         public SpatialGrid(int cellSize)
         {
             this.cellSize = cellSize;
         }
-        public void AddEnemy(Enemies enemy)
+
+        public void AddObject(T obj)
         {
-            var cell = GetCell(enemy.Position);
+            var cell = GetCell(obj.Position);
             if (!grid.ContainsKey(cell))
             {
-                grid[cell] = new List<Enemies>();
+                grid[cell] = new List<T>();
             }
-            grid[cell].Add(enemy);
+            grid[cell].Add(obj);
         }
 
-        public void RemoveEnemy(Enemies enemy)
+        public void RemoveObject(T obj)
         {
-            var cell = GetCell(enemy.Position);
-            if (!grid.ContainsKey(cell))
+            var cell = GetCell(obj.Position);
+            if (grid.ContainsKey(cell))
             {
-                grid[cell].Remove(enemy);
+                grid[cell].Remove(obj);
             }
         }
 
-        public void UpdateEnemyPosition(Enemies enemy, Point newPosition)
+        public void UpdateObjectPosition(T obj, Point newPosition)
         {
-            var oldCell = GetCell(enemy.Position);
+            var oldCell = GetCell(obj.Position);
             var newCell = GetCell(newPosition);
 
             if (oldCell != newCell)
             {
-                RemoveEnemy(enemy);
-                enemy.Position = newPosition;
-                AddEnemy(enemy);
+                RemoveObject(obj);
+                obj.Position = newPosition;
+                AddObject(obj);
             }
             else
             {
-                enemy.Position = newPosition;
+                obj.Position = newPosition;
             }
         }
-        public List<Enemies> GetEnemiesInCell((int, int) cell)
+
+        public List<T> GetObjectsInCell((int, int) cell)
         {
             if (grid.ContainsKey(cell))
             {
                 return grid[cell];
             }
-            return null;
+            return new List<T>();
         }
 
-        private (int, int) GetCell(Point postion)
+        public (int, int) GetCell(Point position)
         {
-            return ((int)(postion.X / cellSize), (int)(postion.Y / cellSize));
+            return ((int)(position.X / cellSize), (int)(position.Y / cellSize));
         }
     }
 }
