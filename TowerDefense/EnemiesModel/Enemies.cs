@@ -23,6 +23,7 @@ namespace TowerDefense.EnemiesModel
         private double _lineLength = 0;
         private double _lineDuration = 0;
         private bool _movingRight = false;
+        public virtual Image? GetEntityPic() => null;
 
         public Enemies(int speed, int life, int coins, int imagewidth = 0, int imageheight = 0)
         {

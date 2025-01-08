@@ -12,7 +12,7 @@ namespace TowerDefense.EnemiesModel.Types
 
         }
 
-        public Image GetEntityPic()
+        public override Image GetEntityPic()
         {
             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\werwolf.png");
 
