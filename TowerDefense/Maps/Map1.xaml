@@ -8,14 +8,14 @@
              Width="1440" Height="1080">
     <Canvas x:Name="GameCanvas">
         <Image Source="Assets/Map1.png" Width="1440" Height="1080"/>
-        <Line x:Name="Line1" X1="0" Y1="735" X2="275" Y2="735"/>
-        <Line x:Name="Line2" X1="275" Y1="735" X2="275" Y2="245"/>
-        <Line x:Name="Line3" X1="275" Y1="245" X2="615" Y2="245"/>
-        <Line x:Name="Line4" X1="615" Y1="245" X2="615" Y2="400"/>
+        <Line x:Name="Line1" X1="0" Y1="735" X2="270" Y2="735"/>
+        <Line x:Name="Line2" X1="270" Y1="735" X2="270" Y2="245"/>
+        <Line x:Name="Line3" X1="270" Y1="245" X2="625" Y2="245"/>
+        <Line x:Name="Line4" X1="625" Y1="245" X2="625" Y2="400"/>
         <Line x:Name="Line5" X1="615" Y1="400" X2="960" Y2="400"/>
         <Line x:Name="Line6" X1="960" Y1="400" X2="960" Y2="670"/>
-        <Line x:Name="Line7" X1="960" Y1="670" X2="680" Y2="670"/>
-        <Line x:Name="Line8" X1="680" Y1="670" X2="680" Y2="890"/>
+        <Line x:Name="Line7" X1="960" Y1="670" X2="665" Y2="670"/>
+        <Line x:Name="Line8" X1="665" Y1="670" X2="665" Y2="890"/>
         <Line x:Name="Line9" X1="680" Y1="890" X2="1210" Y2="890"/>
         <Line x:Name="Line10" X1="1210" Y1="890" X2="1210" Y2="260"/>
         <Line x:Name="Line11" X1="1210" Y1="260" X2="1440" Y2="260"/>
