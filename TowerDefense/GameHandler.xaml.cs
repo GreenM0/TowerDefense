@@ -29,11 +29,13 @@ namespace TowerDefense
         private SpatialGrid<Enemies> _enemyGrid = new SpatialGrid<Enemies>(50);
         private List<Line> _lineList = new List<Line>();
         private Image? ghostTower;
-        private int _Health = 500;
-        private int _currentWaveIndex = 0;
-        private int[] _currentWave;
-        private int _currentEnemyCount = 0;
-        private int _currentEnemyType = 0;
+        private bool _gameOver = false;
+        private bool _allEnemiesSpawned = false;
+
+        //Spieleinstellungen
+        private int _Health = 100;
+        private int _waveSpawnInterval = 1000; // Zeit in Millisekunden zwischen Waves
+        private int _enemySpawnInterval = 5; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler()
         {
@@ -45,6 +47,56 @@ namespace TowerDefense
             InitializeSpawner();
             InitializeGridHandler();
             Cashhandler();
+            _ = SpawnWavesAsync();
+        }
+
+        private async Task SpawnWavesAsync()
+        {
+            Wave waves = new Wave();
+            int currentWaveIndex = 0;
+            int[] currentWave = waves.GetWave(currentWaveIndex);
+            int currentEnemyCount = 0;
+            int currentEnemyType = 0;
+
+            while (currentWaveIndex < 5 && !_gameOver)
+            {
+                wave.Content = "Wave: " + currentWaveIndex + 1 + "/5";
+                currentEnemyType = 0;
+
+                while (currentEnemyType < 3 && !_gameOver)
+                {
+                    currentEnemyCount = 0;
+
+                    while (currentEnemyCount < currentWave[currentEnemyType] && !_gameOver)
+                    {
+                        SpawnEnemy(currentEnemyType);
+                        currentEnemyCount++;
+
+                        await Task.Delay(_enemySpawnInterval);
+                    }
+
+                    currentEnemyType++;
+
+                    if (currentEnemyType > 2)
+                    {
+                        currentEnemyType = 0;
+                        currentWaveIndex++;
+                        wave.Content = "Wave: " + currentWaveIndex + "/5";
+
+                        if (currentWaveIndex < 5)
+                        {
+                            currentWave = waves.GetWave(currentWaveIndex);
+                            await Task.Delay(_waveSpawnInterval);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            _allEnemiesSpawned = true;
         }
 
         private void InitializeMap()
@@ -77,30 +129,6 @@ namespace TowerDefense
         {
             health.Content = _Health;
 
-
-
-            //Waves spawnen
-            Wave waves = new Wave();
-            //erste Wave holen
-            if (_currentWaveIndex == 0)
-            {
-                _currentWave = waves.GetWave(_currentWaveIndex); // Setze die erste Wave
-            }
-
-            //wenn enemys da dann spawnen
-            if (_currentEnemyCount < _currentWave[_currentEnemyType])
-            {
-                SpawnEnemy(_currentEnemyType);
-                _currentEnemyCount++;
-            }
-
-            //wenn alle waves durch dann spiel enden
-            if (_currentWaveIndex >= 5)
-            {
-                _gameTick.Stop();
-                lost.Content = "GAME WON";
-            }
-
             //Leben abziehen
             foreach (var enemy in _enemyList)
             {
@@ -108,16 +136,34 @@ namespace TowerDefense
                 {
                     _Health -= enemy.Life;
                     enemy.ReachedEnd = false;
+                    enemy.Life = 0;
                 }
+            }
+
+            bool won = true;
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy.Life > 0)
+                    won = false;       
+            }
+
+            if (won && _allEnemiesSpawned)
+            {
+                _gameTick.Stop();
+                info.Content = "GAME WON";
+                info.Visibility = Visibility.Visible;
+                health.Content = "0";
+                _gameOver = true;
             }
 
             //Spieler tot
             if (_Health < 0)
             {
                 _gameTick.Stop();
-                lost.Content = "GAME OVER";
-                lost.Visibility = Visibility.Visible;
+                info.Content = "GAME OVER";
+                info.Visibility = Visibility.Visible;
                 health.Content = "0";
+                _gameOver = true;
             }
         }
 
