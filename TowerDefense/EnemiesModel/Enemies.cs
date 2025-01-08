@@ -2,10 +2,12 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using TowerDefense.Grid;
 
 namespace TowerDefense.EnemiesModel
 {
-    public class Enemies
+    public class Enemies : IPositionable
     {
         public int Speed { get; set; }
         public int Life { get; set; }
@@ -100,7 +102,7 @@ namespace TowerDefense.EnemiesModel
         {
             Life -= damage;
 
-            if(Life <= 0)
+            if (Life <= 0)
             {
                 GetKilled();
             }

@@ -2,10 +2,15 @@
 using TowerDefense.EnemiesModel;
 using TowerDefense.Projectils;
 using System.Windows;
+using TowerDefense.Helper;
+using System.IO;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace TowerDefense.Towers
 {
-    public abstract class BaseTower
+    public abstract class BaseTower : IPositionable
     {
         public float AttackRange { get; private set; }
         public float AttackSpeed { get; private set; }
@@ -13,10 +18,13 @@ namespace TowerDefense.Towers
         public int AttackDamage { get; private set; }
         public int Costs { get; private set; }
         public float Size { get; private set; }
-        public int ProjectileimageId {  get; private set; }
+        public int ProjectileimageId { get; private set; }
         public int ProjectileSpeed { get; private set; }
+        public string TowerName { get; private set; }
+        public string PathtoImage { get; private set; }
+        public double TowerRadius { get; private set; }
 
-        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed)
+        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed, string towerName, string pathtoImage, double towerRadius)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -26,12 +34,15 @@ namespace TowerDefense.Towers
             Size = size;
             ProjectileimageId = projectileimageId;
             ProjectileSpeed = projectilespeed;
+            TowerName = towerName;
+            PathtoImage = pathtoImage;
+            TowerRadius = towerRadius;
         }
 
         public void Attack(Enemies target)
         {
             if (target == null) return;
-            
+
             Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed);
             //projectile.Animate(gameCanvas, (proj) =>
             //{
@@ -39,7 +50,7 @@ namespace TowerDefense.Towers
             //});
         }
 
-        public void GetTarget(SpatialGrid grid, int cellSize)
+        public void GetTarget(SpatialGrid<Enemies> grid, int cellSize)
         {
             var enemiesInRange = GetEnemiesInRange(grid, cellSize);
 
@@ -70,7 +81,7 @@ namespace TowerDefense.Towers
             return distance <= AttackRange;
         }
 
-        public List<Enemies> GetEnemiesInRange(SpatialGrid grid, int cellSize)
+        public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid, int cellSize)
         {
             var enemiesInRange = new List<Enemies>();
 
@@ -78,7 +89,7 @@ namespace TowerDefense.Towers
 
             foreach (var cell in cellsToCheck)
             {
-                var enemiesInCell = grid.GetEnemiesInCell(cell);
+                var enemiesInCell = grid.GetObjectsInCell(cell);
                 if (enemiesInCell != null)
                 {
                     foreach (var enemy in enemiesInRange)
@@ -108,8 +119,42 @@ namespace TowerDefense.Towers
                     cellsInRange.Add((centerX, centerY));
                 }
             }
-                
+
             return cellsInRange;
         }
-    }   
+        public Image GetEntityPic()
+        {
+            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
+
+            ImageHelper imageHelper = new();
+            return imageHelper.GetEntityPic(imagePath);
+        }
+        private double DistanceToLine(Point point, Line line)
+        {
+            double x1 = line.X1;
+            double y1 = line.Y1;
+            double x2 = line.X2;
+            double y2 = line.Y2;
+
+            double numerator = Math.Abs((y2 - y1) * point.X - (x2 - x1) * point.Y + x2 * y1 - y2 * x1);
+            double denominator = Math.Sqrt(Math.Pow(y2 - y1, 2) + Math.Pow(x2 - x1, 2));
+
+            return numerator / denominator;
+        }
+        public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers)
+        {
+            if(depolyedTowers != null)
+            {
+                foreach (var t in depolyedTowers)
+                {
+                    if (Math.Sqrt(Math.Pow(t.Position.X - dropPosition.X, 2) + Math.Pow(t.Position.Y - dropPosition.Y, 2)) < TowerRadius)
+                    {
+                        return false; 
+                    }
+                }
+            }
+            return true; // Wenn keine Kollision mit anderen Türmen festgestellt wird
+
+        }
+    }
 }
