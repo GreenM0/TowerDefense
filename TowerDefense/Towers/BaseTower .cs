@@ -117,28 +117,28 @@ namespace TowerDefense.Towers
             return distance <= AttackRange;
         }
 
-        public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid, int cellSize)
-        {
-            var enemiesInRange = new List<Enemies>();
+        //public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid, int cellSize)
+        //{
+        //    var enemiesInRange = new List<Enemies>();
 
-            var cellsToCheck = GetCellsInRange(cellSize);
+        //    var cellsToCheck = GetCellsInRange(cellSize);
 
-            foreach (var cell in cellsToCheck)
-            {
-                var enemiesInCell = grid.GetObjectsInCell(cell);
-                if (enemiesInCell != null)
-                {
-                    foreach (var enemy in enemiesInRange)
-                    {
-                        if (IsInRange(enemy))
-                        {
-                            enemiesInRange.Add(enemy);
-                        }
-                    }
-                }
-            }
-            return enemiesInRange;
-        }
+        //    foreach (var cell in cellsToCheck)
+        //    {
+        //        var enemiesInCell = grid.GetObjectsInCell(cell);
+        //        if (enemiesInCell != null)
+        //        {
+        //            foreach (var enemy in enemiesInRange)
+        //            {
+        //                if (IsInRange(enemy))
+        //                {
+        //                    enemiesInRange.Add(enemy);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return enemiesInRange;
+        //}
 
         public List<(int, int)> GetCellsInRange(int cellSize)
         {
@@ -177,20 +177,45 @@ namespace TowerDefense.Towers
 
             return numerator / denominator;
         }
-        public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers)
+        public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers, List<Rectangle> gameWayBounds)
         {
-            if(depolyedTowers != null)
+            // Prüfen, ob der Turm zu nah an anderen Türmen platziert wird
+            if (depolyedTowers != null)
             {
                 foreach (var t in depolyedTowers)
                 {
                     if (Math.Sqrt(Math.Pow(t.Position.X - dropPosition.X, 2) + Math.Pow(t.Position.Y - dropPosition.Y, 2)) < TowerRadius)
                     {
-                        return false; 
+                        return false;
                     }
                 }
             }
-            return true; // Wenn keine Kollision mit anderen Türmen festgestellt wird
 
+            // Prüfen, ob der Punkt innerhalb eines Rechtecks (Bounding Box des Wegs) liegt
+            foreach (var rect in gameWayBounds)
+            {
+                if (IsPointInsideRectangle(dropPosition, rect))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
+
+        // Hilfsmethode: Prüfen, ob ein Punkt innerhalb eines Rechtecks liegt
+        private bool IsPointInsideRectangle(Point point, Rectangle rect)
+        {
+            // Berechnung der Grenzen des Rechtecks
+            double rectLeft = Canvas.GetLeft(rect);
+            double rectTop = Canvas.GetTop(rect);
+            double rectRight = rectLeft + rect.Width;
+            double rectBottom = rectTop + rect.Height;
+
+            // Prüfen, ob der Punkt innerhalb der Grenzen liegt
+            return (point.X >= rectLeft && point.X <= rectRight &&
+                    point.Y >= rectTop && point.Y <= rectBottom);
+        }
+
     }
 }
