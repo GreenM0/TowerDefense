@@ -12,6 +12,7 @@
             <ColumnDefinition Width="25*"/>
         </Grid.ColumnDefinitions>
 
+        <Image Source="Maps/Assets/Hintergrund.png" Width="480" Height="1080" Grid.Column="1" Panel.ZIndex="1"/>
         <StackPanel Width="470" HorizontalAlignment="Left" Background="LightGray" Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0">
             <TextBlock x:Name="Cashbar" FontWeight="Bold" Text="" Margin="10" Height="18" />
             <TextBlock Text="Towers:" FontWeight="Bold" Margin="10" Height="18"/>
