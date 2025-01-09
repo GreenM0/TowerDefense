@@ -196,17 +196,12 @@ namespace TowerDefense
                 Werwolf werwolf = new Werwolf();
                 CreateEnemy(werwolf);
             }
-            Goblin goblin = new Goblin();          
-            _enemyGrid.AddObject(goblin);
-
-            Image ImageControl = goblin.GetEntityPic();
-            goblin.Image = ImageControl;
-            _enemyList.Add(goblin);
 
             void CreateEnemy(Enemies enemy)
             {
                 _enemyList.Add(enemy);
                 Image ImageControl = enemy.GetEntityPic();
+                enemy.Image = ImageControl;
                 Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
                 Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
                 GameField.Children.Add(ImageControl);
