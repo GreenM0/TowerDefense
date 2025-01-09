@@ -70,5 +70,32 @@ namespace TowerDefense
         {
             return ((int)(position.X / cellSize), (int)(position.Y / cellSize));
         }
+
+        public List<(int, int)> GetCellsInRange(Point towerPosition, float range, int cellSize)
+        {
+            var cellsInRange = new List<(int, int)>();
+
+            // Bestimme die Zelle des Turms
+            (int centerX, int centerY) = GetCell(towerPosition);
+
+            // Berechne, wie viele Zellen im Umkreis des Turms liegen (basierend auf dem Range und der Zellen-Größe)
+            int rangeInCells = (int)Math.Ceiling(range / cellSize);
+
+            // Iteriere über alle Zellen im Umkreis
+            for (int x = -rangeInCells; x <= rangeInCells; x++)
+            {
+                for (int y = -rangeInCells; y <= rangeInCells; y++)
+                {
+                    // Berechne die Koordinaten der benachbarten Zelle
+                    int neighborX = centerX + x;
+                    int neighborY = centerY + y;
+
+                    // Füge die Zelle zum Ergebnis hinzu
+                    cellsInRange.Add((neighborX, neighborY));
+                }
+            }
+
+            return cellsInRange;
+        }
     }
 }

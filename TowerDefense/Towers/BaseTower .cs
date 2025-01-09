@@ -7,6 +7,8 @@ using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using System;
 
 namespace TowerDefense.Towers
 {
@@ -18,61 +20,95 @@ namespace TowerDefense.Towers
         public int AttackDamage { get; private set; }
         public int Costs { get; private set; }
         public float Size { get; private set; }
-        public int ProjectileimageId { get; private set; }
+        public string ProjectileimagePath { get; private set; }
         public int ProjectileSpeed { get; private set; }
         public string TowerName { get; private set; }
         public string PathtoImage { get; private set; }
         public double TowerRadius { get; private set; }
+        private DispatcherTimer? _attackTimer;
 
-        public BaseTower(float attackRange, int attackDamage, Point position, int costs, float size, int projectileimageId, int projectilespeed, string towerName, string pathtoImage, double towerRadius)
+        public BaseTower(float attackRange, int attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
-            AttackSpeed = costs;
+            AttackSpeed = attackspeed;
             Position = position;
             Costs = costs;
             Size = size;
-            ProjectileimageId = projectileimageId;
+            ProjectileimagePath = projectileimagePath;
             ProjectileSpeed = projectilespeed;
             TowerName = towerName;
             PathtoImage = pathtoImage;
             TowerRadius = towerRadius;
         }
 
-        public void Attack(Enemies target)
+        public void StartAttackTimer(Canvas gameCanvas)
         {
-            if (target == null) return;
+            _attackTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(AttackSpeed) // AttackSpeed gibt die Angriffe pro Sekunde an
+            };
 
-            Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed);
-            //projectile.Animate(gameCanvas, (proj) =>
-            //{
-            //    target.GetHit(AttackDamage);
-            //});
+            _attackTimer.Tick += (sender, e) =>
+            {
+                List<Enemies> enemiesInRange = new List<Enemies>();
+                foreach (var enemy in GameHandler.Instance._enemyList)
+                {
+                    // Berechne, ob der Gegner im Angriffsradius ist
+                    double distance = Math.Sqrt(Math.Pow(Position.X - enemy.Position.X, 2) + Math.Pow(Position.Y - enemy.Position.Y, 2));
+
+                    if (distance <= AttackRange)
+                    {
+                        // Gegner angreifen
+                        enemiesInRange.Add(enemy);
+                    }
+                }
+
+                if (enemiesInRange.Count == 0) return;
+
+                Enemies closestEnemy = enemiesInRange[0];
+
+                foreach (var enemy in enemiesInRange)
+                {
+                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
+                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+
+                    if (currentDistance < closestDistance)
+                    {
+                        closestEnemy = enemy;
+                    }
+                }
+
+                Attack(closestEnemy, gameCanvas);
+            };
+
+            _attackTimer.Start();
         }
 
-        public void GetTarget(SpatialGrid<Enemies> grid, int cellSize)
+        public virtual void Attack(Enemies target, Canvas gameCanvas)
         {
-            var enemiesInRange = GetEnemiesInRange(grid, cellSize);
+            if (target == null || !IsInRange(target)) return;
 
-            Enemies closestEnemy = enemiesInRange[0];
+            Vector targetVelocity = target.Velocity;  // Annahme: Velocity ist die Geschwindigkeit des Ziels
 
-            if (enemiesInRange.Count == 0)
+            // Berechne den Abstand zwischen Turm und Ziel
+            double distance = Math.Sqrt(Math.Pow(Position.X - target.Position.X, 2) + Math.Pow(Position.Y - target.Position.Y, 2));
+
+            // Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
+            double timeToTarget = distance / ProjectileSpeed;
+
+            // Berechne den Vorhersagepunkt des Ziels
+            Point predictedTargetPosition = new Point(
+                target.Position.X + targetVelocity.X * timeToTarget,
+                target.Position.Y + targetVelocity.Y * timeToTarget
+            );
+
+            Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target);
+
+            projectile.Animate(gameCanvas, (proj) =>
             {
-                Attack(closestEnemy);
-            }
-
-            foreach (var enemy in enemiesInRange)
-            {
-                double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
-
-                if (currentDistance < closestDistance)
-                {
-                    closestEnemy = enemy;
-                }
-            }
-
-            Attack(closestEnemy);
+                proj.Hit();
+            });
         }
 
         public bool IsInRange(Enemies enemy)

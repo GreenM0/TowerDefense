@@ -10,23 +10,25 @@ using TowerDefense.Grid;
 using TowerDefense.Maps;
 using TowerDefense.Towers;
 
-
 namespace TowerDefense
 {
     public partial class GameHandler : UserControl
     {
         private DispatcherTimer? _gameTick;
         private DispatcherTimer? _gridHandler;
+        private DispatcherTimer? _towerHandler;
         private Point[] _gameWay = new Point[3];
         private Canvas _mainCanvas = null!;
-        private List<Enemies> _enemyList = new List<Enemies>();
+        public List<Enemies> _enemyList = new List<Enemies>();
         private List<BaseTower> _towers = new List<BaseTower>();
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         private int cash;
         private SpatialGrid<BaseTower> _towerGrid = new SpatialGrid<BaseTower>(100);
-        private SpatialGrid<Enemies> _enemyGrid = new SpatialGrid<Enemies>(50);
+        private SpatialGrid<Enemies> _enemyGrid = new SpatialGrid<Enemies>(100);
         private List<Line> _lineList = new List<Line>();
         private Image? ghostTower;
+        private Ellipse? _rangeIndicator; // Anzeige für die Angriffsreichweite
+        public static GameHandler Instance { get; private set; }
 
         public GameHandler()
         {
@@ -36,8 +38,10 @@ namespace TowerDefense
             LoadTowers();
             DisplayTowerMenu();
             InitializeSpawner();
-            InitializeGridHandler();
+            //InitializeGridHandler();
+            //InitializeTowerHandler();
             Cashhandler();
+            Instance = this;
         }
 
         private void InitializeMap()
@@ -50,13 +54,21 @@ namespace TowerDefense
             cash = 1000;
         }
 
-        private void InitializeGridHandler()
-        {
-            _gridHandler = new DispatcherTimer();
-            _gridHandler.Interval = TimeSpan.FromSeconds(0.1);
-            _gridHandler.Tick += GridHandlerTick;
-            _gridHandler.Start();
-        }
+        //private void InitializeGridHandler()
+        //{
+        //    _gridHandler = new DispatcherTimer();
+        //    _gridHandler.Interval = TimeSpan.FromSeconds(0.000001);
+        //    _gridHandler.Tick += GridHandlerTick;
+        //    _gridHandler.Start();
+        //}
+
+        //private void InitializeTowerHandler()
+        //{
+        //    _towerHandler = new DispatcherTimer();
+        //    _towerHandler.Interval = TimeSpan.FromSeconds(0.000001);
+        //    _towerHandler.Tick += TowerHandlerTick;
+        //    _towerHandler.Start();
+        //}
 
         private void InitializeSpawner()
         {
@@ -68,16 +80,19 @@ namespace TowerDefense
 
         private void GameTick(object? sender, EventArgs e)
         {
-            Goblin goblin = new Goblin();
-            _enemyList.Add(goblin);
+            Goblin goblin = new Goblin();          
+            _enemyGrid.AddObject(goblin);
 
             Image ImageControl = goblin.GetEntityPic();
+            goblin.Image = ImageControl;
+            _enemyList.Add(goblin);
 
             Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
             Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
             GameField.Children.Add(ImageControl);
             _ = goblin.Movement(_gameWay, _mainCanvas, ImageControl);
         }
+
         private void LoadTowers()
         {
             _towers = new List<BaseTower>
@@ -85,6 +100,7 @@ namespace TowerDefense
                 new TestTower1(new Point(0, 0)),
             };
         }
+
         private void DisplayTowerMenu()
         {
             foreach (var tower in _towers)
@@ -106,7 +122,6 @@ namespace TowerDefense
             {
                 if (ghostTower == null)
                 {
-                    // Erstelle das Geistermodell
                     ghostTower = new Image
                     {
                         Source = draggedImage.Source,
@@ -119,7 +134,6 @@ namespace TowerDefense
                     GameField.Children.Add(ghostTower);
                 }
 
-                // Bewege das Geistermodell mit der Maus
                 Point mousePosition = e.GetPosition(GameField);
                 Canvas.SetLeft(ghostTower, mousePosition.X - (ghostTower.Width / 2));
                 Canvas.SetTop(ghostTower, mousePosition.Y - (ghostTower.Height / 2));
@@ -139,15 +153,14 @@ namespace TowerDefense
 
                 BaseTower newTower = TowerFactory.CreateTower("TestTower1", dropPosition);
 
-                // Platziere den Turm
                 Image towerImage = tower.GetEntityPic();
                 towerImage.Width = tower.Size;
                 towerImage.Height = tower.Size;
 
                 Ellipse towerRadiusVisual = new Ellipse
                 {
-                    Width = tower.TowerRadius,
-                    Height = tower.TowerRadius,
+                    Width = tower.AttackRange,
+                    Height = tower.AttackRange,
                     Stroke = Brushes.Black,
                     StrokeThickness = 1,
                     Opacity = 0.5,
@@ -166,36 +179,34 @@ namespace TowerDefense
                 tower.Position = dropPosition;
                 _towerGrid.AddObject(newTower);
                 _deployedTowers.Add(newTower);
+                newTower.StartAttackTimer(GameField);
 
                 cash -= tower.Costs;
                 Cashhandler();
 
-                // Entferne das Geistermodell
                 GameField.Children.Remove(ghostTower);
                 ghostTower = null;
+
+                RemoveRangeIndicator();
             }
         }
 
-        private void GridHandlerTick(object? sender, EventArgs e)
-        {
-            foreach (var tower in _deployedTowers)
-            {
-                var cell = _towerGrid.GetCell(tower.Position);
-                var nearbyEnemies = _enemyGrid.GetObjectsInCell(cell);
+        //private void GridHandlerTick(object? sender, EventArgs e)
+        //{
+        //    foreach (var enemi in _enemyList)
+        //    {
+        //        var newposition = enemi.GetEnemyPosition();
+        //        enemi.Position = newposition;
+        //        _enemyGrid.UpdateObjectPosition(enemi, enemi.Position);
+        //    }
+        //}
 
-                if (nearbyEnemies != null)
-                {
-                    foreach (var enemy in nearbyEnemies)
-                    {
-                        double distance = Math.Sqrt(Math.Pow(tower.Position.X - enemy.Position.X, 2) + Math.Pow(tower.Position.Y - enemy.Position.Y, 2));
-                        if (distance <= tower.AttackRange)
-                        {
-                            tower.Attack(enemy);
-                        }
-                    }
-                }
-            }
-        }
+        //private void TowerHandlerTick(object? sender, EventArgs e)
+        //{
+        //    //foreach (var tower in _deployedTowers)
+        //    //{
+        //    //}
+        //}
 
         private void GameField_MouseLeave(object sender, MouseEventArgs e)
         {
@@ -203,6 +214,58 @@ namespace TowerDefense
             {
                 GameField.Children.Remove(ghostTower);
                 ghostTower = null;
+            }
+        }
+
+        private void GameField_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                Point clickPosition = e.GetPosition(GameField);
+
+                foreach (var tower in _deployedTowers)
+                {
+                    double towerX = Canvas.GetLeft(tower.GetEntityPic()) + tower.Size / 2;
+                    double towerY = Canvas.GetTop(tower.GetEntityPic()) + tower.Size / 2;
+                    double distanceToClick = Math.Sqrt(Math.Pow(clickPosition.X - towerX, 2) + Math.Pow(clickPosition.Y - towerY, 2));
+
+                    if (distanceToClick <= tower.Size / 2)
+                    {
+                        ShowTowerRange(tower);
+                        return;
+                    }
+                }
+
+                RemoveRangeIndicator();
+            }
+        }
+
+        private void ShowTowerRange(BaseTower tower)
+        {
+            RemoveRangeIndicator();
+
+            _rangeIndicator = new Ellipse
+            {
+                Width = tower.AttackRange * 2,
+                Height = tower.AttackRange * 2,
+                Stroke = Brushes.Red,
+                StrokeThickness = 2,
+                Opacity = 0.5,
+                IsHitTestVisible = false
+            };
+
+            Canvas.SetLeft(_rangeIndicator, tower.Position.X - tower.AttackRange);
+            Canvas.SetTop(_rangeIndicator, tower.Position.Y - tower.AttackRange);
+
+            GameField.Children.Add(_rangeIndicator);
+        }
+
+        private void RemoveRangeIndicator()
+        {
+            if (_rangeIndicator != null)
+            {
+                GameField.Children.Remove(_rangeIndicator);
+                _rangeIndicator = null;
             }
         }
 
@@ -218,6 +281,20 @@ namespace TowerDefense
                 Point mousePosition = e.GetPosition(GameField);
                 Canvas.SetLeft(ghostTower, mousePosition.X - (ghostTower.Width / 2));
                 Canvas.SetTop(ghostTower, mousePosition.Y - (ghostTower.Height / 2));
+            }
+        }
+        public void RemoveEnemy(Enemies enemy)
+        {
+            // Entferne den Gegner aus der Liste
+            if (_enemyList.Contains(enemy))
+            {
+                _enemyList.Remove(enemy);
+            }
+
+            // Entferne das Bild des Gegners vom Canvas
+            if (GameField.Children.Contains(enemy.Image))
+            {
+                GameField.Children.Remove(enemy.Image);
             }
         }
     }
