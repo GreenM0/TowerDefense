@@ -1,4 +1,8 @@
-﻿namespace TowerDefense.Waves
+﻿using System.Windows.Controls;
+using TowerDefense.EnemiesModel.Types;
+using TowerDefense.EnemiesModel;
+
+namespace TowerDefense.Waves
 {
     public class Wave
     {
@@ -17,6 +21,35 @@
             _singleWave[1] = _waveData[waveNumber, 1];
             _singleWave[2] = _waveData[waveNumber, 2];
             return _singleWave;
+        }
+
+        private void SpawnEnemy(int EnemyType)
+        {
+            if (EnemyType == 0)
+            {
+                Mage mage = new Mage();
+                CreateEnemy(mage);
+            }
+            else if (EnemyType == 1)
+            {
+                Goblin goblin = new Goblin();
+                CreateEnemy(goblin);
+            }
+            else if (EnemyType == 2)
+            {
+                Werwolf werwolf = new Werwolf();
+                CreateEnemy(werwolf);
+            }
+
+            void CreateEnemy(Enemies enemy)
+            {
+                Image ImageControl = enemy.GetEntityPic();
+                enemy.Image = ImageControl;
+                Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
+                Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
+                GameField.Children.Add(ImageControl);
+                _ = enemy.Movement(_gameWay, _mainCanvas, ImageControl);
+            }
         }
 
         private void InitializeWaves()
