@@ -406,6 +406,8 @@ namespace TowerDefense
             if (_enemyList.Contains(enemy))
             {
                 _enemyList.Remove(enemy);
+                cash += enemy.Coins;
+                Cashhandler();
             }
 
             // Entferne das Bild des Gegners vom Canvas
