@@ -387,7 +387,7 @@ namespace TowerDefense
 
         private void Cashhandler()
         {
-            Cashbar.Text = Convert.ToString(cash);
+            Cashbar.Content = Convert.ToString(cash);
         }
 
         private void GameField_MouseMove(object sender, MouseEventArgs e)
@@ -399,6 +399,7 @@ namespace TowerDefense
                 Canvas.SetTop(ghostTower, mousePosition.Y - (ghostTower.Height / 2));
             }
         }
+
         public void RemoveEnemy(Enemies enemy)
         {
             // Entferne den Gegner aus der Liste

@@ -12,17 +12,17 @@
             <ColumnDefinition Width="25*"/>
         </Grid.ColumnDefinitions>
 
-        <Image Source="Maps/Assets/Hintergrund.png" Width="480" Height="1080" Grid.Column="1" Panel.ZIndex="1"/>
-        <StackPanel Width="470" HorizontalAlignment="Left" Background="LightGray" Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0">
-            <TextBlock x:Name="Cashbar" FontWeight="Bold" Text="" Margin="10" Height="18" />
-            <TextBlock Text="Towers:" FontWeight="Bold" Margin="10" Height="18"/>
+        <Image Source="Maps/Assets/Hintergrund.png" Width="480" Height="1080" Grid.Column="1"/>
+        <StackPanel Width="470" HorizontalAlignment="Left" Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0">
         </StackPanel>
 
         <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseDown="GameField_MouseDown"  MouseLeave="GameField_MouseLeave"></Canvas>
         <StackPanel Width="1440" Height="50" VerticalAlignment="Top" Orientation="Horizontal" Background="DarkGreen">
             <Label Width="105" Height="50" FontFamily="Arial" FontSize="30" Content="Health:" Panel.ZIndex="5"/>
-            <Label x:Name="health" Width="75" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
+            <Label x:Name="health" Width="100" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
             <Label x:Name="wave"  Width="200" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
+            <Label Width="80" Height="50" FontFamily="Arial" FontSize="30" Content="Geld:" Panel.ZIndex="5"/>
+            <Label x:Name="Cashbar"  Width="200" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
         </StackPanel>
         <Label x:Name="info"  Width="600" Height="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="80" Panel.ZIndex="5" Visibility="Hidden"/>
     </Grid>
