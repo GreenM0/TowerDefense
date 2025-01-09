@@ -2,30 +2,26 @@
 {
     public class Wave
     {
-        public int[,] _waveData { get; set; }
-        //spawngewschindigkeit pro gegner, zufällig, rückwärts, 
-        public int[] GetWave(int waveNumber)
-        {
+        private int[,] _waveData;
+        private int[] _singleWave = new int[3];
 
-        }
 
         public Wave()
         {
-            FillWaveListWithInfo();
+            InitializeWaves();
         }
 
-        private void FillWaveListWithInfo()
+        public int[] GetSingleWave(int waveNumber)
         {
-           
+            _singleWave[0] = _waveData[waveNumber, 0];
+            _singleWave[1] = _waveData[waveNumber, 1];
+            _singleWave[2] = _waveData[waveNumber, 2];
+            return _singleWave;
         }
 
-        /*
-        
-         */
-
-        public void InitializeWaves()
+        private void InitializeWaves()
         {
-            int[,] _waveData = new int[,]
+            _waveData = new int[,]
             {
                 {5, 0, 0}, {10, 2, 0}, {0, 5, 0}, {20, 0, 1}, {0, 10, 3},
                 {15, 5, 0}, {0, 12, 3}, {25, 0, 0}, {0, 15, 5}, {30, 5, 2},
@@ -44,15 +40,6 @@
                 {0, 400, 125}, {600, 140, 120}, {0, 420, 130}, {620, 150, 125}, {0, 440, 135},
                 {650, 160, 130}, {0, 460, 140}, {670, 170, 135}, {0, 480, 145}, {700, 180, 140}
             };
-
-
-            for (int i = 0; i < _waveContent.GetLength(0); i++)
-            {
-                for (int j = 0; j < _waveContent.GetLength(1); j++)
-                {
-                    WaveList[i, j] = _waveContent[i, j];
-                }
-            }
         }
     }
 }
