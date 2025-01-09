@@ -1,73 +1,147 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using TowerDefense.Helper;
+using System;
 using System.Windows.Media.Animation;
-using System.Windows.Shapes;
+using TowerDefense.EnemiesModel;
+using System.IO;
+using System.Windows.Threading;
 
 namespace TowerDefense.Projectils
 {
     public class Projectile
     {
-        public Point StartPosition { get; private set; }
-        public Point TargetPosition { get; private set; }
-        public double Speed { get; private set; }
-        public UIElement UIElement { get; private set; } 
+        private Point StartPosition { get; }
+        private Point TargetPosition { get; }
+        private int Speed { get; }
+        private Image ProjectileImage { get; set; }
+        private Enemies Target { get; }
+        private int Damage { get; }
+        public int ImageWidth { get; } = 50;
+        public int ImageHeight { get; } = 50;
 
-        public Projectile(Point startPosition, Point targetPosition, double speed)
+
+        public Projectile(Point startPosition, Point targetPosition, int speed, int damage, string imagePath, Enemies target)
         {
             StartPosition = startPosition;
             TargetPosition = targetPosition;
+            Speed = speed;
+            Damage = damage;
+            Target = target;
 
-            // Erstelle eine grafische Darstellung des Projektils (z.B. ein kleiner Kreis)
-            Ellipse projectileVisual = new Ellipse
-            {
-                Width = 5,
-                Height = 5,
-                Fill = Brushes.Black
-            };
 
-            UIElement = projectileVisual;
-
-            Canvas.SetLeft(UIElement, StartPosition.X);
-            Canvas.SetTop(UIElement, StartPosition.Y);
+            // Positioniere das Projektil auf der Leinwand
+            Canvas.SetLeft(GetEntityPic(), StartPosition.X);
+            Canvas.SetTop(GetEntityPic(), StartPosition.Y);
         }
 
-        public void Animate(Canvas canvas, Action<Projectile> onComplete = null)
+        public Image GetEntityPic()
         {
-            double distance = (TargetPosition - StartPosition).Length;
-            double durationInSeconds = distance / Speed;
+            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Projectils\Types\Assets\IceBall.png");
 
-            DoubleAnimation moveXAnimation = new DoubleAnimation
+            ImageHelper imageHelper = new();
+            ProjectileImage = imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);
+            return imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);
+        }
+
+        public void Animate(Canvas gameCanvas, Action<Projectile> onHit)
+        {
+            gameCanvas.Children.Add(ProjectileImage);
+
+            // Berechne die Anfangsdistanz und die Richtung
+            double distance = Math.Sqrt(
+                Math.Pow(Target.Position.X - StartPosition.X, 2) +
+                Math.Pow(Target.Position.Y - StartPosition.Y, 2));
+
+            double duration = distance / Speed; // Berechne die Dauer der Animation basierend auf der Geschwindigkeit
+
+            // Berechne die Schritte in X- und Y-Richtung
+            double stepX = (Target.Position.X - StartPosition.X) / duration;
+            double stepY = (Target.Position.Y - StartPosition.Y) / duration;
+
+            // Setze das Projektil an die Startposition
+            Canvas.SetLeft(ProjectileImage, StartPosition.X);
+            Canvas.SetTop(ProjectileImage, StartPosition.Y);
+
+            // Erstelle das Storyboard und die DoubleAnimation für die X- und Y-Richtung
+            var animationX = new DoubleAnimation
             {
                 From = StartPosition.X,
-                To = TargetPosition.X,
-                Duration = TimeSpan.FromSeconds(durationInSeconds)
+                To = Target.Position.X,
+                Duration = TimeSpan.FromSeconds(duration),
+                AutoReverse = false
             };
 
-            DoubleAnimation moveYAnimation = new DoubleAnimation
+            var animationY = new DoubleAnimation
             {
                 From = StartPosition.Y,
-                To = TargetPosition.Y,
-                Duration = TimeSpan.FromSeconds(durationInSeconds)
+                To = Target.Position.Y,
+                Duration = TimeSpan.FromSeconds(duration),
+                AutoReverse = false
             };
 
-            Storyboard.SetTarget(moveXAnimation, UIElement);
-            Storyboard.SetTargetProperty(moveXAnimation, new PropertyPath("(Canvas.Left)"));
+            // Erstelle das Storyboard
+            Storyboard storyboard = new Storyboard();
+            storyboard.Children.Add(animationX);
+            storyboard.Children.Add(animationY);
 
-            Storyboard.SetTarget(moveYAnimation, UIElement);
-            Storyboard.SetTargetProperty(moveYAnimation, new PropertyPath("(Canvas.Top)"));
+            Storyboard.SetTarget(animationX, ProjectileImage);
+            Storyboard.SetTarget(animationY, ProjectileImage);
 
-            Storyboard movementStoryboard = new Storyboard();
-            movementStoryboard.Children.Add(moveXAnimation);
-            movementStoryboard.Children.Add(moveYAnimation);
+            Storyboard.SetTargetProperty(animationX, new PropertyPath("(Canvas.Left)"));
+            Storyboard.SetTargetProperty(animationY, new PropertyPath("(Canvas.Top)"));
 
-            movementStoryboard.Completed += (s, e) =>
+            // Wenn die Animation abgeschlossen ist, entferne das Projektil und führe den Treffer-Callback aus
+            storyboard.Completed += (sender, e) =>
             {
-                onComplete?.Invoke(this);
+                gameCanvas.Children.Remove(ProjectileImage);
+                onHit(this);
             };
 
-            canvas.Children.Add(UIElement);
-            movementStoryboard.Begin();
+            // Starte das Storyboard
+            storyboard.Begin();
+
+            // Timer, um die Position des Ziels während der Animation kontinuierlich anzupassen
+            DispatcherTimer targetTrackingTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(20) // Update alle 20 ms
+            };
+
+            targetTrackingTimer.Tick += (sender, e) =>
+            {
+                // Wenn das Projektil die Endposition erreicht hat, stoppen wir den Timer
+                if (!storyboard.GetCurrentState().Equals(ClockState.Active))
+                {
+                    targetTrackingTimer.Stop();
+                    return;
+                }
+
+                // Berechne die neue Position des Ziels
+                double currentDistance = Math.Sqrt(Math.Pow(Target.Position.X - Canvas.GetLeft(ProjectileImage), 2) +
+                                                   Math.Pow(Target.Position.Y - Canvas.GetTop(ProjectileImage), 2));
+
+                // Wenn das Ziel sich noch nicht ganz bewegt hat, berechne die neuen Schritte
+                if (currentDistance > 1)
+                {
+                    // Neue Schritte berechnen, basierend auf der aktuellen Position des Ziels
+                    double newStepX = (Target.Position.X - Canvas.GetLeft(ProjectileImage)) / duration;
+                    double newStepY = (Target.Position.Y - Canvas.GetTop(ProjectileImage)) / duration;
+
+                    // Setze die Position des Projektils neu
+                    Canvas.SetLeft(ProjectileImage, Canvas.GetLeft(ProjectileImage) + newStepX);
+                    Canvas.SetTop(ProjectileImage, Canvas.GetTop(ProjectileImage) + newStepY);
+                }
+            };
+
+            // Starte den Timer
+            targetTrackingTimer.Start();
+        }
+
+
+        public void Hit()
+        {
+            Target.GetHit(Damage);
         }
     }
 }

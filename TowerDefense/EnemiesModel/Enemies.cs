@@ -5,13 +5,14 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using TowerDefense.Grid;
 
 namespace TowerDefense.EnemiesModel
 {
     public class Enemies : IPositionable
     {
-        public int Speed { get; set; }
+        public float Speed { get; set; }
         public int Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
@@ -23,6 +24,7 @@ namespace TowerDefense.EnemiesModel
         private double _lineLength = 0;
         private double _lineDuration = 0;
         private bool _movingRight = false;
+        public Vector Velocity { get; set; }
         public virtual Image? GetEntityPic() => null;
 
         public Enemies(int speed, int life, int coins, int imagewidth = 0, int imageheight = 0)
@@ -32,11 +34,24 @@ namespace TowerDefense.EnemiesModel
             Coins = coins;
             ImageWidth = imagewidth;
             ImageHeight = imageheight;
+            Velocity = new Vector(0, 0);
+        }
+
+        public void UpdateVelocity(Point previousPosition, TimeSpan timeDelta)
+        {
+            // Berechne die Änderung der Position (Geschwindigkeit)
+            Vector deltaPosition = new Vector(Position.X - previousPosition.X, Position.Y - previousPosition.Y);
+
+            // Geschwindigkeit = Position Änderung / Zeitänderung
+            Velocity = new Vector(deltaPosition.X / timeDelta.TotalSeconds, deltaPosition.Y / timeDelta.TotalSeconds);
         }
 
         public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
         {
-            //Gesamtlänge vom Weg berechnen
+            // Die vorherige Position speichern
+            Point previousPosition = Position;
+
+            // Gesamtlänge vom Weg berechnen
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
                 double dx = _gameWay[i + 1].X - _gameWay[i].X;
@@ -46,7 +61,7 @@ namespace TowerDefense.EnemiesModel
                 _totalLength += segmentLength;
             }
 
-            //Bild von Punkt zu Punkt animieren
+            // Bild von Punkt zu Punkt animieren
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
                 Point startPoint = _gameWay[i];
@@ -60,7 +75,7 @@ namespace TowerDefense.EnemiesModel
                 DoubleAnimation animationX = new DoubleAnimation
                 {
                     From = Canvas.GetLeft(img),
-                    To = endPoint.X - img.Height / 2,
+                    To = endPoint.X - img.Width / 2,
                     Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
 
@@ -70,12 +85,27 @@ namespace TowerDefense.EnemiesModel
                     To = endPoint.Y - img.Height / 2,
                     Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
-                
+
+                // Berechne die Geschwindigkeit des Gegners (beim ersten Schritt)
+                if (i == 0)
+                {
+                    // Beispiel: Berechnung nach der ersten Bewegung
+                    TimeSpan timeDelta = TimeSpan.FromSeconds(_lineDuration);
+                    UpdateVelocity(previousPosition, timeDelta);
+                }
+
+                // Update-Logik während der Animation
+                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
+                timer.Tick += (s, e) =>
+                {
+                    UpdatePositionFromCanvas(img); // Position aus Canvas abfragen
+                };
+                timer.Start();
+
                 // Erstelle eine TaskCompletionSource für das Ende der Animation
                 TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
                 TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
 
-                // Event-Handler für das Ende der Animationen
                 animationX.Completed += (s, e) => tcsX.SetResult(true);
                 animationY.Completed += (s, e) => tcsY.SetResult(true);
 
@@ -85,6 +115,12 @@ namespace TowerDefense.EnemiesModel
                 FlipImageDirection(img, movingRight);
 
                 await Task.WhenAll(tcsX.Task, tcsY.Task);
+
+                // Stoppe den Timer nach Abschluss der Animation
+                timer.Stop();
+
+                // Nach der ersten Bewegung, die Position aktualisieren
+                previousPosition = endPoint;
             }
 
             if (Life > 0)
@@ -98,6 +134,7 @@ namespace TowerDefense.EnemiesModel
 
             img.Visibility = Visibility.Collapsed;
         }
+
 
         private void FlipImageDirection(Image img, bool movingRight)
         {
@@ -125,16 +162,29 @@ namespace TowerDefense.EnemiesModel
 
         public void GetKilled()
         {
-            //GameHandler.AddCoins(Coins);
+            GameHandler.Instance.RemoveEnemy(this);
         }
 
         public Point GetEnemyPosition()
         {
             Point currentPosition;
-            currentPosition.X = Canvas.GetLeft(Image);
-            currentPosition.Y = Canvas.GetTop(Image);
+            if(Image != null)
+            {
+                currentPosition.X = Canvas.GetLeft(Image);
+                currentPosition.Y = Canvas.GetTop(Image);
 
+                Position = new Point(currentPosition.X, currentPosition.Y);
+            }
             return currentPosition;
+        }
+
+        private void UpdatePositionFromCanvas(Image img)
+        {
+            double x = Canvas.GetLeft(img);
+            double y = Canvas.GetTop(img);
+
+            Position = new Point(x, y); // Synchronisiere die Position des Gegners
         }
     }
 }
+

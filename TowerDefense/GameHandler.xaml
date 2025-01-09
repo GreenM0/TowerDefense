@@ -17,7 +17,7 @@
             <TextBlock Text="Towers:" FontWeight="Bold" Margin="10" Height="18"/>
         </StackPanel>
 
-        <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseLeave="GameField_MouseLeave"></Canvas>
+        <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseDown="GameField_MouseDown"  MouseLeave="GameField_MouseLeave"></Canvas>
         <Rectangle Grid.Column="1" Fill="Blue"/>
         <StackPanel Width="1440" Height="50" VerticalAlignment="Top" Orientation="Horizontal" Background="DarkGreen">
             <Label Width="105" Height="50" FontFamily="Arial" FontSize="30" Content="Health:" Panel.ZIndex="5"/>
