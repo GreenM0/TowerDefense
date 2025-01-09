@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Werwolf : Enemies
     {
-        public Werwolf() : base(speed: 40, life: 12, coins: 10, imagewidth: 75, imageheight: 100)
+        public Werwolf() : base(speed: 40, life: 25, coins: 10, imagewidth: 75, imageheight: 100)
         {
 
         }

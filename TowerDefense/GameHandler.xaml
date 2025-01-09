@@ -22,7 +22,8 @@
             <Label x:Name="health" Width="100" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
             <Label x:Name="wave"  Width="200" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
             <Label Width="80" Height="50" FontFamily="Arial" FontSize="30" Content="Geld:" Panel.ZIndex="5"/>
-            <Label x:Name="Cashbar"  Width="200" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
+            <Label x:Name="Cashbar"  Width="100" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5"/>
+            <Button x:Name="speedo" Content="Speed" Width="200" Height="50" FontFamily="Arial" FontSize="30" Panel.ZIndex="5" Background="DarkGreen" Click="speedo_Click"/>
         </StackPanel>
         <Label x:Name="info"  Width="600" Height="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="80" Panel.ZIndex="5" Visibility="Hidden"/>
     </Grid>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -35,14 +36,13 @@ namespace TowerDefense
         public static GameHandler Instance { get; private set; }
 
         //Spieleinstellungen
-        private int _Health = 100;
-        private int _waveSpawnInterval = 5000; // Zeit in Millisekunden zwischen Waves
-        private int _enemySpawnInterval = 1000; // Zeit in Millisekunden zwischen Gegner-Spawns
+        private int _Health = 50;
+        private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
+        private int _enemySpawnInterval = 750; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler()
         {
             InitializeComponent();
-
             InitializeMap();
             LoadTowers();
             DisplayTowerMenu();
@@ -62,9 +62,9 @@ namespace TowerDefense
             int currentEnemyCount = 0;
             int currentEnemyType = 0;
 
-            while (currentWaveIndex < 5 && !_gameOver)
+            while (currentWaveIndex < 80 && !_gameOver)
             {
-                wave.Content = "Wave: " + (currentWaveIndex + 1) + "/5";
+                wave.Content = "Wave: " + (currentWaveIndex + 1) + "/80";
                 currentEnemyType = 0;
 
                 while (currentEnemyType < 3 && !_gameOver)
@@ -86,11 +86,31 @@ namespace TowerDefense
                         currentEnemyType = 0;
                         currentWaveIndex++;
 
-                        if (currentWaveIndex < 5)
+                        if (currentWaveIndex < 80)
                         {
                             currentWave = waves.GetWave(currentWaveIndex);
                             await Task.Delay(_waveSpawnInterval);
-                            wave.Content = "Wave: " + (currentWaveIndex + 1) + "/5";
+                            wave.Content = "Wave: " + (currentWaveIndex + 1) + "/80";
+                            if (currentWaveIndex == 15)
+                            {
+                                int troll = (int)Math.Round(currentWaveIndex * 0.1);
+                                _waveSpawnInterval = _waveSpawnInterval / troll;
+                                _enemySpawnInterval = _enemySpawnInterval / troll;
+                            }
+
+                            if (currentWaveIndex == 25)
+                            {
+                                int troll = (int)Math.Round(currentWaveIndex * 0.1);
+                                _waveSpawnInterval = _waveSpawnInterval / troll;
+                                _enemySpawnInterval = _enemySpawnInterval / troll;
+                            }
+
+                            if (currentWaveIndex == 35)
+                            {
+                                int troll = (int)Math.Round(currentWaveIndex * 0.1);
+                                _waveSpawnInterval = _waveSpawnInterval / troll;
+                                _enemySpawnInterval = _enemySpawnInterval / troll;
+                            }
                         }
                         else
                         {
@@ -110,7 +130,7 @@ namespace TowerDefense
 
             _mainCanvas = Map1.MainCanvas;
             _gameWay = Map1.Way();
-            cash = 1000;
+            cash = 460;
         }
 
         //private void InitializeGridHandler()
@@ -414,6 +434,22 @@ namespace TowerDefense
             if (GameField.Children.Contains(enemy.Image))
             {
                 GameField.Children.Remove(enemy.Image);
+            }
+        }
+
+        private void speedo_Click(object sender, RoutedEventArgs e)
+        {
+            if (_waveSpawnInterval == 3500)
+            {
+                _waveSpawnInterval = _waveSpawnInterval * 2;
+                _enemySpawnInterval = _enemySpawnInterval * 2;
+                speedo.Content = "speed x2";
+            }
+            else
+            {
+                _waveSpawnInterval = _waveSpawnInterval / 2;
+                _enemySpawnInterval = _enemySpawnInterval / 2;
+                speedo.Content = "speed";
             }
         }
     }
