@@ -34,7 +34,7 @@ namespace TowerDefense.EnemiesModel
             Coins = coins;
             ImageWidth = imagewidth;
             ImageHeight = imageheight;
-            Velocity = new Vector(100, 100);
+            Velocity = new Vector(0, 0);
         }
 
         public void UpdateVelocity(Point previousPosition, TimeSpan timeDelta)
@@ -86,19 +86,21 @@ namespace TowerDefense.EnemiesModel
                     Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
 
-                // Berechne die Geschwindigkeit des Gegners (beim ersten Schritt)
-                if (i == 0)
+                if (i < 20)
                 {
                     // Beispiel: Berechnung nach der ersten Bewegung
                     TimeSpan timeDelta = TimeSpan.FromSeconds(_lineDuration);
                     UpdateVelocity(previousPosition, timeDelta);
                 }
 
+                // Berechne die Geschwindigkeit des Gegners (beim ersten Schritt)             
+
                 // Update-Logik während der Animation
                 var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
                 timer.Tick += (s, e) =>
                 {
                     UpdatePositionFromCanvas(img); // Position aus Canvas abfragen
+
                 };
                 timer.Start();
 

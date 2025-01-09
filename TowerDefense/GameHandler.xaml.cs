@@ -273,24 +273,28 @@ namespace TowerDefense
                 towerImage.Width = tower.Size;
                 towerImage.Height = tower.Size;
 
-                Ellipse towerRadiusVisual = new Ellipse
-                {
-                    Width = tower.AttackRange * 2,
-                    Height = tower.AttackRange * 2,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1,
-                    Opacity = 0.5,
-                    IsHitTestVisible = false
-                };
+                //Ellipse towerRadiusVisual = new Ellipse
+                //{
+                //    Width = tower.AttackRange * 2,
+                //    Height = tower.AttackRange * 2,
+                //    Stroke = Brushes.Black,
+                //    StrokeThickness = 1,
+                //    Opacity = 0.5,
+                //    IsHitTestVisible = false
+                //};
 
                 Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
                 Canvas.SetTop(towerImage, dropPosition.Y - (towerImage.Height / 2));
 
-                Canvas.SetLeft(towerRadiusVisual, dropPosition.X - (towerRadiusVisual.Width / 2));
-                Canvas.SetTop(towerRadiusVisual, dropPosition.Y - (towerRadiusVisual.Height / 2));
+                //Canvas.SetLeft(towerRadiusVisual, dropPosition.X - (towerRadiusVisual.Width / 2));
+                //Canvas.SetTop(towerRadiusVisual, dropPosition.Y - (towerRadiusVisual.Height / 2));
 
+                towerImage.Tag = newTower;
+                towerImage.MouseEnter += TowerImage_MouseEnter;
+                towerImage.MouseLeave += TowerImage_MouseLeave;
                 GameField.Children.Add(towerImage);
-                GameField.Children.Add(towerRadiusVisual);
+
+                //GameField.Children.Add(towerRadiusVisual);
 
                 tower.Position = dropPosition;
                 _towerGrid.AddObject(newTower);
@@ -307,23 +311,6 @@ namespace TowerDefense
             }
         }
 
-        //private void GridHandlerTick(object? sender, EventArgs e)
-        //{
-        //    foreach (var enemi in _enemyList)
-        //    {
-        //        var newposition = enemi.GetEnemyPosition();
-        //        enemi.Position = newposition;
-        //        _enemyGrid.UpdateObjectPosition(enemi, enemi.Position);
-        //    }
-        //}
-
-        //private void TowerHandlerTick(object? sender, EventArgs e)
-        //{
-        //    //foreach (var tower in _deployedTowers)
-        //    //{
-        //    //}
-        //}
-
         private void GameField_MouseLeave(object sender, MouseEventArgs e)
         {
             if (ghostTower != null)
@@ -333,26 +320,26 @@ namespace TowerDefense
             }
         }
 
+        private void TowerImage_MouseLeave(object sender, MouseEventArgs e)
+        {
+            RemoveRangeIndicator();
+        }
+
+        private void TowerImage_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is Image Image && Image.Tag is BaseTower selectedTower)
+            {
+                ShowTowerRange(selectedTower);
+            }
+        }
+
         private void GameField_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.RightButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && sender is Image Image && Image.Tag is BaseTower selectedTower)
             {
                 Point clickPosition = e.GetPosition(GameField);
 
-                foreach (var tower in _deployedTowers)
-                {
-                    double towerX = Canvas.GetLeft(tower.GetEntityPic()) + tower.Size / 2;
-                    double towerY = Canvas.GetTop(tower.GetEntityPic()) + tower.Size / 2;
-                    double distanceToClick = Math.Sqrt(Math.Pow(clickPosition.X - towerX, 2) + Math.Pow(clickPosition.Y - towerY, 2));
-
-                    if (distanceToClick <= tower.Size / 2)
-                    {
-                        ShowTowerRange(tower);
-                        return;
-                    }
-                }
-
-                RemoveRangeIndicator();
+                ShowTowerRange(selectedTower);
             }
         }
 
@@ -364,8 +351,8 @@ namespace TowerDefense
             {
                 Width = tower.AttackRange * 2,
                 Height = tower.AttackRange * 2,
-                Stroke = Brushes.Red,
-                StrokeThickness = 2,
+                Stroke = Brushes.Black,
+                StrokeThickness = 1,
                 Opacity = 0.5,
                 IsHitTestVisible = false
             };
