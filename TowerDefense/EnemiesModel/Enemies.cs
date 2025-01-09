@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Net.Security;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -17,11 +19,13 @@ namespace TowerDefense.EnemiesModel
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
+        public bool ReachedEnd { get; set; }
         private double _totalLength = 0;
         private double _lineLength = 0;
         private double _lineDuration = 0;
         private bool _movingRight = false;
         public Vector Velocity { get; set; }
+        public virtual Image? GetEntityPic() => null;
 
         public Enemies(int speed, int life, int coins, int imagewidth = 0, int imageheight = 0)
         {
@@ -118,6 +122,17 @@ namespace TowerDefense.EnemiesModel
                 // Nach der ersten Bewegung, die Position aktualisieren
                 previousPosition = endPoint;
             }
+
+            if (Life > 0)
+            {
+                ReachedEnd = true;
+            }
+            else
+            {
+                ReachedEnd = false;
+            }
+
+            img.Visibility = Visibility.Collapsed;
         }
 
 

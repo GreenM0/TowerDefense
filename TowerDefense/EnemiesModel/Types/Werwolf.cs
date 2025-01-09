@@ -7,12 +7,12 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Werwolf : Enemies
     {
-        public Werwolf() : base(speed: 5, life: 30, coins: 10, imagewidth: 50, imageheight: 75)
+        public Werwolf() : base(speed: 40, life: 12, coins: 10, imagewidth: 75, imageheight: 100)
         {
 
         }
 
-        public Image GetEntityPic()
+        public override Image GetEntityPic()
         {
             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\werwolf.png");
 

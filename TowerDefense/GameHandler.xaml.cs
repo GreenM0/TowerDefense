@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -6,9 +8,9 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TowerDefense.EnemiesModel;
 using TowerDefense.EnemiesModel.Types;
-using TowerDefense.Grid;
 using TowerDefense.Maps;
 using TowerDefense.Towers;
+using TowerDefense.Waves;
 
 namespace TowerDefense
 {
@@ -27,8 +29,15 @@ namespace TowerDefense
         private SpatialGrid<Enemies> _enemyGrid = new SpatialGrid<Enemies>(100);
         private List<Line> _lineList = new List<Line>();
         private Image? ghostTower;
+        private bool _gameOver = false;
+        private bool _allEnemiesSpawned = false;
         private Ellipse? _rangeIndicator; // Anzeige für die Angriffsreichweite
         public static GameHandler Instance { get; private set; }
+
+        //Spieleinstellungen
+        private int _Health = 100;
+        private int _waveSpawnInterval = 5000; // Zeit in Millisekunden zwischen Waves
+        private int _enemySpawnInterval = 1000; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler()
         {
@@ -42,6 +51,56 @@ namespace TowerDefense
             //InitializeTowerHandler();
             Cashhandler();
             Instance = this;
+            _ = SpawnWavesAsync();
+        }
+
+        private async Task SpawnWavesAsync()
+        {
+            Wave waves = new Wave();
+            int currentWaveIndex = 0;
+            int[] currentWave = waves.GetWave(currentWaveIndex);
+            int currentEnemyCount = 0;
+            int currentEnemyType = 0;
+
+            while (currentWaveIndex < 5 && !_gameOver)
+            {
+                wave.Content = "Wave: " + (currentWaveIndex + 1) + "/5";
+                currentEnemyType = 0;
+
+                while (currentEnemyType < 3 && !_gameOver)
+                {
+                    currentEnemyCount = 0;
+
+                    while (currentEnemyCount < currentWave[currentEnemyType] && !_gameOver)
+                    {
+                        SpawnEnemy(currentEnemyType);
+                        currentEnemyCount++;
+
+                        await Task.Delay(_enemySpawnInterval);
+                    }
+
+                    currentEnemyType++;
+
+                    if (currentEnemyType > 2)
+                    {
+                        currentEnemyType = 0;
+                        currentWaveIndex++;
+
+                        if (currentWaveIndex < 5)
+                        {
+                            currentWave = waves.GetWave(currentWaveIndex);
+                            await Task.Delay(_waveSpawnInterval);
+                            wave.Content = "Wave: " + (currentWaveIndex + 1) + "/5";
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            _allEnemiesSpawned = true;
         }
 
         private void InitializeMap()
@@ -73,13 +132,70 @@ namespace TowerDefense
         private void InitializeSpawner()
         {
             _gameTick = new DispatcherTimer();
-            _gameTick.Interval = TimeSpan.FromSeconds(1);
+            _gameTick.Interval = TimeSpan.FromSeconds(0.2);
             _gameTick.Tick += GameTick;
             _gameTick.Start();
         }
 
         private void GameTick(object? sender, EventArgs e)
         {
+            health.Content = _Health;
+
+            //Leben abziehen
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy.ReachedEnd)
+                {
+                    _Health -= enemy.Life;
+                    enemy.ReachedEnd = false;
+                    enemy.Life = 0;
+                }
+            }
+
+            bool won = true;
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy.Life > 0)
+                    won = false;       
+            }
+
+            if (won && _allEnemiesSpawned)
+            {
+                _gameTick.Stop();
+                info.Content = "GAME WON";
+                info.Visibility = Visibility.Visible;
+                health.Content = "0";
+                _gameOver = true;
+            }
+
+            //Spieler tot
+            if (_Health < 0)
+            {
+                _gameTick.Stop();
+                info.Content = "GAME OVER";
+                info.Visibility = Visibility.Visible;
+                health.Content = "0";
+                _gameOver = true;
+            }
+        }
+
+        private void SpawnEnemy(int EnemyType)
+        {
+            if (EnemyType == 0)
+            {
+                Mage mage = new Mage();
+                CreateEnemy(mage);
+            }
+            else if (EnemyType == 1)
+            {
+                Goblin goblin = new Goblin();
+                CreateEnemy(goblin);
+            }
+            else if (EnemyType == 2)
+            {
+                Werwolf werwolf = new Werwolf();
+                CreateEnemy(werwolf);
+            }
             Goblin goblin = new Goblin();          
             _enemyGrid.AddObject(goblin);
 
@@ -87,10 +203,15 @@ namespace TowerDefense
             goblin.Image = ImageControl;
             _enemyList.Add(goblin);
 
-            Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
-            Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
-            GameField.Children.Add(ImageControl);
-            _ = goblin.Movement(_gameWay, _mainCanvas, ImageControl);
+            void CreateEnemy(Enemies enemy)
+            {
+                _enemyList.Add(enemy);
+                Image ImageControl = enemy.GetEntityPic();
+                Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
+                Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
+                GameField.Children.Add(ImageControl);
+                _ = enemy.Movement(_gameWay, _mainCanvas, ImageControl);
+            }
         }
 
         private void LoadTowers()
