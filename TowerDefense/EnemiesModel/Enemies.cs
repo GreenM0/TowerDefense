@@ -34,7 +34,7 @@ namespace TowerDefense.EnemiesModel
             Coins = coins;
             ImageWidth = imagewidth;
             ImageHeight = imageheight;
-            Velocity = new Vector(100, 100);
+            Velocity = new Vector(0, 0);
         }
 
         public void UpdateVelocity(Point previousPosition, TimeSpan timeDelta)
