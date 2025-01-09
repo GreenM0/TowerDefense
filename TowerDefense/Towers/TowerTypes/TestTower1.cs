@@ -12,7 +12,7 @@ namespace TowerDefense.Towers
     {
         public TestTower1(Point position)
             : base(
-                attackRange: 500,
+                attackRange: 220,
                 attackDamage: 50,
                 position: position,
                 costs: 200,

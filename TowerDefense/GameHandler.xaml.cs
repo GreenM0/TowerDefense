@@ -275,8 +275,8 @@ namespace TowerDefense
 
                 Ellipse towerRadiusVisual = new Ellipse
                 {
-                    Width = tower.AttackRange,
-                    Height = tower.AttackRange,
+                    Width = tower.AttackRange * 2,
+                    Height = tower.AttackRange * 2,
                     Stroke = Brushes.Black,
                     StrokeThickness = 1,
                     Opacity = 0.5,
