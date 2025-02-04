@@ -339,7 +339,6 @@ namespace TowerDefense
                 towerImage.MouseLeave += TowerImage_MouseLeave;
                 GameField.Children.Add(towerImage);
 
-                tower.Position = dropPosition;
                 _deployedTowers.Add(newTower);
                 newTower.StartAttackTimer(GameField);
 
@@ -492,26 +491,29 @@ namespace TowerDefense
             }
         }
         private void UpdateRangeIndicator(BaseTower tower, Point position)
+{
+    // Wenn der Reichweitenindikator noch nicht existiert, erstelle ihn
+    if (_rangeIndicator == null)
+    {
+        _rangeIndicator = new Ellipse
         {
-            // Wenn der Reichweitenindikator noch nicht existiert, erstelle ihn
-            if (_rangeIndicator == null)
-            {
-                _rangeIndicator = new Ellipse
-                {
-                    Width = tower.AttackRange * 2,
-                    Height = tower.AttackRange * 2,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1,
-                    Opacity = 0.5,
-                    IsHitTestVisible = false
-                };
-                GameField.Children.Add(_rangeIndicator);
-            }
+            Width = tower.AttackRange * 2, // Durchmesser = 2 * AttackRange
+            Height = tower.AttackRange * 2, // Durchmesser = 2 * AttackRange
+            Stroke = Brushes.Black,
+            StrokeThickness = 1,
+            Opacity = 0.5,
+            IsHitTestVisible = false
+        };
+        GameField.Children.Add(_rangeIndicator);
+    }
 
-            // Aktualisiere die Position des Indikators
-            Canvas.SetLeft(_rangeIndicator, position.X - tower.AttackRange);
-            Canvas.SetTop(_rangeIndicator, position.Y - tower.AttackRange);
-        }
+    // Aktualisiere die Position des Indikators
+    double indicatorLeft = position.X - tower.AttackRange;
+    double indicatorTop = position.Y - tower.AttackRange;
+
+    Canvas.SetLeft(_rangeIndicator, indicatorLeft);
+    Canvas.SetTop(_rangeIndicator, indicatorTop);
+}
         private void UpdateTowerMenuState()
         {
             foreach (StackPanel towerPanel in TowerMenu.Children)
@@ -535,7 +537,5 @@ namespace TowerDefense
                 }
             }
         }
-
-
     }
 }
