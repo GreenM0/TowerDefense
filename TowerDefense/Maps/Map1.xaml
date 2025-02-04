@@ -19,5 +19,17 @@
         <Line x:Name="Line9" X1="680" Y1="890" X2="1210" Y2="890"/>
         <Line x:Name="Line10" X1="1210" Y1="890" X2="1210" Y2="260"/>
         <Line x:Name="Line11" X1="1210" Y1="260" X2="1440" Y2="260"/>
+
+        <Rectangle x:Name="Rectangle1" Canvas.Left="0" Canvas.Top="688" Width="312" Height="82" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Rectangle x:Name="Rectangle2" Canvas.Left="223" Canvas.Top="225" Width="89" Height="510" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Rectangle x:Name="Rectangle3" Canvas.Left="222" Canvas.Top="200" Width="443" Height="94" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Rectangle x:Name="Rectangle4" Canvas.Left="581" Canvas.Top="235" Width="84" Height="165" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Rectangle x:Name="Rectangle5" Canvas.Left="581" Canvas.Top="360" Width="435" Height="85" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Rectangle x:Name="Rectangle6" Canvas.Left="918" Canvas.Top="390" Width="98" Height="300" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Rectangle x:Name="Rectangle7" Canvas.Left="623" Canvas.Top="623" Width="395" Height="89" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Rectangle x:Name="Rectangle8" Canvas.Left="623" Canvas.Top="670" Width="97" Height="240" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Rectangle x:Name="Rectangle9" Canvas.Left="623" Canvas.Top="848" Width="643" Height="86" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Rectangle x:Name="Rectangle10" Canvas.Left="1163" Canvas.Top="200" Width="103" Height="690" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Rectangle x:Name="Rectangle11" Canvas.Left="1210" Canvas.Top="200" Width="230" Height="118" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
     </Canvas>
 </UserControl>

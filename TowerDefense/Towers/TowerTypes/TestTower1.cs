@@ -21,7 +21,7 @@ namespace TowerDefense.Towers
                 projectilespeed: 800,
                 towerName: "TestTower",
                 pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
-                towerRadius: 100,
+                towerRadius: 80,
                 attackspeed: 1
             )
         {

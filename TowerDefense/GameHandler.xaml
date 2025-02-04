@@ -13,8 +13,8 @@
         </Grid.ColumnDefinitions>
 
         <Image Source="Maps/Assets/Hintergrund.png" Width="480" Height="1080" Grid.Column="1"/>
-        <StackPanel Width="470" HorizontalAlignment="Left" Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0">
-        </StackPanel>
+        <UniformGrid Name="TowerMenu" Grid.Column="1" Margin="10,0,0,0" Rows="0" Columns="3">
+        </UniformGrid>
 
         <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseDown="GameField_MouseDown"  MouseLeave="GameField_MouseLeave"></Canvas>
         <StackPanel Width="1440" Height="50" VerticalAlignment="Top" Orientation="Horizontal" Background="DarkGreen">
