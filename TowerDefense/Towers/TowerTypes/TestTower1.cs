@@ -5,6 +5,8 @@ using TowerDefense.Grid;
 using TowerDefense.EnemiesModel;
 using TowerDefense.Projectils;
 using System.Windows.Controls;
+using System.Configuration;
+using System.Windows.Media;
 
 namespace TowerDefense.Towers
 {
@@ -22,7 +24,11 @@ namespace TowerDefense.Towers
                 towerName: "TestTower",
                 pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
                 towerRadius: 80,
-                attackspeed: 1
+                attackspeed: 1,
+                upgradeLevel: 0,
+                maxUpgradeLevel: 5,
+                upgradeCost: 100,
+                towerWorth:  200
             )
         {
 

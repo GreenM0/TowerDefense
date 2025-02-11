@@ -1,0 +1,56 @@
+﻿<Window x:Class="TowerDefense.Towers.Towerwindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Turm Optionen" Height="250" Width="300"
+        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Background="#3E2A47" Foreground="White">
+
+    <Grid Margin="20">
+        <!-- Grid-Definition für Buttons -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Für Upgrade-Button -->
+            <RowDefinition Height="20"/>
+            <!-- Abstand -->
+            <RowDefinition Height="Auto"/>
+            <!-- Für Sell-Button -->
+            <RowDefinition Height="20"/>
+            <!-- Abstand -->
+            <RowDefinition Height="Auto"/>
+            <!-- Für Close-Button -->
+        </Grid.RowDefinitions>
+
+        <!-- Upgrade Button -->
+        <Button Name="UpgradeButton" Content="🛡️ Upgrade"
+                Click="UpgradeTower_Click"
+                Background="#C5A400" Foreground="Black"
+                FontSize="16" FontFamily="Georgia"
+                Padding="12,6" Width="250"
+                BorderBrush="#9E7B00" BorderThickness="2" Cursor="Hand"
+                Grid.Row="0"/>
+
+        <!-- Abstand zwischen Buttons -->
+        <Rectangle Height="20" Grid.Row="1"/>
+
+        <!-- Sell Button -->
+        <Button Name="SellButton" Content="💰 Verkaufen"
+                Click="SellTower_Click"
+                Background="#B83D3D" Foreground="White"
+                FontSize="16" FontFamily="Georgia"
+                Padding="12,6" Width="250"
+                BorderBrush="#9E1B1B" BorderThickness="2" Cursor="Hand"
+                Grid.Row="2"/>
+
+        <!-- Abstand zwischen Buttons -->
+        <Rectangle Height="20" Grid.Row="3"/>
+
+        <!-- Close Button -->
+        <Button Content="❌ Schließen"
+                Click="CloseWindow_Click"
+                Background="#B83D3D" Foreground="White"
+                FontSize="16" FontFamily="Georgia"
+                Padding="12,6" Width="250"
+                BorderBrush="#9E1B1B" BorderThickness="2" Cursor="Hand"
+                Grid.Row="4"/>
+    </Grid>
+</Window>
