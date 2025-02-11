@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Shapes;
 
 namespace TowerDefense.Maps
 {
@@ -12,10 +13,13 @@ namespace TowerDefense.Maps
         private Point _endPoint { get; set; }
         private Point _corner1 { get; set; }
 
+        public List<Rectangle> Rectangles = new List<Rectangle>();
+        
         public Map1()
         {
             InitializeComponent();
             SetPoints();
+            Rectangles = (new List<Rectangle> { Rectangle1, Rectangle2, Rectangle3, Rectangle4, Rectangle5, Rectangle6, Rectangle7, Rectangle8, Rectangle9, Rectangle10, Rectangle11 });
         }
 
         private void SetPoints()
