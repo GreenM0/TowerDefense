@@ -34,6 +34,8 @@ namespace TowerDefense
         private Ellipse? _rangeIndicator; // Anzeige für die Angriffsreichweite
         private DispatcherTimer? _dragTimer; // Timer für Drag-and-Drop-Überprüfung
         private Point _currentMousePosition; // Aktuelle Mausposition
+        public SpatialGrid<Enemies> _enemyGrid;
+        public SpatialGrid<BaseTower> _towerGrid;
         public static GameHandler Instance { get; private set; }
 
         //Spieleinstellungen
@@ -50,6 +52,10 @@ namespace TowerDefense
             InitializeSpawner();
             Cashhandler();
             Instance = this;
+           
+            _enemyGrid = new SpatialGrid<Enemies>(50);
+            _towerGrid = new SpatialGrid<BaseTower>(50);
+
             _ = SpawnWavesAsync();
             _dragTimer = new DispatcherTimer
             {
@@ -63,39 +69,37 @@ namespace TowerDefense
         {
             Wave waves = new Wave();
 
-            //Geht jede Wave durch
             for (int currentWave = 0; currentWave < waves.GetWaveCount(); currentWave++)
             {
-                //Prüft ob der Spieler schon verloren hat
-                if (_gameOver)
-                    break;
+                if (_gameOver) break;
 
-				wave.Content = "Wave: " + (currentWave + 1) + "/80";
-                
-                //Geht für jede Wave die verschiedenen Enemies durch
+                wave.Content = "Wave: " + (currentWave + 1) + "/80";
+
                 for (int currentEnemyType = 0; currentEnemyType < waves.GetTotalEnemyTypes(); currentEnemyType++)
                 {
-                    //Spawnt den entsprechenden Enemy der Wave
                     for (int EnemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave); EnemyAmount > 0; EnemyAmount--)
                     {
                         Enemies currentEnemy = waves.SpawnEnemy(currentEnemyType, GameField, _gameWay);
-						GameField.Children.Add(currentEnemy.Image);
-						_ = currentEnemy.Movement(_gameWay, _mainCanvas, currentEnemy.Image);
-						_enemyList.Add(currentEnemy);
+
+                        // Füge den Gegner dem Spatial Grid hinzu
+                        _enemyGrid.AddObject(currentEnemy);
+
+                        GameField.Children.Add(currentEnemy.Image);
+                        _ = currentEnemy.Movement(_gameWay, _mainCanvas, currentEnemy.Image, _enemyGrid);
+                        _enemyList.Add(currentEnemy);
 
                         await Task.Delay(_enemySpawnInterval);
                     }
                 }
-				await Task.Delay(_waveSpawnInterval);
+                await Task.Delay(_waveSpawnInterval);
 
-                //Alle 10 Waves die Geschwindigkeit erhöhen
                 if (currentWave >= 10 && currentWave % 10 == 0)
                 {
-					int speed = (int)Math.Round(currentWave * 0.1);
-					_waveSpawnInterval = _waveSpawnInterval / speed;
-					_enemySpawnInterval = _enemySpawnInterval / speed;
-				}
-			}
+                    int speed = (int)Math.Round(currentWave * 0.1);
+                    _waveSpawnInterval = _waveSpawnInterval / speed;
+                    _enemySpawnInterval = _enemySpawnInterval / speed;
+                }
+            }
 
             _allEnemiesSpawned = true;
         }
@@ -256,18 +260,15 @@ namespace TowerDefense
             {
                 Point dropPosition = e.GetPosition(GameField);
 
-                // Überprüfe die Platzierung
                 if (!tower.IsPositionValid(dropPosition, _deployedTowers, _rectangles))
                 {
-                    // Ungültige Platzierung: Entferne das Geisterbild und den Indikator
                     GameField.Children.Remove(ghostTower);
                     ghostTower = null;
                     RemoveRangeIndicator();
-                    _dragTimer?.Stop(); // Dragging ebenfalls stoppen
+                    _dragTimer?.Stop();
                     return;
                 }
 
-                // Gültige Platzierung
                 BaseTower newTower = TowerFactory.CreateTower("TestTower1", dropPosition);
 
                 Image towerImage = tower.GetEntityPic();
@@ -285,7 +286,8 @@ namespace TowerDefense
                 GameField.Children.Add(towerImage);
 
                 _deployedTowers.Add(newTower);
-                newTower.StartAttackTimer(GameField);
+                _towerGrid.AddObject(newTower); // Füge den Turm dem Spatial Grid hinzu
+                newTower.StartAttackTimer(GameField, _enemyGrid); // Übergebe das Spatial Grid
 
                 cash -= tower.Costs;
                 Cashhandler();
@@ -296,16 +298,16 @@ namespace TowerDefense
             }
             else
             {
-                // Falls keine gültige Platzierung möglich ist, entferne das Geisterbild und den Indikator
                 if (ghostTower != null)
                 {
                     GameField.Children.Remove(ghostTower);
                     ghostTower = null;
                     RemoveRangeIndicator();
-                    _dragTimer?.Stop(); // Dragging ebenfalls stoppen
+                    _dragTimer?.Stop();
                 }
             }
         }
+
 
         private void GameField_MouseLeave(object sender, MouseEventArgs e)
         {
@@ -396,15 +398,16 @@ namespace TowerDefense
 
         public void RemoveEnemy(Enemies enemy)
         {
-            // Entferne den Gegner aus der Liste
             if (_enemyList.Contains(enemy))
             {
                 _enemyList.Remove(enemy);
                 cash += enemy.Coins;
                 Cashhandler();
+
+                // Entferne den Gegner aus dem Spatial Grid
+                _enemyGrid.RemoveObject(enemy);
             }
 
-            // Entferne das Bild des Gegners vom Canvas
             if (GameField.Children.Contains(enemy.Image))
             {
                 GameField.Children.Remove(enemy.Image);

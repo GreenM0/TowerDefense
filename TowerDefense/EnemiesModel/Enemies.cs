@@ -16,6 +16,7 @@ namespace TowerDefense.EnemiesModel
         public int Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
+        public (int, int) CurrentCell { get; set; }
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
@@ -46,7 +47,7 @@ namespace TowerDefense.EnemiesModel
             Velocity = new Vector(deltaPosition.X / timeDelta.TotalSeconds, deltaPosition.Y / timeDelta.TotalSeconds);
         }
 
-        public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
+        public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img, SpatialGrid<Enemies> enemyGrid)
         {
             // Die vorherige Position speichern
             Point previousPosition = Position;
@@ -100,6 +101,7 @@ namespace TowerDefense.EnemiesModel
                 timer.Tick += (s, e) =>
                 {
                     UpdatePositionFromCanvas(img); // Position aus Canvas abfragen
+                    enemyGrid.UpdateObjectPosition(this, Position);
 
                 };
                 timer.Start();
@@ -185,7 +187,13 @@ namespace TowerDefense.EnemiesModel
             double x = Canvas.GetLeft(img);
             double y = Canvas.GetTop(img);
 
-            Position = new Point(x, y); // Synchronisiere die Position des Gegners
+            Position = new Point(x, y);
+
+            // Debug-Ausgabe, um die Position zu überprüfen
+            Console.WriteLine($"Enemy Position: X={Position.X}, Y={Position.Y}");
+
+            // Aktualisiere die Position im Spatial Grid
+            GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
         }
     }
 }

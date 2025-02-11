@@ -18,6 +18,7 @@ namespace TowerDefense.Towers
         public Image Image { get; set; }
         public float AttackSpeed { get; private set; }
         public Point Position { get; set; }
+        public (int, int) CurrentCell { get; set; }
         public int AttackDamage { get; private set; }
         public int Costs { get; private set; }
         public float Size { get; private set; }
@@ -52,27 +53,16 @@ namespace TowerDefense.Towers
             TowerWorth = towerWorth;
         }
 
-        public void StartAttackTimer(Canvas gameCanvas)
+        public void StartAttackTimer(Canvas gameCanvas, SpatialGrid<Enemies> enemyGrid)
         {
             _attackTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(AttackSpeed) // AttackSpeed gibt die Angriffe pro Sekunde an
+                Interval = TimeSpan.FromSeconds(AttackSpeed)
             };
 
             _attackTimer.Tick += (sender, e) =>
             {
-                List<Enemies> enemiesInRange = new List<Enemies>();
-                foreach (var enemy in GameHandler.Instance._enemyList)
-                {
-                    // Berechne, ob der Gegner im Angriffsradius ist
-                    double distance = Math.Sqrt(Math.Pow(Position.X - enemy.Position.X, 2) + Math.Pow(Position.Y - enemy.Position.Y, 2));
-
-                    if (distance <= AttackRange)
-                    {
-                        // Gegner angreifen
-                        enemiesInRange.Add(enemy);
-                    }
-                }
+                var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
                 if (enemiesInRange.Count == 0) return;
 
@@ -127,28 +117,13 @@ namespace TowerDefense.Towers
             return distance <= AttackRange;
         }
 
-        //public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid, int cellSize)
-        //{
-        //    var enemiesInRange = new List<Enemies>();
+        public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid)
+        {
+            var enemiesInRange = grid.GetObjectsInRange(Position, (float)AttackRange);
 
-        //    var cellsToCheck = GetCellsInRange(cellSize);
-
-        //    foreach (var cell in cellsToCheck)
-        //    {
-        //        var enemiesInCell = grid.GetObjectsInCell(cell);
-        //        if (enemiesInCell != null)
-        //        {
-        //            foreach (var enemy in enemiesInRange)
-        //            {
-        //                if (IsInRange(enemy))
-        //                {
-        //                    enemiesInRange.Add(enemy);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return enemiesInRange;
-        //}
+            // Filtere nur die Gegner, die tatsächlich in Reichweite sind
+            return enemiesInRange.Where(enemy => IsInRange(enemy)).ToList();
+        }
 
         public List<(int, int)> GetCellsInRange(int cellSize)
         {
