@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Numerics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,7 +27,7 @@ namespace TowerDefense
         private List<BaseTower> _towers = new List<BaseTower>();
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
-        private int cash;
+        public int cash;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;
@@ -337,6 +338,8 @@ namespace TowerDefense
                 towerImage.Tag = newTower;
                 towerImage.MouseEnter += TowerImage_MouseEnter;
                 towerImage.MouseLeave += TowerImage_MouseLeave;
+                towerImage.MouseDown += GameField_MouseDown;
+                tower.Image = towerImage;
                 GameField.Children.Add(towerImage);
 
                 _deployedTowers.Add(newTower);
@@ -392,7 +395,17 @@ namespace TowerDefense
             {
                 Point clickPosition = e.GetPosition(GameField);
 
+                // Zeige die Reichweite des Turms
                 ShowTowerRange(selectedTower);
+
+                // Upgrade-Menü oder direkte Upgrade-Option
+                Towerwindow upgradeWindow = new Towerwindow(selectedTower);
+                upgradeWindow.ShowDialog();
+
+                if (upgradeWindow.IsUpgraded)
+                {
+                    Cashhandler(); // Aktualisiere die Geldanzeige
+                }
             }
         }
 
@@ -491,29 +504,29 @@ namespace TowerDefense
             }
         }
         private void UpdateRangeIndicator(BaseTower tower, Point position)
-{
-    // Wenn der Reichweitenindikator noch nicht existiert, erstelle ihn
-    if (_rangeIndicator == null)
-    {
-        _rangeIndicator = new Ellipse
         {
-            Width = tower.AttackRange * 2, // Durchmesser = 2 * AttackRange
-            Height = tower.AttackRange * 2, // Durchmesser = 2 * AttackRange
-            Stroke = Brushes.Black,
-            StrokeThickness = 1,
-            Opacity = 0.5,
-            IsHitTestVisible = false
-        };
-        GameField.Children.Add(_rangeIndicator);
-    }
+            // Wenn der Reichweitenindikator noch nicht existiert, erstelle ihn
+            if (_rangeIndicator == null)
+            {
+                _rangeIndicator = new Ellipse
+                {
+                    Width = tower.AttackRange * 2, // Durchmesser = 2 * AttackRange
+                    Height = tower.AttackRange * 2, // Durchmesser = 2 * AttackRange
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1,
+                    Opacity = 0.5,
+                    IsHitTestVisible = false
+                };
+                GameField.Children.Add(_rangeIndicator);
+            }
 
-    // Aktualisiere die Position des Indikators
-    double indicatorLeft = position.X - tower.AttackRange;
-    double indicatorTop = position.Y - tower.AttackRange;
+            // Aktualisiere die Position des Indikators
+            double indicatorLeft = position.X - tower.AttackRange;
+            double indicatorTop = position.Y - tower.AttackRange;
 
-    Canvas.SetLeft(_rangeIndicator, indicatorLeft);
-    Canvas.SetTop(_rangeIndicator, indicatorTop);
-}
+            Canvas.SetLeft(_rangeIndicator, indicatorLeft);
+            Canvas.SetTop(_rangeIndicator, indicatorTop);
+        }
         private void UpdateTowerMenuState()
         {
             foreach (StackPanel towerPanel in TowerMenu.Children)
@@ -536,6 +549,35 @@ namespace TowerDefense
                     }
                 }
             }
+        }
+
+        public void SellTower(BaseTower tower)
+        {
+            if (_deployedTowers.Contains(tower))
+            {
+                _deployedTowers.Remove(tower);
+                tower.StopAttackTimer();
+                cash += tower.TowerWorth / 2;
+                Cashhandler();
+            }
+
+            Dispatcher.Invoke(() =>
+            {
+                Image? imageToRemove = null;
+                foreach (var child in GameField.Children)
+                {
+                    if (child is Image img && img.Tag == tower)
+                    {
+                        imageToRemove = img;
+                        break;
+                    }
+                }
+
+                if (imageToRemove != null)
+                {
+                    GameField.Children.Remove(imageToRemove);
+                }
+            });
         }
     }
 }

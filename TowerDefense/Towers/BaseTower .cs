@@ -14,7 +14,8 @@ namespace TowerDefense.Towers
 {
     public abstract class BaseTower : IPositionable
     {
-        public float AttackRange { get; private set; }
+        public double AttackRange { get; private set; }
+        public Image Image { get; set; }
         public float AttackSpeed { get; private set; }
         public Point Position { get; set; }
         public int AttackDamage { get; private set; }
@@ -25,9 +26,14 @@ namespace TowerDefense.Towers
         public string TowerName { get; private set; }
         public string PathtoImage { get; private set; }
         public double TowerRadius { get; private set; }
+        public int UpgradeLevel { get; private set; }
+        public int MaxUpgradeLevel { get; private set; }
+        public int UpgradeCost { get; private set; }
+        public int TowerWorth {  get; private set; }
+
         private DispatcherTimer? _attackTimer;
 
-        public BaseTower(float attackRange, int attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius)
+        public BaseTower(float attackRange, int attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -40,6 +46,10 @@ namespace TowerDefense.Towers
             TowerName = towerName;
             PathtoImage = pathtoImage;
             TowerRadius = towerRadius;
+            UpgradeLevel = upgradeLevel;
+            MaxUpgradeLevel = maxUpgradeLevel;
+            UpgradeCost = upgradeCost;
+            TowerWorth = towerWorth;
         }
 
         public void StartAttackTimer(Canvas gameCanvas)
@@ -217,5 +227,22 @@ namespace TowerDefense.Towers
                     point.Y >= rectTop && point.Y <= rectBottom);
         }
 
+        public virtual void UpgradeTower()
+        {
+            if (UpgradeLevel < MaxUpgradeLevel)
+            {
+                UpgradeLevel += 1;
+                TowerWorth = TowerWorth + UpgradeCost;
+            }
+        }
+
+        public void StopAttackTimer()
+        {
+            if (_attackTimer != null)
+            {
+                _attackTimer.Stop();
+                _attackTimer = null; // Verhindert weiteres Arbeiten
+            }
+        }
     }
 }
