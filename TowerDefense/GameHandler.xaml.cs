@@ -62,68 +62,40 @@ namespace TowerDefense
         private async Task SpawnWavesAsync()
         {
             Wave waves = new Wave();
-            int currentWaveIndex = 0;
-            int[] currentWave = waves.GetWave(currentWaveIndex);
-            int currentEnemyCount = 0;
-            int currentEnemyType = 0;
 
-            while (currentWaveIndex < 80 && !_gameOver)
+            //Geht jede Wave durch
+            for (int currentWave = 0; currentWave < waves.GetWaveCount(); currentWave++)
             {
-                wave.Content = "Wave: " + (currentWaveIndex + 1) + "/80";
-                currentEnemyType = 0;
+                //Prüft ob der Spieler schon verloren hat
+                if (_gameOver)
+                    break;
 
-                while (currentEnemyType < 3 && !_gameOver)
+				wave.Content = "Wave: " + (currentWave + 1) + "/80";
+                
+                //Geht für jede Wave die verschiedenen Enemies durch
+                for (int currentEnemyType = 0; currentEnemyType < waves.GetTotalEnemyTypes(); currentEnemyType++)
                 {
-                    currentEnemyCount = 0;
-
-                    while (currentEnemyCount < currentWave[currentEnemyType] && !_gameOver)
+                    //Spawnt den entsprechenden Enemy der Wave
+                    for (int EnemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave); EnemyAmount > 0; EnemyAmount--)
                     {
-                        SpawnEnemy(currentEnemyType);
-                        currentEnemyCount++;
+                        Enemies currentEnemy = waves.SpawnEnemy(currentEnemyType, GameField, _gameWay);
+						GameField.Children.Add(currentEnemy.Image);
+						_ = currentEnemy.Movement(_gameWay, _mainCanvas, currentEnemy.Image);
+						_enemyList.Add(currentEnemy);
 
                         await Task.Delay(_enemySpawnInterval);
                     }
-
-                    currentEnemyType++;
-
-                    if (currentEnemyType > 2)
-                    {
-                        currentEnemyType = 0;
-                        currentWaveIndex++;
-
-                        if (currentWaveIndex < 80)
-                        {
-                            currentWave = waves.GetWave(currentWaveIndex);
-                            await Task.Delay(_waveSpawnInterval);
-                            wave.Content = "Wave: " + (currentWaveIndex + 1) + "/80";
-                            if (currentWaveIndex == 15)
-                            {
-                                int troll = (int)Math.Round(currentWaveIndex * 0.1);
-                                _waveSpawnInterval = _waveSpawnInterval / troll;
-                                _enemySpawnInterval = _enemySpawnInterval / troll;
-                            }
-
-                            if (currentWaveIndex == 25)
-                            {
-                                int troll = (int)Math.Round(currentWaveIndex * 0.1);
-                                _waveSpawnInterval = _waveSpawnInterval / troll;
-                                _enemySpawnInterval = _enemySpawnInterval / troll;
-                            }
-
-                            if (currentWaveIndex == 35)
-                            {
-                                int troll = (int)Math.Round(currentWaveIndex * 0.1);
-                                _waveSpawnInterval = _waveSpawnInterval / troll;
-                                _enemySpawnInterval = _enemySpawnInterval / troll;
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
                 }
-            }
+				await Task.Delay(_waveSpawnInterval);
+
+                //Alle 10 Waves die Geschwindigkeit erhöhen
+                if (currentWave >= 10 && currentWave % 10 == 0)
+                {
+					int speed = (int)Math.Round(currentWave * 0.1);
+					_waveSpawnInterval = _waveSpawnInterval / speed;
+					_enemySpawnInterval = _enemySpawnInterval / speed;
+				}
+			}
 
             _allEnemiesSpawned = true;
         }
@@ -186,36 +158,6 @@ namespace TowerDefense
                 info.Visibility = Visibility.Visible;
                 health.Content = "0";
                 _gameOver = true;
-            }
-        }
-
-        private void SpawnEnemy(int EnemyType)
-        {
-            if (EnemyType == 0)
-            {
-                Mage mage = new Mage();
-                CreateEnemy(mage);
-            }
-            else if (EnemyType == 1)
-            {
-                Goblin goblin = new Goblin();
-                CreateEnemy(goblin);
-            }
-            else if (EnemyType == 2)
-            {
-                Werwolf werwolf = new Werwolf();
-                CreateEnemy(werwolf);
-            }
-
-            void CreateEnemy(Enemies enemy)
-            {
-                _enemyList.Add(enemy);
-                Image ImageControl = enemy.GetEntityPic();
-                enemy.Image = ImageControl;
-                Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
-                Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
-                GameField.Children.Add(ImageControl);
-                _ = enemy.Movement(_gameWay, _mainCanvas, ImageControl);
             }
         }
 
