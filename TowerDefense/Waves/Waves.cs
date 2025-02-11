@@ -1,13 +1,14 @@
 ﻿using System.Windows.Controls;
 using TowerDefense.EnemiesModel.Types;
 using TowerDefense.EnemiesModel;
+using System.Windows;
 
 namespace TowerDefense.Waves
 {
     public class Wave
     {
         private int[,] _waveData;
-        private int[] _singleWave = new int[3];
+        private int[] _singleWave =  new int[3];
 
 
         public Wave()
@@ -15,7 +16,22 @@ namespace TowerDefense.Waves
             InitializeWaves();
         }
 
-        public int[] GetSingleWave(int waveNumber)
+        public int GetWaveCount() 
+        { 
+            return _waveData.GetLength(0);
+        }
+
+        public int GetTotalEnemyTypes()
+        {
+            return 3;
+		}
+
+        public int GetAmountOfEnemies(int currentEnemy, int currentWave)
+        {
+            return _waveData[currentWave, currentEnemy];
+        }
+
+		public int[] GetSingleWave(int waveNumber)
         {
             _singleWave[0] = _waveData[waveNumber, 0];
             _singleWave[1] = _waveData[waveNumber, 1];
@@ -23,33 +39,31 @@ namespace TowerDefense.Waves
             return _singleWave;
         }
 
-        private void SpawnEnemy(int EnemyType)
+        public Enemies SpawnEnemy(int EnemyType, Canvas GameField, Point[] _gameWay)
         {
             if (EnemyType == 0)
             {
                 Mage mage = new Mage();
-                CreateEnemy(mage);
+				return CreateEnemy(mage);
             }
             else if (EnemyType == 1)
             {
                 Goblin goblin = new Goblin();
-                CreateEnemy(goblin);
+				return CreateEnemy(goblin);
             }
-            else if (EnemyType == 2)
+            else
             {
                 Werwolf werwolf = new Werwolf();
-                CreateEnemy(werwolf);
+				return CreateEnemy(werwolf);
             }
 
-            void CreateEnemy(Enemies enemy)
+			Enemies CreateEnemy(Enemies enemy)
             {
-                Image ImageControl = enemy.GetEntityPic();
-                enemy.Image = ImageControl;
-                Canvas.SetLeft(ImageControl, _gameWay[0].X - ImageControl.Width / 2);
-                Canvas.SetTop(ImageControl, _gameWay[0].Y - ImageControl.Height / 2);
-                GameField.Children.Add(ImageControl);
-                _ = enemy.Movement(_gameWay, _mainCanvas, ImageControl);
-            }
+				enemy.Image = enemy.GetEntityPic();
+                Canvas.SetLeft(enemy.Image, _gameWay[0].X - enemy.Image.Width / 2);
+                Canvas.SetTop(enemy.Image, _gameWay[0].Y - enemy.Image.Height / 2);
+				return enemy;
+			}
         }
 
         private void InitializeWaves()
