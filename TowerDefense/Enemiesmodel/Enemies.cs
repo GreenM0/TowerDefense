@@ -12,8 +12,9 @@ namespace TowerDefense.EnemiesModel
 {
     public class Enemies : IPositionable
     {
-        public float Speed { get; set; }
-        public int Life { get; set; }
+        public double BaseSpeed { get; set; }
+        public double CurrentSpeed { get; set; }
+        public double Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
         public (int, int) CurrentCell { get; set; }
@@ -30,7 +31,8 @@ namespace TowerDefense.EnemiesModel
 
         public Enemies(int speed, int life, int coins, int imagewidth = 0, int imageheight = 0)
         {
-            Speed = speed;
+            CurrentSpeed = speed;
+            BaseSpeed = speed;
             Life = life;
             Coins = coins;
             ImageWidth = imagewidth;
@@ -38,27 +40,14 @@ namespace TowerDefense.EnemiesModel
             Velocity = new Vector(0, 0);
         }
 
-        public void UpdateVelocity(Point previousPosition, TimeSpan timeDelta)
-        {
-            // Berechne die Änderung der Position (Geschwindigkeit)
-            Vector deltaPosition = new Vector(Position.X - previousPosition.X, Position.Y - previousPosition.Y);
-
-            // Geschwindigkeit = Position Änderung / Zeitänderung
-            Velocity = new Vector(deltaPosition.X / timeDelta.TotalSeconds, deltaPosition.Y / timeDelta.TotalSeconds);
-        }
-
         public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img, SpatialGrid<Enemies> enemyGrid)
         {
-            // Die vorherige Position speichern
-            Point previousPosition = Position;
-
             // Gesamtlänge vom Weg berechnen
             for (int i = 0; i < _gameWay.Length - 1; i++)
             {
                 double dx = _gameWay[i + 1].X - _gameWay[i].X;
                 double dy = _gameWay[i + 1].Y - _gameWay[i].Y;
                 double segmentLength = Math.Sqrt(dx * dx + dy * dy);
-
                 _totalLength += segmentLength;
             }
 
@@ -71,7 +60,10 @@ namespace TowerDefense.EnemiesModel
                 bool movingRight = endPoint.X >= startPoint.X;
 
                 _lineLength = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
-                _lineDuration = (_lineLength / _totalLength) * this.Speed;
+                _lineDuration = (_lineLength / _totalLength) * this.CurrentSpeed;
+
+                // Erstelle ein Storyboard für die Animation
+                Storyboard storyboard = new Storyboard();
 
                 DoubleAnimation animationX = new DoubleAnimation
                 {
@@ -87,58 +79,44 @@ namespace TowerDefense.EnemiesModel
                     Duration = TimeSpan.FromSeconds(_lineDuration)
                 };
 
-                if (i < 20)
-                {
-                    // Beispiel: Berechnung nach der ersten Bewegung
-                    TimeSpan timeDelta = TimeSpan.FromSeconds(_lineDuration);
-                    UpdateVelocity(previousPosition, timeDelta);
-                }
+                Storyboard.SetTarget(animationX, img);
+                Storyboard.SetTargetProperty(animationX, new PropertyPath(Canvas.LeftProperty));
+                Storyboard.SetTarget(animationY, img);
+                Storyboard.SetTargetProperty(animationY, new PropertyPath(Canvas.TopProperty));
 
-                // Berechne die Geschwindigkeit des Gegners (beim ersten Schritt)             
+                storyboard.Children.Add(animationX);
+                storyboard.Children.Add(animationY);
 
-                // Update-Logik während der Animation
-                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
-                timer.Tick += (s, e) =>
+                // Starte das Storyboard
+                TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+                storyboard.Completed += (s, e) => tcs.SetResult(true);
+                storyboard.Begin();
+
+                // Aktualisiere die Position während der Animation
+                storyboard.CurrentTimeInvalidated += (s, e) =>
                 {
-                    UpdatePositionFromCanvas(img); // Position aus Canvas abfragen
+                    UpdatePositionFromCanvas(img);
                     enemyGrid.UpdateObjectPosition(this, Position);
-
                 };
-                timer.Start();
-
-                // Erstelle eine TaskCompletionSource für das Ende der Animation
-                TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
-                TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
-
-                animationX.Completed += (s, e) => tcsX.SetResult(true);
-                animationY.Completed += (s, e) => tcsY.SetResult(true);
-
-                img.BeginAnimation(Canvas.LeftProperty, animationX);
-                img.BeginAnimation(Canvas.TopProperty, animationY);
 
                 FlipImageDirection(img, movingRight);
 
-                await Task.WhenAll(tcsX.Task, tcsY.Task);
-
-                // Stoppe den Timer nach Abschluss der Animation
-                timer.Stop();
-
-                // Nach der ersten Bewegung, die Position aktualisieren
-                previousPosition = endPoint;
+                await tcs.Task; // Warte auf das Ende der Animation
             }
 
+            // Überprüfe, ob der Gegner das Ende des Weges erreicht hat
             if (Life > 0)
             {
                 ReachedEnd = true;
+                GameHandler.Instance.RemoveEnemy(this); // Entferne den Gegner
             }
             else
             {
                 ReachedEnd = false;
             }
 
-            img.Visibility = Visibility.Collapsed;
+            img.Visibility = Visibility.Collapsed; // Verstecke das Bild des Gegners
         }
-
 
         private void FlipImageDirection(Image img, bool movingRight)
         {
@@ -154,7 +132,7 @@ namespace TowerDefense.EnemiesModel
             }
         }
 
-        public void GetHit(int damage)
+        public void GetHit(double damage)
         {
             Life -= damage;
 
@@ -194,6 +172,22 @@ namespace TowerDefense.EnemiesModel
 
             // Aktualisiere die Position im Spatial Grid
             GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
+        }
+
+        private bool _isSlowed = false;
+
+        public void ApplySlowEffect(double slowFactor, TimeSpan duration)
+        {
+            if (_isSlowed) return; // Verhindere mehrfache Anwendung
+
+            _isSlowed = true;
+            CurrentSpeed = BaseSpeed * slowFactor;
+
+            Task.Delay(duration).ContinueWith(_ =>
+            {
+                CurrentSpeed = BaseSpeed;
+                _isSlowed = false;
+            });
         }
     }
 }

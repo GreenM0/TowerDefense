@@ -39,7 +39,7 @@ namespace TowerDefense
         public static GameHandler Instance { get; private set; }
 
         //Spieleinstellungen
-        private int _Health = 50;
+        private double _Health = 50;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
         private int _enemySpawnInterval = 750; // Zeit in Millisekunden zwischen Gegner-Spawns
 
@@ -53,7 +53,7 @@ namespace TowerDefense
             Cashhandler();
             Instance = this;
            
-            _enemyGrid = new SpatialGrid<Enemies>(50);
+            _enemyGrid = new SpatialGrid<Enemies>(100);
             _towerGrid = new SpatialGrid<BaseTower>(50);
 
             _ = SpawnWavesAsync();

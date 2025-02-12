@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System;
+using System.Windows.Media;
 
 namespace TowerDefense.Towers
 {
@@ -19,7 +20,7 @@ namespace TowerDefense.Towers
         public float AttackSpeed { get; private set; }
         public Point Position { get; set; }
         public (int, int) CurrentCell { get; set; }
-        public int AttackDamage { get; private set; }
+        public double AttackDamage { get; private set; }
         public int Costs { get; private set; }
         public float Size { get; private set; }
         public string ProjectileimagePath { get; private set; }
@@ -31,10 +32,11 @@ namespace TowerDefense.Towers
         public int MaxUpgradeLevel { get; private set; }
         public int UpgradeCost { get; private set; }
         public int TowerWorth {  get; private set; }
+        public string TargetMode { get; private set; }
 
         private DispatcherTimer? _attackTimer;
 
-        public BaseTower(float attackRange, int attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth)
+        public BaseTower(float attackRange, double attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth, string targetMode)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -51,59 +53,54 @@ namespace TowerDefense.Towers
             MaxUpgradeLevel = maxUpgradeLevel;
             UpgradeCost = upgradeCost;
             TowerWorth = towerWorth;
+            TargetMode = targetMode;
         }
+        private EventHandler _renderingHandler;
 
         public void StartAttackTimer(Canvas gameCanvas, SpatialGrid<Enemies> enemyGrid)
         {
-            _attackTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(AttackSpeed)
-            };
-
-            _attackTimer.Tick += (sender, e) =>
+            _renderingHandler = (s, e) =>
             {
                 var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
                 if (enemiesInRange.Count == 0) return;
 
-                Enemies closestEnemy = enemiesInRange[0];
+                var target = GetTarget(enemiesInRange);
 
-                foreach (var enemy in enemiesInRange)
-                {
-                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
-
-                    if (currentDistance < closestDistance)
-                    {
-                        closestEnemy = enemy;
-                    }
-                }
-
-                Attack(closestEnemy, gameCanvas);
+                Attack(target, gameCanvas);
             };
 
-            _attackTimer.Start();
+            CompositionTarget.Rendering += _renderingHandler;
         }
 
-        public virtual void Attack(Enemies target, Canvas gameCanvas)
+        public void StopAttackTimer()
         {
-            if (target == null || !IsInRange(target)) return;
+            if (_renderingHandler != null)
+            {
+                CompositionTarget.Rendering -= _renderingHandler;
+                _renderingHandler = null;
+            }
+        }
 
-            Vector targetVelocity = target.Velocity;  // Annahme: Velocity ist die Geschwindigkeit des Ziels
+        public virtual void Attack(List<Enemies> target, Canvas gameCanvas)
+        {
+            if (target == null || !IsInRange(target[0])) return;
+
+            Vector targetVelocity = target[0].Velocity;  // Annahme: Velocity ist die Geschwindigkeit des Ziels
 
             // Berechne den Abstand zwischen Turm und Ziel
-            double distance = Math.Sqrt(Math.Pow(Position.X - target.Position.X, 2) + Math.Pow(Position.Y - target.Position.Y, 2));
+            double distance = Math.Sqrt(Math.Pow(Position.X - target[0].Position.X, 2) + Math.Pow(Position.Y - target[0].Position.Y, 2));
 
             // Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
             double timeToTarget = distance / ProjectileSpeed;
 
             // Berechne den Vorhersagepunkt des Ziels
             Point predictedTargetPosition = new Point(
-                target.Position.X + targetVelocity.X * timeToTarget,
-                target.Position.Y + targetVelocity.Y * timeToTarget
+                target[0].Position.X + targetVelocity.X * timeToTarget,
+                target[0].Position.Y + targetVelocity.Y * timeToTarget
             );
 
-            Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target);
+            Projectile projectile = new Projectile(Position, target[0].Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target[0]);
 
             projectile.Animate(gameCanvas, (proj) =>
             {
@@ -211,12 +208,29 @@ namespace TowerDefense.Towers
             }
         }
 
-        public void StopAttackTimer()
+        public List<Enemies> GetTarget(List<Enemies> enemiesInRange)
         {
-            if (_attackTimer != null)
+            List<Enemies> targets = new List<Enemies>();
+            if (TargetMode == "CLOSE")
+            { 
+                Enemies closestEnemy = enemiesInRange[0];
+
+                foreach (var enemy in enemiesInRange)
+                {
+                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
+                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+                        
+                    if (currentDistance < closestDistance)
+                    {
+                        closestEnemy = enemy;
+                    }
+                }
+                targets[0] = closestEnemy;
+                return targets;
+            }
+            else
             {
-                _attackTimer.Stop();
-                _attackTimer = null; // Verhindert weiteres Arbeiten
+                return enemiesInRange;
             }
         }
     }
