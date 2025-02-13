@@ -26,6 +26,8 @@ namespace TowerDefense.EnemiesModel
         private double _lineLength = 0;
         private double _lineDuration = 0;
         private bool _movingRight = false;
+        private Storyboard _currentStoryboard; // Speichert das aktuelle Storyboard
+        private CancellationTokenSource _slowEffectCancellationTokenSource; // Für die Steuerung des Slow-Effekts
         public Vector Velocity { get; set; }
         public virtual Image? GetEntityPic() => null;
 
@@ -87,9 +89,16 @@ namespace TowerDefense.EnemiesModel
                 storyboard.Children.Add(animationX);
                 storyboard.Children.Add(animationY);
 
-                // Starte das Storyboard
+                // Speichere das aktuelle Storyboard
+                _currentStoryboard = storyboard;
+
+                // TaskCompletionSource, um auf das Ende der Animation zu warten
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+                // Ereignis für das Ende der Animation
                 storyboard.Completed += (s, e) => tcs.SetResult(true);
+
+                // Starte das Storyboard
                 storyboard.Begin();
 
                 // Aktualisiere die Position während der Animation
@@ -183,15 +192,75 @@ namespace TowerDefense.EnemiesModel
             _isSlowed = true;
             CurrentSpeed = BaseSpeed * slowFactor;
 
+            // Falls eine Bewegung läuft, passe die Geschwindigkeit an
+            if (_currentStoryboard != null)
+            {
+                _currentStoryboard.SetSpeedRatio(slowFactor);
+            }
+
+            // Setze die normale Geschwindigkeit nach Ablauf des Slow-Effekts
             Task.Delay(duration).ContinueWith(_ =>
-            {   
+            {
                 if (dodamage)
                 {
                     Life -= attackDamage * slowFactor;
                 }
+
+                // Setze die normale Geschwindigkeit zurück
                 CurrentSpeed = BaseSpeed;
                 _isSlowed = false;
-            });
+
+                // Falls die Bewegung noch läuft, setze die normale Geschwindigkeit wiederher
+                if (_currentStoryboard != null)
+                {
+                    _currentStoryboard.SetSpeedRatio(1.0);
+                }
+
+            }, TaskScheduler.FromCurrentSynchronizationContext()); // UI-Thread verwenden
+        }
+        private void StartSlowMovement(TimeSpan duration)
+        {
+            // Erstelle ein neues Storyboard für die verlangsamte Bewegung
+            Storyboard slowStoryboard = new Storyboard();
+
+            DoubleAnimation slowAnimationX = new DoubleAnimation
+            {
+                From = Canvas.GetLeft(Image),
+                To = Canvas.GetLeft(Image) + (Velocity.X * duration.TotalSeconds),
+                Duration = duration
+            };
+
+            DoubleAnimation slowAnimationY = new DoubleAnimation
+            {
+                From = Canvas.GetTop(Image),
+                To = Canvas.GetTop(Image) + (Velocity.Y * duration.TotalSeconds),
+                Duration = duration
+            };
+
+            Storyboard.SetTarget(slowAnimationX, Image);
+            Storyboard.SetTargetProperty(slowAnimationX, new PropertyPath(Canvas.LeftProperty));
+            Storyboard.SetTarget(slowAnimationY, Image);
+            Storyboard.SetTargetProperty(slowAnimationY, new PropertyPath(Canvas.TopProperty));
+
+            slowStoryboard.Children.Add(slowAnimationX);
+            slowStoryboard.Children.Add(slowAnimationY);
+
+            // Speichere das aktuelle Storyboard
+            _currentStoryboard = slowStoryboard;
+
+            // Starte die verlangsamte Animation
+            slowStoryboard.Begin();
+        }
+        private void StartNormalMovement()
+        {
+            // Stoppe die aktuelle Animation (falls vorhanden)
+            if (_currentStoryboard != null)
+            {
+                _currentStoryboard.Stop();
+            }
+
+            // Starte die normale Movement-Methode erneut
+            _ = Movement(GameHandler.Instance._gameWay, GameHandler.Instance._mainCanvas, Image, GameHandler.Instance._enemyGrid);
         }
     }
 }

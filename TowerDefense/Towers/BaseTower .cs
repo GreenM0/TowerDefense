@@ -86,19 +86,11 @@ namespace TowerDefense.Towers
         {
             if (target == null || !IsInRange(target[0])) return;
 
-            Vector targetVelocity = target[0].Velocity;  // Annahme: Velocity ist die Geschwindigkeit des Ziels
-
             // Berechne den Abstand zwischen Turm und Ziel
             double distance = Math.Sqrt(Math.Pow(Position.X - target[0].Position.X, 2) + Math.Pow(Position.Y - target[0].Position.Y, 2));
 
             // Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
             double timeToTarget = distance / ProjectileSpeed;
-
-            // Berechne den Vorhersagepunkt des Ziels
-            Point predictedTargetPosition = new Point(
-                target[0].Position.X + targetVelocity.X * timeToTarget,
-                target[0].Position.Y + targetVelocity.Y * timeToTarget
-            );
 
             Projectile projectile = new Projectile(Position, target[0].Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target[0]);
 

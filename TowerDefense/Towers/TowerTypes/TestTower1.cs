@@ -56,9 +56,7 @@ namespace TowerDefense.Towers
                 if (UpgradeLevel == 1)
                 {
                     PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
-                    Image newTowerImage = GetEntityPic();
-                    GameHandler.Instance.GameField.Children.Remove(this.Image);
-                    GameHandler.Instance.GameField.Children.Add(newTowerImage);
+                    GameHandler.Instance.SetTowerImage(this, this.Position);
 
                     UpgradeLevel += 1;
                     AttackRange = 200;
@@ -72,8 +70,7 @@ namespace TowerDefense.Towers
                 {
                     PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
                     Image newTowerImage = GetEntityPic();
-                    GameHandler.Instance.GameField.Children.Remove(this.Image);
-                    GameHandler.Instance.GameField.Children.Add(newTowerImage);
+                    GameHandler.Instance.SetTowerImage(this, this.Position);
 
                     UpgradeLevel += 1;
                     AttackRange = 220;

@@ -21,8 +21,8 @@ namespace TowerDefense
         private DispatcherTimer? _gameTick;
         private DispatcherTimer? _gridHandler;
         private DispatcherTimer? _towerHandler;
-        private Point[] _gameWay = new Point[3];
-        private Canvas _mainCanvas = null!;
+        public Point[] _gameWay = new Point[3];
+        public Canvas _mainCanvas = null!;
         public List<Enemies> _enemyList = new List<Enemies>();
         private List<BaseTower> _towers = new List<BaseTower>();
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
@@ -125,18 +125,7 @@ namespace TowerDefense
 
         private void GameTick(object? sender, EventArgs e)
         {
-            health.Content = _Health;
-
-            //Leben abziehen
-            foreach (var enemy in _enemyList)
-            {
-                if (enemy.ReachedEnd)
-                {
-                    _Health -= enemy.Life;
-                    enemy.ReachedEnd = false;
-                    enemy.Life = 0;
-                }
-            }
+            health.Content = _Health;       
 
             bool won = true;
             foreach (var enemy in _enemyList)
@@ -254,6 +243,23 @@ namespace TowerDefense
             }
         }
 
+        public void SetTowerImage(BaseTower tower, Point Position)
+        {
+            Image towerImage = tower.GetEntityPic();
+            towerImage.Width = tower.Size;
+            towerImage.Height = tower.Size;
+
+            Canvas.SetLeft(towerImage, Position.X - (towerImage.Width / 2));
+            Canvas.SetTop(towerImage, Position.Y - towerImage.Height);
+
+            towerImage.Tag = tower;
+            towerImage.MouseEnter += TowerImage_MouseEnter;
+            towerImage.MouseLeave += TowerImage_MouseLeave;
+            towerImage.MouseDown += GameField_MouseDown;
+            tower.Image = towerImage;
+            GameField.Children.Add(towerImage);
+        }
+
         private void GameField_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (ghostTower != null && ghostTower.Tag is BaseTower tower && cash >= tower.Costs)
@@ -271,19 +277,7 @@ namespace TowerDefense
 
                 BaseTower newTower = TowerFactory.CreateTower("TestTower1", dropPosition);
 
-                Image towerImage = tower.GetEntityPic();
-                towerImage.Width = tower.Size;
-                towerImage.Height = tower.Size;
-
-                Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
-                Canvas.SetTop(towerImage, dropPosition.Y - towerImage.Height);
-
-                towerImage.Tag = newTower;
-                towerImage.MouseEnter += TowerImage_MouseEnter;
-                towerImage.MouseLeave += TowerImage_MouseLeave;
-                towerImage.MouseDown += GameField_MouseDown;
-                tower.Image = towerImage;
-                GameField.Children.Add(towerImage);
+                SetTowerImage(newTower, dropPosition);
 
                 _deployedTowers.Add(newTower);
                 _towerGrid.AddObject(newTower); // Füge den Turm dem Spatial Grid hinzu
@@ -348,6 +342,7 @@ namespace TowerDefense
 
                 if (upgradeWindow.IsUpgraded)
                 {
+                    RemoveTowerImage(selectedTower);
                     Cashhandler(); // Aktualisiere die Geldanzeige
                 }
             }
@@ -401,9 +396,15 @@ namespace TowerDefense
             if (_enemyList.Contains(enemy))
             {
                 _enemyList.Remove(enemy);
-                cash += enemy.Coins;
-                Cashhandler();
-
+                if (enemy.Life <= 0)
+                {
+                    cash += enemy.Coins;
+                    Cashhandler();
+                }
+                else
+                {
+                    _Health -= enemy.Life;
+                }
                 // Entferne den Gegner aus dem Spatial Grid
                 _enemyGrid.RemoveObject(enemy);
             }
@@ -496,16 +497,8 @@ namespace TowerDefense
             }
         }
 
-        public void SellTower(BaseTower tower)
+        public void RemoveTowerImage(BaseTower tower)
         {
-            if (_deployedTowers.Contains(tower))
-            {
-                _deployedTowers.Remove(tower);
-                tower.StopAttackTimer();
-                cash += tower.TowerWorth / 2;
-                Cashhandler();
-            }
-
             Dispatcher.Invoke(() =>
             {
                 Image? imageToRemove = null;
@@ -523,6 +516,19 @@ namespace TowerDefense
                     GameField.Children.Remove(imageToRemove);
                 }
             });
+        }
+
+        public void SellTower(BaseTower tower)
+        {
+            if (_deployedTowers.Contains(tower))
+            {
+                _deployedTowers.Remove(tower);
+                tower.StopAttackTimer();
+                cash += tower.TowerWorth / 2;
+                Cashhandler();
+            }
+
+            RemoveTowerImage(tower);
         }
     }
 }
