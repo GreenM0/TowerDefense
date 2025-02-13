@@ -176,7 +176,7 @@ namespace TowerDefense.EnemiesModel
 
         private bool _isSlowed = false;
 
-        public void ApplySlowEffect(double slowFactor, TimeSpan duration)
+        public void ApplySlowEffect(double slowFactor, TimeSpan duration, bool dodamage, double attackDamage)
         {
             if (_isSlowed) return; // Verhindere mehrfache Anwendung
 
@@ -184,7 +184,11 @@ namespace TowerDefense.EnemiesModel
             CurrentSpeed = BaseSpeed * slowFactor;
 
             Task.Delay(duration).ContinueWith(_ =>
-            {
+            {   
+                if (dodamage)
+                {
+                    Life -= attackDamage * slowFactor;
+                }
                 CurrentSpeed = BaseSpeed;
                 _isSlowed = false;
             });

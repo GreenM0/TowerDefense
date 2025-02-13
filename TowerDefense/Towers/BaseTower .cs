@@ -15,24 +15,24 @@ namespace TowerDefense.Towers
 {
     public abstract class BaseTower : IPositionable
     {
-        public double AttackRange { get; private set; }
+        public double AttackRange { get; protected set; }
         public Image Image { get; set; }
-        public float AttackSpeed { get; private set; }
+        public float AttackSpeed { get; protected set; }
         public Point Position { get; set; }
         public (int, int) CurrentCell { get; set; }
-        public double AttackDamage { get; private set; }
-        public int Costs { get; private set; }
-        public float Size { get; private set; }
-        public string ProjectileimagePath { get; private set; }
-        public int ProjectileSpeed { get; private set; }
-        public string TowerName { get; private set; }
-        public string PathtoImage { get; private set; }
-        public double TowerRadius { get; private set; }
-        public int UpgradeLevel { get; private set; }
-        public int MaxUpgradeLevel { get; private set; }
-        public int UpgradeCost { get; private set; }
-        public int TowerWorth {  get; private set; }
-        public string TargetMode { get; private set; }
+        public double AttackDamage { get; protected set; }
+        public int Costs { get; protected set; }
+        public float Size { get; protected set; }
+        public string ProjectileimagePath { get; protected set; }
+        public int ProjectileSpeed { get; protected set; }
+        public string TowerName { get; protected set; }
+        public string PathtoImage { get; protected set; }
+        public double TowerRadius { get; protected set; }
+        public int UpgradeLevel { get; protected set; }
+        public int MaxUpgradeLevel { get; protected set; }
+        public int UpgradeCost { get; protected set; }
+        public int TowerWorth {  get; protected set; }
+        public string TargetMode { get; protected set; }
 
         private DispatcherTimer? _attackTimer;
 
@@ -122,24 +122,6 @@ namespace TowerDefense.Towers
             return enemiesInRange.Where(enemy => IsInRange(enemy)).ToList();
         }
 
-        public List<(int, int)> GetCellsInRange(int cellSize)
-        {
-            var cellsInRange = new List<(int, int)>();
-
-            (int centerX, int centerY) = ((int)(Position.X / cellSize), (int)(Position.Y / cellSize));
-
-            int rangeInCells = (int)Math.Ceiling(AttackRange / cellSize);
-
-            for (int x = -rangeInCells; x <= rangeInCells; x++)
-            {
-                for (int y = -rangeInCells; y <= rangeInCells; y++)
-                {
-                    cellsInRange.Add((centerX, centerY));
-                }
-            }
-
-            return cellsInRange;
-        }
         public Image GetEntityPic()
         {
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
@@ -147,6 +129,7 @@ namespace TowerDefense.Towers
             ImageHelper imageHelper = new();
             return imageHelper.GetEntityPic(imagePath);
         }
+
         private double DistanceToLine(Point point, Line line)
         {
             double x1 = line.X1;
@@ -159,6 +142,7 @@ namespace TowerDefense.Towers
 
             return numerator / denominator;
         }
+
         public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers, List<Rectangle> gameWayBounds)
         {
             // Prüfen, ob der Turm zu nah an anderen Türmen platziert wird
