@@ -9,31 +9,37 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System;
+using System.Windows.Media;
 
 namespace TowerDefense.Towers
 {
     public abstract class BaseTower : IPositionable
     {
-        public double AttackRange { get; private set; }
+        public double AttackRange { get; protected set; }
         public Image Image { get; set; }
-        public float AttackSpeed { get; private set; }
+        public float AttackSpeed { get; protected set; }
         public Point Position { get; set; }
-        public int AttackDamage { get; private set; }
-        public int Costs { get; private set; }
-        public float Size { get; private set; }
-        public string ProjectileimagePath { get; private set; }
-        public int ProjectileSpeed { get; private set; }
-        public string TowerName { get; private set; }
-        public string PathtoImage { get; private set; }
-        public double TowerRadius { get; private set; }
-        public int UpgradeLevel { get; private set; }
-        public int MaxUpgradeLevel { get; private set; }
-        public int UpgradeCost { get; private set; }
-        public int TowerWorth {  get; private set; }
+        public (int, int) CurrentCell { get; set; }
+        public double AttackDamage { get; protected set; }
+        public int Costs { get; protected set; }
+        public float Size { get; protected set; }
+        public string ProjectileimagePath { get; protected set; }
+        public int ProjectileSpeed { get; protected set; }
+        public string TowerName { get; protected set; }
+        public string PathtoImage { get; protected set; }
+        public double TowerRadius { get; protected set; }
+        public int UpgradeLevel { get; protected set; }
+        public int MaxUpgradeLevel { get; protected set; }
+        public int UpgradeCost { get; protected set; }
+        public int TowerWorth {  get; protected set; }
+        public string TargetMode { get; protected set; }
+        public int CooldownTime { get; protected set; }
 
         private DispatcherTimer? _attackTimer;
+        private DispatcherTimer? _cooldownTimer;  // Neu: Cooldown-Timer
+        protected bool _isCooldownActive = false;  // Flag, um zu prüfen, ob der Cooldown läuft
 
-        public BaseTower(float attackRange, int attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth)
+        public BaseTower(float attackRange, double attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth, string targetMode, int cooldownTime)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -50,70 +56,72 @@ namespace TowerDefense.Towers
             MaxUpgradeLevel = maxUpgradeLevel;
             UpgradeCost = upgradeCost;
             TowerWorth = towerWorth;
+            TargetMode = targetMode;
+            CooldownTime = cooldownTime;
         }
+        private EventHandler _renderingHandler;
 
-        public void StartAttackTimer(Canvas gameCanvas)
+        public void StartAttackTimer(Canvas gameCanvas, SpatialGrid<Enemies> enemyGrid)
         {
-            _attackTimer = new DispatcherTimer
+            _renderingHandler = (s, e) =>
             {
-                Interval = TimeSpan.FromSeconds(AttackSpeed) // AttackSpeed gibt die Angriffe pro Sekunde an
-            };
+                if (_isCooldownActive) return;
 
-            _attackTimer.Tick += (sender, e) =>
-            {
-                List<Enemies> enemiesInRange = new List<Enemies>();
-                foreach (var enemy in GameHandler.Instance._enemyList)
-                {
-                    // Berechne, ob der Gegner im Angriffsradius ist
-                    double distance = Math.Sqrt(Math.Pow(Position.X - enemy.Position.X, 2) + Math.Pow(Position.Y - enemy.Position.Y, 2));
-
-                    if (distance <= AttackRange)
-                    {
-                        // Gegner angreifen
-                        enemiesInRange.Add(enemy);
-                    }
-                }
+                var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
                 if (enemiesInRange.Count == 0) return;
 
-                Enemies closestEnemy = enemiesInRange[0];
+                var target = GetTarget(enemiesInRange);
 
-                foreach (var enemy in enemiesInRange)
-                {
-                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+                Attack(target, gameCanvas);
 
-                    if (currentDistance < closestDistance)
-                    {
-                        closestEnemy = enemy;
-                    }
-                }
-
-                Attack(closestEnemy, gameCanvas);
+                StartCooldown();
             };
 
-            _attackTimer.Start();
+            CompositionTarget.Rendering += _renderingHandler;
         }
 
-        public virtual void Attack(Enemies target, Canvas gameCanvas)
+        public void StopAttackTimer()
         {
-            if (target == null || !IsInRange(target)) return;
+            if (_renderingHandler != null)
+            {
+                CompositionTarget.Rendering -= _renderingHandler;
+                _renderingHandler = null;
+            }
+        }
+        public void StartCooldown()
+        {
+            if (_isCooldownActive) return;  // Wenn der Cooldown bereits läuft, nichts tun
 
-            Vector targetVelocity = target.Velocity;  // Annahme: Velocity ist die Geschwindigkeit des Ziels
+            _isCooldownActive = true;
+
+            // Cooldown-Timer
+            _cooldownTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(CooldownTime)
+            };
+
+            _cooldownTimer.Tick += (s, e) =>
+            {
+                _cooldownTimer.Stop();
+                _cooldownTimer = null;
+                _isCooldownActive = false;  // Cooldown beendet
+            };
+
+            _cooldownTimer.Start();
+        }
+
+        public virtual void Attack(List<Enemies> target, Canvas gameCanvas)
+        {
+            if (target == null || !IsInRange(target[0])) return;
 
             // Berechne den Abstand zwischen Turm und Ziel
-            double distance = Math.Sqrt(Math.Pow(Position.X - target.Position.X, 2) + Math.Pow(Position.Y - target.Position.Y, 2));
+            double distance = Math.Sqrt(Math.Pow(Position.X - target[0].Position.X, 2) + Math.Pow(Position.Y - target[0].Position.Y, 2));
 
             // Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
             double timeToTarget = distance / ProjectileSpeed;
 
-            // Berechne den Vorhersagepunkt des Ziels
-            Point predictedTargetPosition = new Point(
-                target.Position.X + targetVelocity.X * timeToTarget,
-                target.Position.Y + targetVelocity.Y * timeToTarget
-            );
-
-            Projectile projectile = new Projectile(Position, target.Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target);
+            Projectile projectile = new Projectile(Position, target[0].Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target[0]);
 
             projectile.Animate(gameCanvas, (proj) =>
             {
@@ -127,47 +135,14 @@ namespace TowerDefense.Towers
             return distance <= AttackRange;
         }
 
-        //public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid, int cellSize)
-        //{
-        //    var enemiesInRange = new List<Enemies>();
-
-        //    var cellsToCheck = GetCellsInRange(cellSize);
-
-        //    foreach (var cell in cellsToCheck)
-        //    {
-        //        var enemiesInCell = grid.GetObjectsInCell(cell);
-        //        if (enemiesInCell != null)
-        //        {
-        //            foreach (var enemy in enemiesInRange)
-        //            {
-        //                if (IsInRange(enemy))
-        //                {
-        //                    enemiesInRange.Add(enemy);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return enemiesInRange;
-        //}
-
-        public List<(int, int)> GetCellsInRange(int cellSize)
+        public List<Enemies> GetEnemiesInRange(SpatialGrid<Enemies> grid)
         {
-            var cellsInRange = new List<(int, int)>();
+            var enemiesInRange = grid.GetObjectsInRange(Position, (float)AttackRange);
 
-            (int centerX, int centerY) = ((int)(Position.X / cellSize), (int)(Position.Y / cellSize));
-
-            int rangeInCells = (int)Math.Ceiling(AttackRange / cellSize);
-
-            for (int x = -rangeInCells; x <= rangeInCells; x++)
-            {
-                for (int y = -rangeInCells; y <= rangeInCells; y++)
-                {
-                    cellsInRange.Add((centerX, centerY));
-                }
-            }
-
-            return cellsInRange;
+            // Filtere nur die Gegner, die tatsächlich in Reichweite sind
+            return enemiesInRange.Where(enemy => IsInRange(enemy)).ToList();
         }
+
         public Image GetEntityPic()
         {
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
@@ -175,6 +150,7 @@ namespace TowerDefense.Towers
             ImageHelper imageHelper = new();
             return imageHelper.GetEntityPic(imagePath);
         }
+
         private double DistanceToLine(Point point, Line line)
         {
             double x1 = line.X1;
@@ -187,6 +163,7 @@ namespace TowerDefense.Towers
 
             return numerator / denominator;
         }
+
         public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers, List<Rectangle> gameWayBounds)
         {
             // Prüfen, ob der Turm zu nah an anderen Türmen platziert wird
@@ -236,12 +213,29 @@ namespace TowerDefense.Towers
             }
         }
 
-        public void StopAttackTimer()
+        public List<Enemies> GetTarget(List<Enemies> enemiesInRange)
         {
-            if (_attackTimer != null)
+            List<Enemies> targets = new List<Enemies>();
+            if (TargetMode == "CLOSE")
+            { 
+                Enemies closestEnemy = enemiesInRange[0];
+
+                foreach (var enemy in enemiesInRange)
+                {
+                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
+                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+                        
+                    if (currentDistance < closestDistance)
+                    {
+                        closestEnemy = enemy;
+                    }
+                }
+                targets[0] = closestEnemy;
+                return targets;
+            }
+            else
             {
-                _attackTimer.Stop();
-                _attackTimer = null; // Verhindert weiteres Arbeiten
+                return enemiesInRange;
             }
         }
     }

@@ -6,5 +6,6 @@ namespace TowerDefense.Grid
     public interface IPositionable
     {
         Point Position { get; set; }
+        (int, int) CurrentCell { get; set; }
     }
 }

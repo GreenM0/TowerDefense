@@ -17,12 +17,12 @@ namespace TowerDefense.Projectils
         private int Speed { get; }
         private Image ProjectileImage { get; set; }
         private Enemies Target { get; }
-        private int Damage { get; }
+        private Double Damage { get; }
         public int ImageWidth { get; } = 50;
         public int ImageHeight { get; } = 50;
 
 
-        public Projectile(Point startPosition, Point targetPosition, int speed, int damage, string imagePath, Enemies target)
+        public Projectile(Point startPosition, Point targetPosition, int speed, Double damage, string imagePath, Enemies target)
         {
             StartPosition = startPosition;
             TargetPosition = targetPosition;
@@ -102,42 +102,7 @@ namespace TowerDefense.Projectils
             // Starte das Storyboard
             storyboard.Begin();
 
-            // Timer, um die Position des Ziels während der Animation kontinuierlich anzupassen
-            DispatcherTimer targetTrackingTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(20) // Update alle 20 ms
-            };
-
-            targetTrackingTimer.Tick += (sender, e) =>
-            {
-                // Wenn das Projektil die Endposition erreicht hat, stoppen wir den Timer
-                if (!storyboard.GetCurrentState().Equals(ClockState.Active))
-                {
-                    targetTrackingTimer.Stop();
-                    return;
-                }
-
-                // Berechne die neue Position des Ziels
-                double currentDistance = Math.Sqrt(Math.Pow(Target.Position.X - Canvas.GetLeft(ProjectileImage), 2) +
-                                                   Math.Pow(Target.Position.Y - Canvas.GetTop(ProjectileImage), 2));
-
-                // Wenn das Ziel sich noch nicht ganz bewegt hat, berechne die neuen Schritte
-                if (currentDistance > 1)
-                {
-                    // Neue Schritte berechnen, basierend auf der aktuellen Position des Ziels
-                    double newStepX = (Target.Position.X - Canvas.GetLeft(ProjectileImage)) / duration;
-                    double newStepY = (Target.Position.Y - Canvas.GetTop(ProjectileImage)) / duration;
-
-                    // Setze die Position des Projektils neu
-                    Canvas.SetLeft(ProjectileImage, Canvas.GetLeft(ProjectileImage) + newStepX);
-                    Canvas.SetTop(ProjectileImage, Canvas.GetTop(ProjectileImage) + newStepY);
-                }
-            };
-
-            // Starte den Timer
-            targetTrackingTimer.Start();
         }
-
 
         public void Hit()
         {

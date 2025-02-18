@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net.NetworkInformation;
 using System.Net.Security;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,10 +14,12 @@ namespace TowerDefense.EnemiesModel
 {
     public class Enemies : IPositionable
     {
-        public float Speed { get; set; }
-        public int Life { get; set; }
+        public double BaseSpeed { get; set; }
+        public double CurrentSpeed { get; set; }
+        public double Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
+        public (int, int) CurrentCell { get; set; }
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
@@ -24,122 +28,180 @@ namespace TowerDefense.EnemiesModel
         private double _lineLength = 0;
         private double _lineDuration = 0;
         private bool _movingRight = false;
-        public Vector Velocity { get; set; }
+        private bool _isSlowed = false;
+        private Storyboard storyboard;
+        private bool slowactive = false;
+        public PathGeometry Gamepath { get; set; }
         public virtual Image? GetEntityPic() => null;
 
         public Enemies(int speed, int life, int coins, int imagewidth = 0, int imageheight = 0)
         {
-            Speed = speed;
+            CurrentSpeed = speed;
+            BaseSpeed = speed;
             Life = life;
             Coins = coins;
             ImageWidth = imagewidth;
             ImageHeight = imageheight;
-            Velocity = new Vector(0, 0);
         }
 
-        public void UpdateVelocity(Point previousPosition, TimeSpan timeDelta)
+        public async Task Movement(Canvas _gameField, SpatialGrid<Enemies> enemyGrid)
         {
-            // Berechne die Änderung der Position (Geschwindigkeit)
-            Vector deltaPosition = new Vector(Position.X - previousPosition.X, Position.Y - previousPosition.Y);
+            double totalPathLength = Gamepath.GetRenderBounds(null).Width + Gamepath.GetRenderBounds(null).Height;
 
-            // Geschwindigkeit = Position Änderung / Zeitänderung
-            Velocity = new Vector(deltaPosition.X / timeDelta.TotalSeconds, deltaPosition.Y / timeDelta.TotalSeconds);
-        }
+            // Berechne die Dauer basierend auf dem aktuellen Speed
+            double adjustedDuration = totalPathLength / CurrentSpeed;
 
-        public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
-        {
-            // Die vorherige Position speichern
-            Point previousPosition = Position;
-
-            // Gesamtlänge vom Weg berechnen
-            for (int i = 0; i < _gameWay.Length - 1; i++)
+            // Animationsobjekte erstellen
+            DoubleAnimationUsingPath animationX = new DoubleAnimationUsingPath
             {
-                double dx = _gameWay[i + 1].X - _gameWay[i].X;
-                double dy = _gameWay[i + 1].Y - _gameWay[i].Y;
-                double segmentLength = Math.Sqrt(dx * dx + dy * dy);
+                PathGeometry = Gamepath,
+                Duration = TimeSpan.FromSeconds(adjustedDuration),
+                Source = PathAnimationSource.X 
+            };
 
-                _totalLength += segmentLength;
-            }
-
-            // Bild von Punkt zu Punkt animieren
-            for (int i = 0; i < _gameWay.Length - 1; i++)
+            DoubleAnimationUsingPath animationY = new DoubleAnimationUsingPath
             {
-                Point startPoint = _gameWay[i];
-                Point endPoint = _gameWay[i + 1];
+                PathGeometry = Gamepath,
+                Duration = TimeSpan.FromSeconds(adjustedDuration),
+                Source = PathAnimationSource.Y
+            };
 
-                bool movingRight = endPoint.X >= startPoint.X;
+            // Storyboard erstellen und Animationsobjekte hinzufügen
+            storyboard = new Storyboard();
+            Storyboard.SetTarget(animationX, Image);
+            Storyboard.SetTargetProperty(animationX, new PropertyPath(Canvas.LeftProperty));
+            Storyboard.SetTarget(animationY, Image);
+            Storyboard.SetTargetProperty(animationY, new PropertyPath(Canvas.TopProperty));
 
-                _lineLength = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
-                _lineDuration = (_lineLength / _totalLength) * this.Speed;
+            storyboard.Children.Add(animationX);
+            storyboard.Children.Add(animationY);
 
-                DoubleAnimation animationX = new DoubleAnimation
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            storyboard.Completed += (s, e) => tcs.SetResult(true);
+            storyboard.Begin();
+
+            // Track the previous position to detect direction change
+            Point previousPosition = Gamepath.Figures[0].StartPoint;
+            bool isFlipped = false;
+
+            storyboard.CurrentTimeInvalidated += (s, e) =>
+            {
+
+                UpdatePositionFromCanvas(Image);
+                enemyGrid.UpdateObjectPosition(this, Position);
+                // Get the current position of the image
+
+                // Compare current position with the previous position to detect direction change
+                if (Position.X < previousPosition.X)
                 {
-                    From = Canvas.GetLeft(img),
-                    To = endPoint.X - img.Width / 2,
-                    Duration = TimeSpan.FromSeconds(_lineDuration)
-                };
-
-                DoubleAnimation animationY = new DoubleAnimation
+                    // If moving left, flip the image
+                    if (!isFlipped)
+                    {
+                        FlipImageDirection(Image, false);
+                        isFlipped = true;
+                    }
+                }
+                else if (Position.X > previousPosition.X)
                 {
-                    From = Canvas.GetTop(img),
-                    To = endPoint.Y - img.Height / 2,
-                    Duration = TimeSpan.FromSeconds(_lineDuration)
-                };
-
-                if (i < 20)
-                {
-                    // Beispiel: Berechnung nach der ersten Bewegung
-                    TimeSpan timeDelta = TimeSpan.FromSeconds(_lineDuration);
-                    UpdateVelocity(previousPosition, timeDelta);
+                    // If moving right, reset flip
+                    if (isFlipped)
+                    {
+                        FlipImageDirection(Image, true);
+                        isFlipped = false;
+                    }
                 }
 
-                // Berechne die Geschwindigkeit des Gegners (beim ersten Schritt)             
+                // Update the previous position for the next frame
+                previousPosition = Position;
 
-                // Update-Logik während der Animation
-                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
-                timer.Tick += (s, e) =>
+                // Wenn der Slow-Effekt aktiv ist, ändere die Geschwindigkeit und starte die Animation mit der aktuellen Position
+                if (_isSlowed && !slowactive)
                 {
-                    UpdatePositionFromCanvas(img); // Position aus Canvas abfragen
+                    slowactive = true;
 
-                };
-                timer.Start();
+                    // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
+                    var bufferdstart = Gamepath.Figures[0].StartPoint;
+                    Gamepath.Figures[0].StartPoint = Position; // Setze den Startpunkt auf die aktuelle Position
+                    RemovePassedSegments(bufferdstart);
 
-                // Erstelle eine TaskCompletionSource für das Ende der Animation
-                TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
-                TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
+                    // Starte die Animation mit dem neuen Pfad und der neuen Dauer
+                    Movement(_gameField, enemyGrid);
+                }
 
-                animationX.Completed += (s, e) => tcsX.SetResult(true);
-                animationY.Completed += (s, e) => tcsY.SetResult(true);
+                if (!_isSlowed && slowactive)
+                {
+                    slowactive = false;
 
-                img.BeginAnimation(Canvas.LeftProperty, animationX);
-                img.BeginAnimation(Canvas.TopProperty, animationY);
+                    // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
+                    var bufferdstart = Gamepath.Figures[0].StartPoint;
+                    Gamepath.Figures[0].StartPoint = Position; // Setze den Startpunkt auf die aktuelle Position
+                    RemovePassedSegments(bufferdstart);
 
-                FlipImageDirection(img, movingRight);
+                    // Starte die Animation mit dem neuen Pfad und der neuen Dauer
+                    Movement(_gameField, enemyGrid);
+                }
+     
+            };
 
-                await Task.WhenAll(tcsX.Task, tcsY.Task);
+            await tcs.Task; // Wait for the animation to complete
 
-                // Stoppe den Timer nach Abschluss der Animation
-                timer.Stop();
-
-                // Nach der ersten Bewegung, die Position aktualisieren
-                previousPosition = endPoint;
-            }
-
+            // Check if the enemy has reached the end
             if (Life > 0)
             {
                 ReachedEnd = true;
+                GameHandler.Instance.RemoveEnemy(this);
             }
             else
             {
                 ReachedEnd = false;
             }
 
-            img.Visibility = Visibility.Collapsed;
+            Image.Visibility = Visibility.Collapsed;
         }
 
+        private void RemovePassedSegments(Point originalStart)
+        {
+            var segments = Gamepath.Figures[0].Segments;
+
+            if (segments.Count == 0) return; // Falls keine Segmente vorhanden sind, nichts tun
+
+            // Liste für zu löschende Segmente
+            List<int> segmentsToRemove = new List<int>();
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                if (segments[i] is LineSegment lineSegment)
+                {
+                    Point segmentEnd = lineSegment.Point;
+
+                    // Prüfe, ob das Segment zwischen originalStart und newStart liegt
+                    if (IsPointBetween(originalStart, Gamepath.Figures[0].StartPoint, segmentEnd))
+                    {
+                        segmentsToRemove.Add(i);
+                    }
+                }
+            }
+
+            // Entferne Segmente in umgekehrter Reihenfolge (damit die Indizes korrekt bleiben)
+            for (int i = segmentsToRemove.Count - 1; i >= 0; i--)
+            {
+                segments.RemoveAt(segmentsToRemove[i]);
+            }
+        }
+
+        private bool IsPointBetween(Point originalStart, Point newStart, Point segmentEnd)
+        {
+            double minX = Math.Min(originalStart.X, newStart.X);
+            double maxX = Math.Max(originalStart.X, newStart.X);
+            double minY = Math.Min(originalStart.Y, newStart.Y);
+            double maxY = Math.Max(originalStart.Y, newStart.Y);
+
+            return (segmentEnd.X >= minX && segmentEnd.X <= maxX) &&
+                   (segmentEnd.Y >= minY && segmentEnd.Y <= maxY);
+        }
 
         private void FlipImageDirection(Image img, bool movingRight)
-        {
+        { 
             if (img.RenderTransform is ScaleTransform flipTransform)
             {
                 flipTransform.ScaleX = movingRight ? 1 : -1;
@@ -152,7 +214,7 @@ namespace TowerDefense.EnemiesModel
             }
         }
 
-        public void GetHit(int damage)
+        public void GetHit(double damage)
         {
             Life -= damage;
 
@@ -185,7 +247,32 @@ namespace TowerDefense.EnemiesModel
             double x = Canvas.GetLeft(img);
             double y = Canvas.GetTop(img);
 
-            Position = new Point(x, y); // Synchronisiere die Position des Gegners
+            Position = new Point(x, y);
+
+            // Debug-Ausgabe, um die Position zu überprüfen
+            Console.WriteLine($"Enemy Position: X={Position.X}, Y={Position.Y}");
+
+            // Aktualisiere die Position im Spatial Grid
+            GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
+        }       
+
+        public void ApplySlowEffect(double slowFactor, TimeSpan duration, bool dodamage, double attackDamage)
+        {
+            if (_isSlowed) return; // Verhindere mehrfache Anwendung
+
+            _isSlowed = true;
+            CurrentSpeed = BaseSpeed * slowFactor;
+            storyboard.Stop();
+
+            Task.Delay(duration).ContinueWith(_ =>
+            {   
+                if (dodamage)
+                {
+                    Life -= attackDamage * slowFactor;
+                }
+                CurrentSpeed = BaseSpeed;
+                _isSlowed = false;
+            });
         }
     }
 }

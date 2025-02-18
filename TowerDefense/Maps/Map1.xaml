@@ -8,19 +8,28 @@
              Width="1440" Height="1080">
     <Canvas x:Name="GameCanvas">
         <Image Source="Assets/Map1.png" Width="1440" Height="1080"/>
-        <Line x:Name="Line1" X1="0" Y1="735" X2="270" Y2="735"/>
-        <Line x:Name="Line2" X1="270" Y1="735" X2="270" Y2="245"/>
-        <Line x:Name="Line3" X1="270" Y1="245" X2="625" Y2="245"/>
-        <Line x:Name="Line4" X1="625" Y1="245" X2="625" Y2="400"/>
-        <Line x:Name="Line5" X1="615" Y1="400" X2="960" Y2="400"/>
-        <Line x:Name="Line6" X1="960" Y1="400" X2="960" Y2="670"/>
-        <Line x:Name="Line7" X1="960" Y1="670" X2="665" Y2="670"/>
-        <Line x:Name="Line8" X1="665" Y1="670" X2="665" Y2="890"/>
-        <Line x:Name="Line9" X1="680" Y1="890" X2="1210" Y2="890"/>
-        <Line x:Name="Line10" X1="1210" Y1="890" X2="1210" Y2="260"/>
-        <Line x:Name="Line11" X1="1210" Y1="260" X2="1440" Y2="260"/>
+        <Path>
+            <Path.Data>
+                <PathGeometry x:Name="Path">
+                    <PathFigure StartPoint="0,680">
+                        <LineSegment Point="230,680" />
+                        <LineSegment Point="230,195" />
+                        <LineSegment Point="590,195" />
+                        <LineSegment Point="590,355" />
+                        <LineSegment Point="930,355" />
+                        <LineSegment Point="930,615" />
+                        <LineSegment Point="635,615" />
+                        <LineSegment Point="635,850" />
+                        <LineSegment Point="1175,850" />
+                        <LineSegment Point="1175,205" />
+                        <LineSegment Point="1440,205" />
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
 
-        <Rectangle x:Name="Rectangle1" Canvas.Left="0" Canvas.Top="688" Width="312" Height="82" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+
+         <Rectangle x:Name="Rectangle1" Canvas.Left="0" Canvas.Top="688" Width="312" Height="82" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <Rectangle x:Name="Rectangle2" Canvas.Left="223" Canvas.Top="225" Width="89" Height="510" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <Rectangle x:Name="Rectangle3" Canvas.Left="222" Canvas.Top="200" Width="443" Height="94" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <Rectangle x:Name="Rectangle4" Canvas.Left="581" Canvas.Top="235" Width="84" Height="165" Fill="Transparent" Stroke="Transparent" StrokeThickness="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
