@@ -32,17 +32,20 @@ namespace TowerDefense.Towers
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
                 upgradeCost: 100,
-                towerWorth:  200,
-                targetMode: "ALL"
+                towerWorth: 200,
+                targetMode: "ALL",
+                cooldownTime: 1000
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
-            AttackSlowFactor = 3;
+            AttackSlowFactor = 0.5;
             DoDamage = false;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
         {
+            if (_isCooldownActive) return;
+
             foreach (Enemies enemies in target)
             {
                 target[0].ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
@@ -56,30 +59,30 @@ namespace TowerDefense.Towers
                 if (UpgradeLevel == 1)
                 {
                     PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
-                    GameHandler.Instance.SetTowerImage(this, this.Position);
+                    GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
                     AttackRange = 200;
-                    AttackSlowFactor = 5;
+                    AttackSlowFactor = 0.3;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
+                    CooldownTime = 800;
 
                 }
                 if (UpgradeLevel == 2)
                 {
                     PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
                     Image newTowerImage = GetEntityPic();
-                    GameHandler.Instance.SetTowerImage(this, this.Position);
+                    GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
                     AttackRange = 220;
-                    AttackSlowFactor = 7;
+                    AttackSlowFactor = 0.2;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
-
-                    
+                    CooldownTime = 500;
                 }
             }            
         }

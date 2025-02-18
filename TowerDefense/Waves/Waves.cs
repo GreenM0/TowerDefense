@@ -2,6 +2,8 @@
 using TowerDefense.EnemiesModel.Types;
 using TowerDefense.EnemiesModel;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace TowerDefense.Waves
 {
@@ -39,7 +41,7 @@ namespace TowerDefense.Waves
             return _singleWave;
         }
 
-        public Enemies SpawnEnemy(int EnemyType, Canvas GameField, Point[] _gameWay)
+        public Enemies SpawnEnemy(int EnemyType, Canvas GameField, PathGeometry path)
         {
             if (EnemyType == 0)
             {
@@ -59,10 +61,14 @@ namespace TowerDefense.Waves
 
 			Enemies CreateEnemy(Enemies enemy)
             {
-				enemy.Image = enemy.GetEntityPic();
-                Canvas.SetLeft(enemy.Image, _gameWay[0].X - enemy.Image.Width / 2);
-                Canvas.SetTop(enemy.Image, _gameWay[0].Y - enemy.Image.Height / 2);
-				return enemy;
+                PathGeometry pathCopy = path.Clone();
+                enemy.Image = enemy.GetEntityPic();
+                Point startPoint = pathCopy.Figures[0].StartPoint;
+
+                Canvas.SetLeft(enemy.Image, startPoint.X - (enemy.Image.Width / 2));
+                Canvas.SetTop(enemy.Image, startPoint.Y - enemy.Image.Height / 2);
+                enemy.Gamepath = pathCopy;
+                return enemy;
 			}
         }
 

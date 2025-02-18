@@ -33,10 +33,13 @@ namespace TowerDefense.Towers
         public int UpgradeCost { get; protected set; }
         public int TowerWorth {  get; protected set; }
         public string TargetMode { get; protected set; }
+        public int CooldownTime { get; protected set; }
 
         private DispatcherTimer? _attackTimer;
+        private DispatcherTimer? _cooldownTimer;  // Neu: Cooldown-Timer
+        protected bool _isCooldownActive = false;  // Flag, um zu prüfen, ob der Cooldown läuft
 
-        public BaseTower(float attackRange, double attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth, string targetMode)
+        public BaseTower(float attackRange, double attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth, string targetMode, int cooldownTime)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -54,6 +57,7 @@ namespace TowerDefense.Towers
             UpgradeCost = upgradeCost;
             TowerWorth = towerWorth;
             TargetMode = targetMode;
+            CooldownTime = cooldownTime;
         }
         private EventHandler _renderingHandler;
 
@@ -61,6 +65,8 @@ namespace TowerDefense.Towers
         {
             _renderingHandler = (s, e) =>
             {
+                if (_isCooldownActive) return;
+
                 var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
                 if (enemiesInRange.Count == 0) return;
@@ -68,6 +74,8 @@ namespace TowerDefense.Towers
                 var target = GetTarget(enemiesInRange);
 
                 Attack(target, gameCanvas);
+
+                StartCooldown();
             };
 
             CompositionTarget.Rendering += _renderingHandler;
@@ -80,6 +88,27 @@ namespace TowerDefense.Towers
                 CompositionTarget.Rendering -= _renderingHandler;
                 _renderingHandler = null;
             }
+        }
+        public void StartCooldown()
+        {
+            if (_isCooldownActive) return;  // Wenn der Cooldown bereits läuft, nichts tun
+
+            _isCooldownActive = true;
+
+            // Cooldown-Timer
+            _cooldownTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(CooldownTime)
+            };
+
+            _cooldownTimer.Tick += (s, e) =>
+            {
+                _cooldownTimer.Stop();
+                _cooldownTimer = null;
+                _isCooldownActive = false;  // Cooldown beendet
+            };
+
+            _cooldownTimer.Start();
         }
 
         public virtual void Attack(List<Enemies> target, Canvas gameCanvas)

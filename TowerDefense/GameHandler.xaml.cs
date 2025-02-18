@@ -21,7 +21,7 @@ namespace TowerDefense
         private DispatcherTimer? _gameTick;
         private DispatcherTimer? _gridHandler;
         private DispatcherTimer? _towerHandler;
-        public Point[] _gameWay = new Point[3];
+        public PathGeometry _gameWay;
         public Canvas _mainCanvas = null!;
         public List<Enemies> _enemyList = new List<Enemies>();
         private List<BaseTower> _towers = new List<BaseTower>();
@@ -85,7 +85,7 @@ namespace TowerDefense
                         _enemyGrid.AddObject(currentEnemy);
 
                         GameField.Children.Add(currentEnemy.Image);
-                        _ = currentEnemy.Movement(_gameWay, _mainCanvas, currentEnemy.Image, _enemyGrid);
+                        _ = currentEnemy.Movement(_mainCanvas, _enemyGrid);
                         _enemyList.Add(currentEnemy);
 
                         await Task.Delay(_enemySpawnInterval);
@@ -110,7 +110,7 @@ namespace TowerDefense
             GameField.Children.Add(Map1);
 
             _mainCanvas = Map1.MainCanvas;
-            _gameWay = Map1.Way();
+            _gameWay = Map1.GetPathGeometry();
             _rectangles = Map1.Rectangles;
             cash = 460;
         }
@@ -301,7 +301,6 @@ namespace TowerDefense
                 }
             }
         }
-
 
         private void GameField_MouseLeave(object sender, MouseEventArgs e)
         {
