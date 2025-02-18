@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using TowerDefense.EnemiesModel;
 using System.IO;
 using System.Windows.Threading;
+using System.Windows.Media;
 
 namespace TowerDefense.Projectils
 {
@@ -14,22 +15,26 @@ namespace TowerDefense.Projectils
     {
         private Point StartPosition { get; }
         private Point TargetPosition { get; }
-        private int Speed { get; }
+        private float Speed { get; }
         private Image ProjectileImage { get; set; }
-        private Enemies Target { get; }
-        private Double Damage { get; }
-        public int ImageWidth { get; } = 50;
-        public int ImageHeight { get; } = 50;
+        private List<Enemies> Targets { get; }
+        private double Damage { get; }
+        public int ImageWidth { get; } = 20;
+        public int ImageHeight { get; } = 10;
+        public string ImagePath { get; set; }
+        public Action<Enemies> OnHit { get; set; }
+        private Storyboard storyboard;
 
 
-        public Projectile(Point startPosition, Point targetPosition, int speed, Double damage, string imagePath, Enemies target)
+
+        public Projectile(Point startPosition, Point targetPosition, float speed, double damage, List<Enemies> targets, string imagePath)
         {
             StartPosition = startPosition;
             TargetPosition = targetPosition;
             Speed = speed;
             Damage = damage;
-            Target = target;
-
+            Targets = targets;
+            ImagePath = imagePath;
 
             // Positioniere das Projektil auf der Leinwand
             Canvas.SetLeft(GetEntityPic(), StartPosition.X);
@@ -38,75 +43,123 @@ namespace TowerDefense.Projectils
 
         public Image GetEntityPic()
         {
-            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Projectils\Types\Assets\IceBall.png");
+            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ImagePath);
 
             ImageHelper imageHelper = new();
-            ProjectileImage = imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);
-            return imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);
+            ProjectileImage = imageHelper.GetEntityPic(imagePath, ImageWidth, ImageHeight);
+            return ProjectileImage;
         }
 
-        public void Animate(Canvas gameCanvas, Action<Projectile> onHit)
+        public async Task Shoot(Canvas gameCanvas, Point startPosition, Point targetPosition, double speed, Action<Projectile> onHit)
         {
-            gameCanvas.Children.Add(ProjectileImage);
 
-            // Berechne die Anfangsdistanz und die Richtung
-            double distance = Math.Sqrt(
-                Math.Pow(Target.Position.X - StartPosition.X, 2) +
-                Math.Pow(Target.Position.Y - StartPosition.Y, 2));
+                
+                Canvas.SetLeft(ProjectileImage, startPosition.X);
+                Canvas.SetTop(ProjectileImage, startPosition.Y);
 
-            double duration = distance / Speed; // Berechne die Dauer der Animation basierend auf der Geschwindigkeit
+                // Berechne die Entfernung und die Dauer der Animation
+                double distance = Math.Sqrt(
+                    Math.Pow(targetPosition.X - startPosition.X, 2) +
+                    Math.Pow(targetPosition.Y - startPosition.Y, 2));
 
-            // Berechne die Schritte in X- und Y-Richtung
-            double stepX = (Target.Position.X - StartPosition.X) / duration;
-            double stepY = (Target.Position.Y - StartPosition.Y) / duration;
+                double duration = distance / speed;
 
-            // Setze das Projektil an die Startposition
-            Canvas.SetLeft(ProjectileImage, StartPosition.X);
-            Canvas.SetTop(ProjectileImage, StartPosition.Y);
+                // Erstelle die Animationen für X- und Y-Richtung
+                var animationX = new DoubleAnimation
+                {
+                    From = startPosition.X,
+                    To = targetPosition.X,
+                    Duration = TimeSpan.FromSeconds(duration),
+                    AutoReverse = false
+                };
 
-            // Erstelle das Storyboard und die DoubleAnimation für die X- und Y-Richtung
-            var animationX = new DoubleAnimation
+                var animationY = new DoubleAnimation
+                {
+                    From = startPosition.Y,
+                    To = targetPosition.Y,
+                    Duration = TimeSpan.FromSeconds(duration),
+                    AutoReverse = false
+                };
+
+                // Erstelle das Storyboard
+                storyboard = new Storyboard();
+
+                Storyboard.SetTarget(animationX, ProjectileImage);
+                Storyboard.SetTarget(animationY, ProjectileImage);
+
+                Storyboard.SetTargetProperty(animationX, new PropertyPath(Canvas.LeftProperty));
+                Storyboard.SetTargetProperty(animationY, new PropertyPath(Canvas.TopProperty));
+
+                storyboard.Children.Add(animationX);
+                storyboard.Children.Add(animationY);
+
+            // Drehe den Pfeil in Richtung des Ziels
+            double angle = Math.Atan2(targetPosition.Y - startPosition.Y, targetPosition.X - startPosition.X) * 180 / Math.PI;
+            ProjectileImage.RenderTransform = new RotateTransform(angle);
+
+            // TaskCompletionSource, um das Ende der Animation abzuwarten
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            storyboard.Completed += (s, e) =>
             {
-                From = StartPosition.X,
-                To = Target.Position.X,
-                Duration = TimeSpan.FromSeconds(duration),
-                AutoReverse = false
+                // Überprüfe Kollision und ob der Pfeil das Ziel getroffen hat
+                if (IsCollidingWithAnyTarget(gameCanvas))
+                {
+                    onHit?.Invoke(this);
+                    gameCanvas.Children.Remove(ProjectileImage);
+                }
+                else
+                {
+                    // Wenn der Pfeil das Ziel nicht trifft und aus der Karte fliegt
+                    if (IsOutOfBounds(gameCanvas))
+                    {
+                        // Entferne den Pfeil, wenn er aus der Karte fliegt
+                        gameCanvas.Children.Remove(ProjectileImage);
+                    }
+                }
+
+                // Setze das Ergebnis auf true, damit TaskCompletionSource abgeschlossen wird
+                tcs.SetResult(true);
             };
 
-            var animationY = new DoubleAnimation
-            {
-                From = StartPosition.Y,
-                To = Target.Position.Y,
-                Duration = TimeSpan.FromSeconds(duration),
-                AutoReverse = false
-            };
-
-            // Erstelle das Storyboard
-            Storyboard storyboard = new Storyboard();
-            storyboard.Children.Add(animationX);
-            storyboard.Children.Add(animationY);
-
-            Storyboard.SetTarget(animationX, ProjectileImage);
-            Storyboard.SetTarget(animationY, ProjectileImage);
-
-            Storyboard.SetTargetProperty(animationX, new PropertyPath("(Canvas.Left)"));
-            Storyboard.SetTargetProperty(animationY, new PropertyPath("(Canvas.Top)"));
-
-            // Wenn die Animation abgeschlossen ist, entferne das Projektil und führe den Treffer-Callback aus
-            storyboard.Completed += (sender, e) =>
-            {
-                gameCanvas.Children.Remove(ProjectileImage);
-                onHit(this);
-            };
-
-            // Starte das Storyboard
+            // Starte die Animation
             storyboard.Begin();
 
+            await tcs.Task;
+
+                // Entferne den Pfeil vom Canvas und führe den Treffer-Callback aus
         }
 
-        public void Hit()
+        private bool IsCollidingWithAnyTarget(Canvas GameCanvas)
         {
-            Target.GetHit(Damage);
+            Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width, ProjectileImage.Height);
+
+            foreach (var enemy in Targets)
+            {
+                Rect targetRect = new Rect(enemy.Position.X, enemy.Position.Y, enemy.Image.Width, enemy.Image.Height);
+
+                // Prüfe, ob der Pfeil mit einem Gegner kollidiert
+                if (arrowRect.IntersectsWith(targetRect))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsOutOfBounds(Canvas GameCanvas)
+        {
+            double x = Canvas.GetLeft(ProjectileImage);
+            double y = Canvas.GetTop(ProjectileImage);
+
+            var Position = new Point(x, y);
+
+            if (Position.X < -100 || Position.X > 3000 || Position.Y < -100 || Position.Y > 3000)
+            {
+                return true;
+            }
+            else
+                return false;
         }
     }
 }

@@ -159,6 +159,7 @@ namespace TowerDefense
             _towers = new List<BaseTower>
             {
                 new TestTower1(new Point(0, 0)),
+                new ArcherTower(new Point(0, 0))
             };
         }
 
@@ -275,7 +276,7 @@ namespace TowerDefense
                     return;
                 }
 
-                BaseTower newTower = TowerFactory.CreateTower("TestTower1", dropPosition);
+                BaseTower newTower = TowerFactory.CreateTower(ghostTower.Tag.GetType().Name, dropPosition);
 
                 SetTowerImage(newTower, dropPosition);
 

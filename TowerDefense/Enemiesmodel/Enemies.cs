@@ -249,9 +249,6 @@ namespace TowerDefense.EnemiesModel
 
             Position = new Point(x, y);
 
-            // Debug-Ausgabe, um die Position zu überprüfen
-            Console.WriteLine($"Enemy Position: X={Position.X}, Y={Position.Y}");
-
             // Aktualisiere die Position im Spatial Grid
             GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
         }       

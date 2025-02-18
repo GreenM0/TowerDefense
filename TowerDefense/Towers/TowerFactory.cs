@@ -12,6 +12,8 @@ public class TowerFactory
         {
             case "TestTower1":
                 return new TestTower1(position);
+            case "ArcherTower":
+                return new ArcherTower(position);
             default:
                 throw new ArgumentException("Unknown tower type");
         }

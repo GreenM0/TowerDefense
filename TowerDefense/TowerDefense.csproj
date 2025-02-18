@@ -24,7 +24,6 @@
     <Resource Include="EnemiesModel\Types\Assets\werwolf.png" />
     <Resource Include="Maps\Assets\Hintergrund.png" />
     <Resource Include="Maps\Assets\Map1.png" />
-    <Resource Include="Projectils\Types\Assets\IceBall.png" />
   </ItemGroup>
 
 </Project>
