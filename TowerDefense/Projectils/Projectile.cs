@@ -50,8 +50,9 @@ namespace TowerDefense.Projectils
             return ProjectileImage;
         }
 
-        public async Task Shoot(Canvas gameCanvas, Point startPosition, Point targetPosition, double speed, Action<Projectile> onHit)
+        public async Task Shoot(Canvas gameCanvas, Point startPosition, Enemies target, double speed, Action<Projectile> onHit)
         {
+            // Füge den Pfeil zum Canvas hinzu
             gameCanvas.Children.Add(ProjectileImage);
             ProjectileImage.Visibility = Visibility.Visible;
             ProjectileImage.Opacity = 1.0;
@@ -59,18 +60,37 @@ namespace TowerDefense.Projectils
             Canvas.SetLeft(ProjectileImage, startPosition.X);
             Canvas.SetTop(ProjectileImage, startPosition.Y);
 
-            // Berechne die Entfernung und die Dauer der Animation
-            double distance = Math.Sqrt(
-            Math.Pow(targetPosition.X - startPosition.X, 2) +
-            Math.Pow(targetPosition.Y - startPosition.Y, 2));
+            // Berechne die Richtung zum Ziel
+            double directionX = target.Position.X - startPosition.X;
+            double directionY = target.Position.Y - startPosition.Y;
 
-            double duration = distance / speed;
+            // Normalisiere die Richtung (Einheitsvektor)
+            double distanceToTarget = Math.Sqrt(directionX * directionX + directionY * directionY);
+            if (distanceToTarget > 0)
+            {
+                directionX /= distanceToTarget;
+                directionY /= distanceToTarget;
+            }
+
+            // Lege einen Punkt weit hinter dem Ziel fest (z. B. 1000 Einheiten entfernt)
+            double extendedDistance = 5000; // Entfernung hinter dem Ziel
+            Point extendedTarget = new Point(
+                target.Position.X + directionX * extendedDistance,
+                target.Position.Y + directionY * extendedDistance
+            );
+
+            // Berechne die Entfernung und die Dauer der Animation
+            double totalDistance = Math.Sqrt(
+                Math.Pow(extendedTarget.X - startPosition.X, 2) +
+                Math.Pow(extendedTarget.Y - startPosition.Y, 2)
+            );
+            double duration = totalDistance / speed;
 
             // Erstelle die Animationen für X- und Y-Richtung
             var animationX = new DoubleAnimation
             {
                 From = startPosition.X,
-                To = targetPosition.X,
+                To = extendedTarget.X,
                 Duration = TimeSpan.FromSeconds(duration),
                 AutoReverse = false
             };
@@ -78,13 +98,15 @@ namespace TowerDefense.Projectils
             var animationY = new DoubleAnimation
             {
                 From = startPosition.Y,
-                To = targetPosition.Y,
+                To = extendedTarget.Y,
                 Duration = TimeSpan.FromSeconds(duration),
                 AutoReverse = false
             };
 
             // Erstelle das Storyboard
             storyboard = new Storyboard();
+            storyboard.Children.Add(animationX);
+            storyboard.Children.Add(animationY);
 
             Storyboard.SetTarget(animationX, ProjectileImage);
             Storyboard.SetTarget(animationY, ProjectileImage);
@@ -92,40 +114,38 @@ namespace TowerDefense.Projectils
             Storyboard.SetTargetProperty(animationX, new PropertyPath(Canvas.LeftProperty));
             Storyboard.SetTargetProperty(animationY, new PropertyPath(Canvas.TopProperty));
 
-            storyboard.Children.Add(animationX);
-            storyboard.Children.Add(animationY);
-
             // Drehe den Pfeil in Richtung des Ziels
-            double angle = Math.Atan2(targetPosition.Y - startPosition.Y, targetPosition.X - startPosition.X) * 180 / Math.PI;
+            double angle = Math.Atan2(directionY, directionX) * 180 / Math.PI;
             ProjectileImage.RenderTransform = new RotateTransform(angle);
 
             // TaskCompletionSource, um das Ende der Animation abzuwarten
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-            storyboard.Completed += (s, e) => tcs.SetResult(true);
+
+            // Event, um die Animation zu überwachen
+            storyboard.CurrentTimeInvalidated += (s, e) => 
+            {
+                // Überprüfe, ob der Pfeil einen Gegner getroffen hat
+                if (IsCollidingWithAnyTarget(gameCanvas))
+                {
+                    // Animation stoppen
+                    storyboard.Stop();
+                    gameCanvas.Children.Remove(ProjectileImage);
+                    onHit?.Invoke(this);
+                }
+                // Überprüfe, ob der Pfeil die Map verlassen hat
+                else if (IsOutOfBounds(gameCanvas))
+                {
+                    // Animation stoppen
+                    storyboard.Stop();
+                    gameCanvas.Children.Remove(ProjectileImage);
+                }
+            };
 
             // Starte die Animation
             storyboard.Begin();
 
-            storyboard.CurrentTimeInvalidated += (s, e) =>
-            {
-
-                if (IsCollidingWithAnyTarget(gameCanvas))
-                {
-                    onHit?.Invoke(this);
-                    gameCanvas.Children.Remove(ProjectileImage);
-                }
-                else
-                {
-                    if (IsOutOfBounds(gameCanvas))
-                    {
-                        gameCanvas.Children.Remove(ProjectileImage);
-                    }
-                }
-
-            };
-
-
-                // Entferne den Pfeil vom Canvas und führe den Treffer-Callback aus
+            // Warte auf das Ende der Animation (entweder durch Treffer oder Verlassen der Map)
+            await tcs.Task;
         }
 
         private bool IsCollidingWithAnyTarget(Canvas GameCanvas)

@@ -34,6 +34,7 @@ namespace TowerDefense.Towers
         public int TowerWorth {  get; protected set; }
         public string TargetMode { get; protected set; }
         public int CooldownTime { get; protected set; }
+        public Enemies? currentTarget { get; protected set; }
 
         private DispatcherTimer? _attackTimer;
         private DispatcherTimer? _cooldownTimer;  // Neu: Cooldown-Timer
@@ -69,11 +70,25 @@ namespace TowerDefense.Towers
 
                 var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
-                if (enemiesInRange.Count == 0) return;
+                // Überprüfe, ob es gültige Ziele gibt
+                if (enemiesInRange.Count == 0)
+                {
+                    currentTarget = null; // Setze das aktuelle Ziel zurück
+                    return;
+                }
 
-                var target = GetTarget(enemiesInRange);
+                var targets = GetTarget(enemiesInRange);
 
-                Attack(target, gameCanvas);
+                // Überprüfe, ob die Ziele noch existieren
+                targets = targets.Where(target => GameHandler.Instance._enemyList.Contains(target)).ToList();
+
+                if (targets.Count == 0)
+                {
+                    currentTarget = null; // Setze das aktuelle Ziel zurück
+                    return;
+                }
+
+                Attack(targets, gameCanvas);
 
                 StartCooldown();
             };

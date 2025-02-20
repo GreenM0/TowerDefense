@@ -47,18 +47,31 @@ namespace TowerDefense.Towers
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
         {
+            // Überprüfe, ob das Ziel noch existiert und in Reichweite ist
+            if (target == null || target.Count == 0 || !IsInRange(target[0]))
+            {
+                currentTarget = null; // Setze das aktuelle Ziel zurück
+                return; // Beende die Methode, wenn kein gültiges Ziel vorhanden ist
+            }
+
             UpdateTowerDirection();
             // Erstelle Pfeil-Image
             Pfeil pfeil = new(Position, target[0].Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
 
-            pfeil.Shoot(gameCanvas, Position, target[0].Position, AttackSpeed, (projectile) =>
+            pfeil.Shoot(gameCanvas, Position, target[0], AttackSpeed, (projectile) =>
             {
                 target[0].GetHit(AttackDamage);
             });
-
         }
+
         public void UpdateTowerDirection()
         {
+            // Überprüfe, ob das aktuelle Ziel noch existiert und in Reichweite ist
+            if (currentTarget != null && !GameHandler.Instance._enemyList.Contains(currentTarget))
+            {
+                currentTarget = null; // Setze das aktuelle Ziel zurück, wenn der Gegner nicht mehr existiert
+            }
+
             if (currentTarget != null)
             {
                 // Berechne den Winkel zum Ziel
