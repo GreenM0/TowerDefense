@@ -15,10 +15,8 @@ namespace TowerDefense.Towers
 {
     public class ArcherTower : BaseTower
     {
-        public TimeSpan AttackDuration { get; set; }
-        public double AttackSlowFactor { get; set; }
-        public bool DoDamage { get; set; }
         private Enemies currentTarget;
+        private int ArrowCount;
         public ArcherTower(Point position)
             : base(
                 attackRange: 250,
@@ -40,9 +38,7 @@ namespace TowerDefense.Towers
                 cooldownTime: 1000
             )
         {
-            AttackDuration = TimeSpan.FromSeconds(3);
-            AttackSlowFactor = 0.5;
-            DoDamage = false;
+            ArrowCount = 1;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -56,8 +52,18 @@ namespace TowerDefense.Towers
 
             UpdateTowerDirection();
             // Erstelle Pfeil-Image
+            if (UpgradeLevel == 3)
+            {
+                Point SecondArrowstart = new Point();
+                SecondArrowstart.X = Position.X;
+                SecondArrowstart.Y = Position.Y - 500;
+                Pfeil pfeil2 = new(SecondArrowstart, target[0].Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+                pfeil2.Shoot(gameCanvas, Position, target[0], AttackSpeed, (projectile) =>
+                {
+                    target[0].GetHit(AttackDamage);
+                });
+            }
             Pfeil pfeil = new(Position, target[0].Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
-
             pfeil.Shoot(gameCanvas, Position, target[0], AttackSpeed, (projectile) =>
             {
                 target[0].GetHit(AttackDamage);
@@ -106,11 +112,9 @@ namespace TowerDefense.Towers
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
-                    AttackRange = 200;
-                    AttackSlowFactor = 0.3;
+                    AttackRange = 270;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackDuration = TimeSpan.FromSeconds(5);
-                    AttackSpeed = 2;
+                    AttackSpeed = 150;
                     CooldownTime = 800;
 
                 }
@@ -121,11 +125,9 @@ namespace TowerDefense.Towers
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
-                    AttackRange = 220;
-                    AttackSlowFactor = 0.2;
+                    AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackDuration = TimeSpan.FromSeconds(7);
-                    AttackSpeed = 3;
+                    AttackSpeed = 200;
                     CooldownTime = 500;
                 }
             }
