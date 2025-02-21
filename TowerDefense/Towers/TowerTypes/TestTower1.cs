@@ -48,7 +48,7 @@ namespace TowerDefense.Towers
 
             foreach (Enemies enemies in target)
             {
-                target[0].ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                enemies.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
             }
         }
 

@@ -121,7 +121,7 @@ namespace TowerDefense.EnemiesModel
 
                     // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
                     var bufferdstart = Gamepath.Figures[0].StartPoint;
-                    Gamepath.Figures[0].StartPoint = Position; // Setze den Startpunkt auf die aktuelle Position
+                    Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
                     RemovePassedSegments(bufferdstart);
 
                     // Starte die Animation mit dem neuen Pfad und der neuen Dauer
@@ -134,7 +134,7 @@ namespace TowerDefense.EnemiesModel
 
                     // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
                     var bufferdstart = Gamepath.Figures[0].StartPoint;
-                    Gamepath.Figures[0].StartPoint = Position; // Setze den Startpunkt auf die aktuelle Position
+                    Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
                     RemovePassedSegments(bufferdstart);
 
                     // Starte die Animation mit dem neuen Pfad und der neuen Dauer
