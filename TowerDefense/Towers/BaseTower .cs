@@ -158,25 +158,12 @@ namespace TowerDefense.Towers
             return enemiesInRange.Where(enemy => IsInRange(enemy)).ToList();
         }
 
-        public Image GetEntityPic()
+        public virtual Image GetEntityPic()
         {
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
 
             ImageHelper imageHelper = new();
             return imageHelper.GetEntityPic(imagePath);
-        }
-
-        private double DistanceToLine(Point point, Line line)
-        {
-            double x1 = line.X1;
-            double y1 = line.Y1;
-            double x2 = line.X2;
-            double y2 = line.Y2;
-
-            double numerator = Math.Abs((y2 - y1) * point.X - (x2 - x1) * point.Y + x2 * y1 - y2 * x1);
-            double denominator = Math.Sqrt(Math.Pow(y2 - y1, 2) + Math.Pow(x2 - x1, 2));
-
-            return numerator / denominator;
         }
 
         public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers, List<Rectangle> gameWayBounds)

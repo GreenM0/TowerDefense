@@ -19,8 +19,8 @@ namespace TowerDefense.Projectils
         private Image ProjectileImage { get; set; }
         private List<Enemies> Targets { get; }
         private double Damage { get; }
-        public int ImageWidth { get; } = 20;
-        public int ImageHeight { get; } = 10;
+        public int ImageWidth { get; } = 40;
+        public int ImageHeight { get; } = 25;
         public string ImagePath { get; set; }
         public Action<Enemies> OnHit { get; set; }
         private Storyboard storyboard;
@@ -129,8 +129,6 @@ namespace TowerDefense.Projectils
                 {
                     // Animation stoppen
                     storyboard.Stop();
-                    gameCanvas.Children.Remove(ProjectileImage);
-                    onHit?.Invoke(this);
                 }
                 // Überprüfe, ob der Pfeil die Map verlassen hat
                 else if (IsOutOfBounds(gameCanvas))
@@ -152,13 +150,15 @@ namespace TowerDefense.Projectils
         {
             Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width, ProjectileImage.Height);
 
-            foreach (var enemy in Targets)
+            foreach (var enemy in GameHandler.Instance._enemyList)
             {
-                Rect targetRect = new Rect(enemy.Position.X, enemy.Position.Y, enemy.Image.Width, enemy.Image.Height );
+                Rect targetRect = new Rect(enemy.Position.X, enemy.Position.Y, enemy.Image.Width / 2, enemy.Image.Height / 2 );
 
                 // Prüfe, ob der Pfeil mit einem Gegner kollidiert
                 if (arrowRect.IntersectsWith(targetRect))
-                {
+                {   
+                    enemy.GetHit(Damage);
+                    GameCanvas.Children.Remove(ProjectileImage);
                     return true;
                 }
             }

@@ -10,13 +10,14 @@ using System.Windows.Media;
 using System.Security.Cryptography.X509Certificates;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using TowerDefense.Helper;
 
 namespace TowerDefense.Towers
 {
     public class ArcherTower : BaseTower
     {
         private Enemies currentTarget;
-        private int ArrowCount;
+        private Point Positionoffset;
         public ArcherTower(Point position)
             : base(
                 attackRange: 250,
@@ -38,7 +39,7 @@ namespace TowerDefense.Towers
                 cooldownTime: 1000
             )
         {
-            ArrowCount = 1;
+            Positionoffset = new Point(Position.X + 40, Position.Y - 60);
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -49,56 +50,44 @@ namespace TowerDefense.Towers
                 currentTarget = null; // Setze das aktuelle Ziel zurück
                 return; // Beende die Methode, wenn kein gültiges Ziel vorhanden ist
             }
+            else
+            {
+                currentTarget = target[0];
+            }
 
             UpdateTowerDirection();
-            // Erstelle Pfeil-Image
+            Pfeil pfeil1 = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+            pfeil1.Shoot(gameCanvas, Positionoffset, currentTarget, AttackSpeed, (projectile) =>
+            {
+            });
+
+            // Wenn der Turm auf Level 3 ist, schieße einen zweiten Pfeil
             if (UpgradeLevel == 3)
             {
-                Point SecondArrowstart = new Point();
-                SecondArrowstart.X = Position.X;
-                SecondArrowstart.Y = Position.Y - 500;
-                Pfeil pfeil2 = new(SecondArrowstart, target[0].Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
-                pfeil2.Shoot(gameCanvas, Position, target[0], AttackSpeed, (projectile) =>
+                // Positioniere den zweiten Pfeil unterhalb des ersten Pfeils
+                Point secondArrowStart = new Point(Positionoffset.X, Positionoffset.Y + 20); // 20 Einheiten unterhalb des Turms
+
+                Pfeil pfeil2 = new(secondArrowStart, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+                pfeil2.Shoot(gameCanvas, secondArrowStart, currentTarget, AttackSpeed, (projectile) =>
                 {
-                    target[0].GetHit(AttackDamage);
                 });
             }
-            Pfeil pfeil = new(Position, target[0].Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
-            pfeil.Shoot(gameCanvas, Position, target[0], AttackSpeed, (projectile) =>
-            {
-                target[0].GetHit(AttackDamage);
-            });
         }
 
         public void UpdateTowerDirection()
         {
-            // Überprüfe, ob das aktuelle Ziel noch existiert und in Reichweite ist
-            if (currentTarget != null && !GameHandler.Instance._enemyList.Contains(currentTarget))
+            bool isTargetOnRight = currentTarget.Position.X > this.Position.X;
+            
+            if (Image.RenderTransform is ScaleTransform flipTransform)
             {
-                currentTarget = null; // Setze das aktuelle Ziel zurück, wenn der Gegner nicht mehr existiert
+                flipTransform.ScaleX = isTargetOnRight ? 1 : -1;
             }
-
-            if (currentTarget != null)
+            else
             {
-                // Berechne den Winkel zum Ziel
-                double deltaX = currentTarget.Position.X - this.Position.X;
-                double deltaY = currentTarget.Position.Y - this.Position.Y;
-                double angle = Math.Atan2(deltaY, deltaX);
-
-                // Umrechnung von Radians zu Grad
-                double angleInDegrees = angle * (90.0 / Math.PI);
-
-                // Begrenze den Winkel auf einen bestimmten Bereich (z. B. -90° bis 90°)
-                double minAngle = -180.0; // Minimaler Winkel
-                double maxAngle = 180.0;  // Maximaler Winkel
-                angleInDegrees = Math.Max(minAngle, Math.Min(maxAngle, angleInDegrees));
-
-                // Setze den Drehpunkt auf die Hand des Schützen
-                Image.RenderTransformOrigin = new Point(0.5, 0.8); // Beispielwerte, anpassen je nach Grafik
-
-                // Drehe den Turm
-                RotateTransform rotateTransform = new RotateTransform(angleInDegrees);
-                Image.RenderTransform = rotateTransform;
+                Positionoffset.X -= 40;
+                flipTransform = new ScaleTransform(isTargetOnRight ? 1 : -1, 1);
+                Image.RenderTransform = flipTransform;
+                Image.RenderTransformOrigin = new Point(0.5, 0.5);    
             }
         }
 
@@ -108,7 +97,8 @@ namespace TowerDefense.Towers
             {
                 if (UpgradeLevel == 1)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\Archer.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\Archer2.png";
+                    ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
@@ -118,9 +108,10 @@ namespace TowerDefense.Towers
                     CooldownTime = 800;
 
                 }
-                if (UpgradeLevel == 2)
+                else if (UpgradeLevel == 2)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\Archer.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\Archer3.png";
+                    ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
 
@@ -131,6 +122,14 @@ namespace TowerDefense.Towers
                     CooldownTime = 500;
                 }
             }
+        }
+
+        public override Image GetEntityPic()
+        {
+            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
+
+            ImageHelper imageHelper = new();
+            return imageHelper.GetEntityPic(imagePath, 25, 35);
         }
 
     }

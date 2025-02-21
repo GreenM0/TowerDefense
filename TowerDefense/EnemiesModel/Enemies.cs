@@ -247,7 +247,9 @@ namespace TowerDefense.EnemiesModel
             double x = Canvas.GetLeft(img);
             double y = Canvas.GetTop(img);
 
-            Position = new Point(x, y);
+            double centerX = x + (ImageWidth / 2);
+            double centerY = y + (ImageHeight / 2);
+            Position = new Point(centerX, centerY);
 
             // Aktualisiere die Position im Spatial Grid
             GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
