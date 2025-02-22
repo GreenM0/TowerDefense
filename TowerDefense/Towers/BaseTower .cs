@@ -34,6 +34,7 @@ namespace TowerDefense.Towers
         public int TowerWorth {  get; protected set; }
         public string TargetMode { get; protected set; }
         public int CooldownTime { get; protected set; }
+        public Enemies? currentTarget { get; protected set; }
 
         private DispatcherTimer? _attackTimer;
         private DispatcherTimer? _cooldownTimer;  // Neu: Cooldown-Timer
@@ -69,11 +70,25 @@ namespace TowerDefense.Towers
 
                 var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
-                if (enemiesInRange.Count == 0) return;
+                // Überprüfe, ob es gültige Ziele gibt
+                if (enemiesInRange.Count == 0)
+                {
+                    currentTarget = null; // Setze das aktuelle Ziel zurück
+                    return;
+                }
 
-                var target = GetTarget(enemiesInRange);
+                var targets = GetTarget(enemiesInRange);
 
-                Attack(target, gameCanvas);
+                // Überprüfe, ob die Ziele noch existieren
+                targets = targets.Where(target => GameHandler.Instance._enemyList.Contains(target)).ToList();
+
+                if (targets.Count == 0)
+                {
+                    currentTarget = null; // Setze das aktuelle Ziel zurück
+                    return;
+                }
+
+                Attack(targets, gameCanvas);
 
                 StartCooldown();
             };
@@ -113,20 +128,20 @@ namespace TowerDefense.Towers
 
         public virtual void Attack(List<Enemies> target, Canvas gameCanvas)
         {
-            if (target == null || !IsInRange(target[0])) return;
+            //if (target == null || !IsInRange(target[0])) return;
 
-            // Berechne den Abstand zwischen Turm und Ziel
-            double distance = Math.Sqrt(Math.Pow(Position.X - target[0].Position.X, 2) + Math.Pow(Position.Y - target[0].Position.Y, 2));
+            //// Berechne den Abstand zwischen Turm und Ziel
+            //double distance = Math.Sqrt(Math.Pow(Position.X - target[0].Position.X, 2) + Math.Pow(Position.Y - target[0].Position.Y, 2));
 
-            // Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
-            double timeToTarget = distance / ProjectileSpeed;
+            //// Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
+            //double timeToTarget = distance / ProjectileSpeed;
 
-            Projectile projectile = new Projectile(Position, target[0].Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target[0]);
+            //Projectile projectile = new Projectile(Position, target[0].Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target[0]);
 
-            projectile.Animate(gameCanvas, (proj) =>
-            {
-                proj.Hit();
-            });
+            //projectile.Animate(gameCanvas, (proj) =>
+            //{
+            //    proj.Hit();
+            //});
         }
 
         public bool IsInRange(Enemies enemy)
@@ -143,25 +158,12 @@ namespace TowerDefense.Towers
             return enemiesInRange.Where(enemy => IsInRange(enemy)).ToList();
         }
 
-        public Image GetEntityPic()
+        public virtual Image GetEntityPic()
         {
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
 
             ImageHelper imageHelper = new();
             return imageHelper.GetEntityPic(imagePath);
-        }
-
-        private double DistanceToLine(Point point, Line line)
-        {
-            double x1 = line.X1;
-            double y1 = line.Y1;
-            double x2 = line.X2;
-            double y2 = line.Y2;
-
-            double numerator = Math.Abs((y2 - y1) * point.X - (x2 - x1) * point.Y + x2 * y1 - y2 * x1);
-            double denominator = Math.Sqrt(Math.Pow(y2 - y1, 2) + Math.Pow(x2 - x1, 2));
-
-            return numerator / denominator;
         }
 
         public bool IsPositionValid(Point dropPosition, List<BaseTower> depolyedTowers, List<Rectangle> gameWayBounds)

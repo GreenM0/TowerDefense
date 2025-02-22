@@ -48,7 +48,7 @@ namespace TowerDefense.Towers
 
             foreach (Enemies enemies in target)
             {
-                target[0].ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                enemies.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
             }
         }
 
@@ -70,7 +70,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 800;
 
                 }
-                if (UpgradeLevel == 2)
+                else if (UpgradeLevel == 2)
                 {
                     PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
                     Image newTowerImage = GetEntityPic();

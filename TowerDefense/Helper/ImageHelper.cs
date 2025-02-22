@@ -21,8 +21,8 @@ namespace TowerDefense.Helper
             Image imageControl = new Image
             {
                 Source = img,
-                Width = 75,
-                Height = 75
+                Width = imageWidth,
+                Height = imageHeight
             };
 
             return imageControl;

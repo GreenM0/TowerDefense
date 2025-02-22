@@ -121,7 +121,7 @@ namespace TowerDefense.EnemiesModel
 
                     // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
                     var bufferdstart = Gamepath.Figures[0].StartPoint;
-                    Gamepath.Figures[0].StartPoint = Position; // Setze den Startpunkt auf die aktuelle Position
+                    Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
                     RemovePassedSegments(bufferdstart);
 
                     // Starte die Animation mit dem neuen Pfad und der neuen Dauer
@@ -134,7 +134,7 @@ namespace TowerDefense.EnemiesModel
 
                     // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
                     var bufferdstart = Gamepath.Figures[0].StartPoint;
-                    Gamepath.Figures[0].StartPoint = Position; // Setze den Startpunkt auf die aktuelle Position
+                    Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
                     RemovePassedSegments(bufferdstart);
 
                     // Starte die Animation mit dem neuen Pfad und der neuen Dauer
@@ -247,10 +247,9 @@ namespace TowerDefense.EnemiesModel
             double x = Canvas.GetLeft(img);
             double y = Canvas.GetTop(img);
 
-            Position = new Point(x, y);
-
-            // Debug-Ausgabe, um die Position zu überprüfen
-            Console.WriteLine($"Enemy Position: X={Position.X}, Y={Position.Y}");
+            double centerX = x + (ImageWidth / 2);
+            double centerY = y + (ImageHeight / 2);
+            Position = new Point(centerX, centerY);
 
             // Aktualisiere die Position im Spatial Grid
             GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
