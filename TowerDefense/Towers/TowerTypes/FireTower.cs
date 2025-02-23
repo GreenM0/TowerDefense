@@ -19,10 +19,11 @@ namespace TowerDefense.Towers
         private Enemies currentTarget = null;
         private Point Positionoffset;   
         public TimeSpan AttackDuration { get; set; }
+        private int FlameRadius; 
         public FireTower(Point position)
             : base(
                 attackRange: 250,
-                attackDamage: 2,
+                attackDamage: 1,
                 position: position,
                 costs: 200,
                 size: 100,
@@ -41,7 +42,8 @@ namespace TowerDefense.Towers
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
-            Positionoffset = new Point(Position.X + 40, Position.Y - 60);
+            Positionoffset = new Point(Position.X, Position.Y - 70);
+            FlameRadius = 1; 
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -57,40 +59,10 @@ namespace TowerDefense.Towers
                 currentTarget = target[0];
             }
 
-            UpdateTowerDirection();
-            Flamme flamme = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath, AttackDuration);
+            Flamme flamme = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath, AttackDuration, FlameRadius);
             flamme.Shoot(gameCanvas, Positionoffset, currentTarget, AttackSpeed, (projectile) =>
             {
             });
-
-            // Wenn der Turm auf Level 3 ist, schieße einen zweiten Pfeil
-            if (UpgradeLevel == 3)
-            {
-                // Positioniere den zweiten Pfeil unterhalb des ersten Pfeils
-                Point secondArrowStart = new Point(Positionoffset.X, Positionoffset.Y + 20); // 20 Einheiten unterhalb des Turms
-
-                Pfeil pfeil2 = new(secondArrowStart, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
-                pfeil2.Shoot(gameCanvas, secondArrowStart, currentTarget, AttackSpeed, (projectile) =>
-                {
-                });
-            }
-        }
-
-        public void UpdateTowerDirection()
-        {
-            bool isTargetOnRight = currentTarget.Position.X > this.Position.X;
-
-            if (Image.RenderTransform is ScaleTransform flipTransform)
-            {
-                flipTransform.ScaleX = isTargetOnRight ? 1 : -1;
-            }
-            else
-            {
-                Positionoffset.X -= 40;
-                flipTransform = new ScaleTransform(isTargetOnRight ? 1 : -1, 1);
-                Image.RenderTransform = flipTransform;
-                Image.RenderTransformOrigin = new Point(0.5, 0.5);
-            }
         }
 
         public override void UpgradeTower()
@@ -108,6 +80,8 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
                     CooldownTime = 800;
+                    AttackDuration = TimeSpan.FromSeconds(4); 
+                    AttackDamage = 2;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -122,6 +96,9 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
                     CooldownTime = 500;
+                    AttackDuration = TimeSpan.FromSeconds(5);
+                    AttackDamage = 3;
+                    FlameRadius = 50;
                 }
             }
         }
