@@ -16,9 +16,9 @@ namespace TowerDefense.Projectils
         private Point StartPosition { get; }
         private Point TargetPosition { get; }
         private float Speed { get; }
-        private Image ProjectileImage { get; set; }
+        protected Image ProjectileImage { get; set; }
         private List<Enemies> Targets { get; }
-        private double Damage { get; }
+        protected double Damage { get; }
         public int ImageWidth { get; } = 40;
         public int ImageHeight { get; } = 25;
         public string ImagePath { get; set; }
@@ -146,7 +146,7 @@ namespace TowerDefense.Projectils
             await tcs.Task;
         }
 
-        private bool IsCollidingWithAnyTarget(Canvas GameCanvas)
+        public virtual bool IsCollidingWithAnyTarget(Canvas GameCanvas)
         {
             Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width, ProjectileImage.Height);
 

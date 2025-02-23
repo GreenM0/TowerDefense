@@ -159,7 +159,8 @@ namespace TowerDefense
             _towers = new List<BaseTower>
             {
                 new TestTower1(new Point(0, 0)),
-                new ArcherTower(new Point(0, 0))
+                new ArcherTower(new Point(0, 0)),
+                new FireTower(new Point(0, 0))
             };
         }
 
