@@ -21,7 +21,8 @@ namespace TowerDefense.Towers
         {
             if (GameHandler.Instance.cash >= _tower.UpgradeCost)
             {
-                GameHandler.Instance.cash -= _tower.UpgradeCost;
+                var change = -1 * _tower.UpgradeCost;
+                GameHandler.Instance.Cashhandler(change);
                 _tower.UpgradeTower();
                 IsUpgraded = true;
                 MessageBox.Show("Turm erfolgreich aufgerüstet!", "Upgrade", MessageBoxButton.OK, MessageBoxImage.Information);

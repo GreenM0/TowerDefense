@@ -28,6 +28,7 @@ namespace TowerDefense
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
         public int cash;
+        private int startchash = 500;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;
@@ -50,7 +51,7 @@ namespace TowerDefense
             LoadTowers();
             DisplayTowerMenu();
             InitializeSpawner();
-            Cashhandler();
+            Cashhandler(startchash);
             Instance = this;
            
             _enemyGrid = new SpatialGrid<Enemies>(100);
@@ -112,7 +113,6 @@ namespace TowerDefense
             _mainCanvas = Map1.MainCanvas;
             _gameWay = Map1.GetPathGeometry();
             _rectangles = Map1.Rectangles;
-            cash = 460;
         }
 
         private void InitializeSpawner()
@@ -285,8 +285,8 @@ namespace TowerDefense
                 _towerGrid.AddObject(newTower); // Füge den Turm dem Spatial Grid hinzu
                 newTower.StartAttackTimer(GameField, _enemyGrid); // Übergebe das Spatial Grid
 
-                cash -= tower.Costs;
-                Cashhandler();
+                var cashchange = -1 * tower.Costs;
+                Cashhandler(cashchange);
 
                 GameField.Children.Remove(ghostTower);
                 ghostTower = null;
@@ -344,7 +344,6 @@ namespace TowerDefense
                 if (upgradeWindow.IsUpgraded)
                 {
                     RemoveTowerImage(selectedTower);
-                    Cashhandler(); // Aktualisiere die Geldanzeige
                 }
             }
         }
@@ -378,10 +377,13 @@ namespace TowerDefense
             }
         }
 
-        private void Cashhandler()
+        public void Cashhandler(int change)
         {
+            cash += change;
             Cashbar.Content = Convert.ToString(cash);
+            ShowCashChange(change);
             UpdateTowerMenuState(); // Aktualisiere den Zustand des Menü
+
         }
 
         private void GameField_MouseMove(object sender, MouseEventArgs e)
@@ -399,12 +401,13 @@ namespace TowerDefense
                 _enemyList.Remove(enemy);
                 if (enemy.Life <= 0)
                 {
-                    cash += enemy.Coins;
-                    Cashhandler();
+                    var cashchange = enemy.Coins;
+                    Cashhandler(cashchange);
                 }
                 else
                 {
-                    _Health -= enemy.Life;
+                    var _Health = -1 * enemy.Life;
+                    ShowHealthChange(_Health);
                 }
                 // Entferne den Gegner aus dem Spatial Grid
                 _enemyGrid.RemoveObject(enemy);
@@ -422,13 +425,11 @@ namespace TowerDefense
             {
                 _waveSpawnInterval = _waveSpawnInterval * 2;
                 _enemySpawnInterval = _enemySpawnInterval * 2;
-                speedo.Content = "speed x2";
             }
             else
             {
                 _waveSpawnInterval = _waveSpawnInterval / 2;
                 _enemySpawnInterval = _enemySpawnInterval / 2;
-                speedo.Content = "speed";
             }
         }
 
@@ -525,11 +526,63 @@ namespace TowerDefense
             {
                 _deployedTowers.Remove(tower);
                 tower.StopAttackTimer();
-                cash += tower.TowerWorth / 2;
-                Cashhandler();
+                var cashchange = tower.TowerWorth / 2;
+                Cashhandler(cashchange);
             }
 
             RemoveTowerImage(tower);
+        }
+
+        private void ShowHealthChange(double change)
+        {
+            if (change < 0)
+            {
+                healthChange.Foreground = Brushes.Red;
+                healthChange.Content = $"{change}";
+            }
+            else
+            {
+                healthChange.Foreground = Brushes.Green;
+                healthChange.Content = $"+{change}";
+            }
+
+            _Health += change;
+            healthChange.Visibility = Visibility.Visible;
+
+            // Animation: Nach 1 Sekunde ausblenden
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (sender, args) =>
+            {
+                healthChange.Visibility = Visibility.Collapsed;
+                timer.Stop();
+            };
+            timer.Start();
+        }
+
+        // Methode zur Anzeige von Geldänderungen
+        private void ShowCashChange(int change)
+        {
+            if (change < 0)
+            {
+                cashChange.Foreground = Brushes.Red;
+                cashChange.Content = $"{change}";
+            }
+            else
+            {
+                cashChange.Foreground = Brushes.Green;
+                cashChange.Content = $"+{change}";
+            }
+
+            cashChange.Visibility = Visibility.Visible;
+
+            // Animation: Nach 1 Sekunde ausblenden
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (sender, args) =>
+            {
+                cashChange.Visibility = Visibility.Collapsed;
+                timer.Stop();
+            };
+            timer.Start();
         }
     }
 }

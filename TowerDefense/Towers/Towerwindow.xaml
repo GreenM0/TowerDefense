@@ -1,11 +1,11 @@
 ﻿<Window x:Class="TowerDefense.Towers.Towerwindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Turm Optionen" Height="250" Width="300"
+        Title="Turm Optionen" Height="182" Width="300"
         WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         Background="#3E2A47" Foreground="White">
 
-    <Grid Margin="20">
+    <Grid Margin="20,20,20,11">
         <!-- Grid-Definition für Buttons -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
