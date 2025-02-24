@@ -170,8 +170,8 @@ namespace TowerDefense
             {
                 // Bild des Turms erstellen
                 Image towerImage = tower.GetEntityPic();
-                towerImage.Width = 50;
-                towerImage.Height = 50;
+                towerImage.Width = 100;
+                towerImage.Height = 100;
                 towerImage.Tag = tower;
 
                 towerImage.MouseMove += TowerImage_MouseMove;
