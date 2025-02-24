@@ -14,7 +14,7 @@ namespace TowerDefense.Towers
             InitializeComponent();
             _tower = tower;
 
-            UpgradeButton.IsEnabled = GameHandler.Instance.cash >= tower.UpgradeCost;
+            UpgradeButton.IsEnabled = (GameHandler.Instance.cash >= tower.UpgradeCost && _tower.UpgradeLevel < _tower.MaxUpgradeLevel);
         }
 
         private void UpgradeTower_Click(object sender, RoutedEventArgs e)
