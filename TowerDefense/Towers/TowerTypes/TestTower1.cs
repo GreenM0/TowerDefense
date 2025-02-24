@@ -19,7 +19,7 @@ namespace TowerDefense.Towers
         public TestTower1(Point position)
             : base(
                 attackRange: 150,
-                attackDamage: 0.5,
+                attackDamage: 0.8,
                 position: position,
                 costs: 200,
                 size: 100,
@@ -34,7 +34,7 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 1000
+                cooldownTime: 8000
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
@@ -63,11 +63,11 @@ namespace TowerDefense.Towers
 
                     UpgradeLevel += 1;
                     AttackRange = 200;
-                    AttackSlowFactor = 0.3;
+                    AttackSlowFactor = 0.7;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
-                    CooldownTime = 800;
+                    CooldownTime = 5000;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -78,11 +78,11 @@ namespace TowerDefense.Towers
 
                     UpgradeLevel += 1;
                     AttackRange = 220;
-                    AttackSlowFactor = 0.2;
+                    AttackSlowFactor = 0.5;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
-                    CooldownTime = 500;
+                    CooldownTime = 2000;
                 }
             }            
         }

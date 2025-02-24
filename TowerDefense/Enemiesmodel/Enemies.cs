@@ -91,6 +91,7 @@ namespace TowerDefense.EnemiesModel
             {
                 UpdatePositionFromCanvas(Image);
                 enemyGrid.UpdateObjectPosition(this, Position);
+                RemovePassedSegments(Position);
 
                 // Compare current position with the previous position to detect direction change
                 if (Position.X < previousPosition.X)
@@ -123,11 +124,9 @@ namespace TowerDefense.EnemiesModel
                     // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
                     var bufferdstart = Gamepath.Figures[0].StartPoint;
                     Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
-                    RemovePassedSegments(bufferdstart);
 
                     // Starte die Animation mit dem neuen Pfad und der neuen Dauer
                     Movement(EnemyCanvas, enemyGrid);
-
                 }
 
                 if (!_isSlowed && slowactive)
@@ -137,7 +136,6 @@ namespace TowerDefense.EnemiesModel
                     // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
                     var bufferdstart = Gamepath.Figures[0].StartPoint;
                     Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
-                    RemovePassedSegments(bufferdstart);
 
                     // Starte die Animation mit dem neuen Pfad und der neuen Dauer
                     Movement(EnemyCanvas, enemyGrid);
@@ -154,6 +152,7 @@ namespace TowerDefense.EnemiesModel
                     burnactive = false;
                     StopBurning(_gameField);
                 }
+
             };
 
             await tcs.Task; // Wait for the animation to complete
@@ -162,7 +161,7 @@ namespace TowerDefense.EnemiesModel
             if (Life > 0)
             {
                 ReachedEnd = true;
-                GameHandler.Instance.RemoveEnemy(this);
+                GetKilled();
             }
             else
             {
@@ -172,26 +171,45 @@ namespace TowerDefense.EnemiesModel
             Image.Visibility = Visibility.Collapsed;
         }
 
-        private void RemovePassedSegments(Point originalStart)
+        private void RemovePassedSegments(Point newStart, double tolerance = 10.0)
         {
             var segments = Gamepath.Figures[0].Segments;
 
             if (segments.Count == 0) return; // Falls keine Segmente vorhanden sind, nichts tun
 
+            // Berechne die Länge des Pfads bis zum neuen Startpunkt
+            double pathLengthToNewStart = CalculatePathLength(Gamepath.Figures[0].StartPoint, newStart);
+
             // Liste für zu löschende Segmente
             List<int> segmentsToRemove = new List<int>();
 
+            // Aktueller Startpunkt des Pfads
+            Point currentStart = Gamepath.Figures[0].StartPoint;
+
+            // Gehe alle Segmente durch
             for (int i = 0; i < segments.Count; i++)
             {
                 if (segments[i] is LineSegment lineSegment)
                 {
                     Point segmentEnd = lineSegment.Point;
 
-                    // Prüfe, ob das Segment zwischen originalStart und newStart liegt
-                    if (IsPointBetween(originalStart, Gamepath.Figures[0].StartPoint, segmentEnd))
+                    // Berechne die Länge des aktuellen Segments
+                    double segmentLength = CalculateDistance(currentStart, segmentEnd);
+
+                    // Prüfe, ob die kumulierte Länge kleiner ist als die Länge bis zum neuen Startpunkt (mit Toleranz)
+                    if (pathLengthToNewStart + tolerance > segmentLength)
                     {
                         segmentsToRemove.Add(i);
+                        pathLengthToNewStart -= segmentLength; // Reduziere die verbleibende Länge
                     }
+                    else
+                    {
+                        // Wenn das Segment nicht passiert wurde, breche die Schleife ab
+                        break;
+                    }
+
+                    // Aktualisiere den Startpunkt für die nächste Iteration
+                    currentStart = segmentEnd;
                 }
             }
 
@@ -202,15 +220,16 @@ namespace TowerDefense.EnemiesModel
             }
         }
 
-        private bool IsPointBetween(Point originalStart, Point newStart, Point segmentEnd)
+        private double CalculatePathLength(Point start, Point end)
         {
-            double minX = Math.Min(originalStart.X, newStart.X);
-            double maxX = Math.Max(originalStart.X, newStart.X);
-            double minY = Math.Min(originalStart.Y, newStart.Y);
-            double maxY = Math.Max(originalStart.Y, newStart.Y);
+            // Berechne die Länge des Pfads zwischen zwei Punkten
+            return CalculateDistance(start, end);
+        }
 
-            return (segmentEnd.X >= minX && segmentEnd.X <= maxX) &&
-                   (segmentEnd.Y >= minY && segmentEnd.Y <= maxY);
+        private double CalculateDistance(Point p1, Point p2)
+        {
+            // Berechne den euklidischen Abstand zwischen zwei Punkten
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
         }
 
         private void FlipImageDirection(Image img, bool movingRight)
@@ -239,6 +258,10 @@ namespace TowerDefense.EnemiesModel
 
         public void GetKilled()
         {
+            if (_isBurning)
+            {
+                StopBurning(GameHandler.Instance._mainCanvas);
+            }
             GameHandler.Instance.RemoveEnemy(this);
         }
 
@@ -268,24 +291,33 @@ namespace TowerDefense.EnemiesModel
             GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
         }
 
-        public void ApplySlowEffect(double slowFactor, TimeSpan duration, bool dodamage, double attackDamage)
-        {
-            if (_isSlowed) return; // Verhindere mehrfache Anwendung
+       public async void ApplySlowEffect(double slowFactor, TimeSpan duration, bool dodamage, double attackDamage)
+{
+    if (_isSlowed) return; // Verhindere mehrfache Anwendung
 
-            _isSlowed = true;
-            CurrentSpeed = BaseSpeed * slowFactor;
-            storyboard.Stop();
+    _isSlowed = true;
+    CurrentSpeed = BaseSpeed * slowFactor;
+    storyboard.Stop();
 
-            Task.Delay(duration).ContinueWith(_ =>
-            {
-                if (dodamage)
-                {
-                    Life -= attackDamage * slowFactor;
-                }
-                CurrentSpeed = BaseSpeed;
-                _isSlowed = false;
-            });
-        }
+    // Ändere die Farbe des Gegners (z. B. Blauton)
+    Image.Effect = new System.Windows.Media.Effects.DropShadowEffect
+    {
+        Color = Colors.Blue,
+        Opacity = 0.7,
+        ShadowDepth = 0
+    };
+
+    await Task.Delay(duration); // Warte asynchron
+
+    // Nach der Verzögerung im UI-Thread fortfahren
+    if (dodamage)
+    {
+        Life -= attackDamage * slowFactor;
+    }
+    CurrentSpeed = BaseSpeed;
+    Image.Effect = null; // Entferne den Farbfilter
+    _isSlowed = false;
+}
 
         private void StopBurning(Canvas gameCanvas)
         {
