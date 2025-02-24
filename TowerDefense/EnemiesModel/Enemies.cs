@@ -9,6 +9,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using TowerDefense.Grid;
+using TowerDefense.Helper;
 
 namespace TowerDefense.EnemiesModel
 {
@@ -49,7 +50,7 @@ namespace TowerDefense.EnemiesModel
         public async Task Movement(Canvas _gameField, SpatialGrid<Enemies> enemyGrid)
         {
             EnemyCanvas = _gameField;
-            double totalPathLength = Gamepath.GetRenderBounds(null).Width + Gamepath.GetRenderBounds(null).Height;
+            double totalPathLength = Gamepath.GetTotalLength(); // Neue Methode zur Berechnung der Pfadlänge
 
             // Berechne die Dauer basierend auf dem aktuellen Speed
             double adjustedDuration = totalPathLength / CurrentSpeed;
@@ -91,7 +92,6 @@ namespace TowerDefense.EnemiesModel
             {
                 UpdatePositionFromCanvas(Image);
                 enemyGrid.UpdateObjectPosition(this, Position);
-                RemovePassedSegments(Position);
 
                 // Compare current position with the previous position to detect direction change
                 if (Position.X < previousPosition.X)
@@ -120,24 +120,14 @@ namespace TowerDefense.EnemiesModel
                 if (_isSlowed && !slowactive)
                 {
                     slowactive = true;
-
-                    // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
-                    var bufferdstart = Gamepath.Figures[0].StartPoint;
-                    Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
-
-                    // Starte die Animation mit dem neuen Pfad und der neuen Dauer
+                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                     Movement(EnemyCanvas, enemyGrid);
                 }
 
                 if (!_isSlowed && slowactive)
                 {
                     slowactive = false;
-
-                    // Erstelle eine neue PathGeometry, basierend auf der aktuellen Position
-                    var bufferdstart = Gamepath.Figures[0].StartPoint;
-                    Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
-
-                    // Starte die Animation mit dem neuen Pfad und der neuen Dauer
+                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                     Movement(EnemyCanvas, enemyGrid);
                 }
 
@@ -146,13 +136,12 @@ namespace TowerDefense.EnemiesModel
                     burnactive = true;
                     FlameMovement();
                 }
-                
+
                 if (!_isBurning && burnactive)
                 {
                     burnactive = false;
                     StopBurning(_gameField);
                 }
-
             };
 
             await tcs.Task; // Wait for the animation to complete
@@ -217,6 +206,12 @@ namespace TowerDefense.EnemiesModel
             for (int i = segmentsToRemove.Count - 1; i >= 0; i--)
             {
                 segments.RemoveAt(segmentsToRemove[i]);
+            }
+
+            // Aktualisiere den Startpunkt des Pfads
+            if (segments.Count > 0)
+            {
+                Gamepath.Figures[0].StartPoint = newStart;
             }
         }
 
@@ -291,33 +286,47 @@ namespace TowerDefense.EnemiesModel
             GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
         }
 
-       public async void ApplySlowEffect(double slowFactor, TimeSpan duration, bool dodamage, double attackDamage)
-{
-    if (_isSlowed) return; // Verhindere mehrfache Anwendung
+        public void ApplySlowEffect(double slowFactor, TimeSpan duration, bool doDamage, double attackDamage)
+        {
+            if (_isSlowed) return; // Verhindere mehrfache Anwendung
 
-    _isSlowed = true;
-    CurrentSpeed = BaseSpeed * slowFactor;
-    storyboard.Stop();
+            _isSlowed = true;
+            CurrentSpeed = BaseSpeed * slowFactor;
 
-    // Ändere die Farbe des Gegners (z. B. Blauton)
-    Image.Effect = new System.Windows.Media.Effects.DropShadowEffect
-    {
-        Color = Colors.Blue,
-        Opacity = 0.7,
-        ShadowDepth = 0
-    };
+            // Ändere die Farbe des Gegners (z. B. Blauton)
+            Image.Effect = new System.Windows.Media.Effects.DropShadowEffect
+            {
+                Color = Colors.Blue,
+                Opacity = 0.7,
+                ShadowDepth = 0
+            };
 
-    await Task.Delay(duration); // Warte asynchron
+            // Timer für die Dauer des Slow-Effekts
+            DispatcherTimer slowTimer = new DispatcherTimer
+            {
+                Interval = duration
+            };
 
-    // Nach der Verzögerung im UI-Thread fortfahren
-    if (dodamage)
-    {
-        Life -= attackDamage * slowFactor;
-    }
-    CurrentSpeed = BaseSpeed;
-    Image.Effect = null; // Entferne den Farbfilter
-    _isSlowed = false;
-}
+            slowTimer.Tick += (s, e) =>
+            {
+                slowTimer.Stop();
+                CurrentSpeed = BaseSpeed;
+                Image.Effect = null; // Entferne den Farbfilter
+                _isSlowed = false;
+            };
+
+            slowTimer.Start();
+
+            // Füge Schaden hinzu, falls erforderlich
+            if (doDamage)
+            {
+                Life -= attackDamage * slowFactor;
+                if (Life <= 0)
+                {
+                    GetKilled();
+                }
+            }
+        }
 
         private void StopBurning(Canvas gameCanvas)
         {

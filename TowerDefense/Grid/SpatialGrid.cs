@@ -59,9 +59,8 @@ namespace TowerDefense
                     }
                 }
             }
-            
+
             return objectsInRange.Where(obj => Math.Sqrt(Math.Pow(obj.Position.X - position.X, 2) + Math.Pow(obj.Position.Y - position.Y, 2)) <= range).ToList();
-            
         }
 
         public void RemoveObject(T obj)

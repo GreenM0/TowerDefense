@@ -126,23 +126,7 @@ namespace TowerDefense.Towers
             _cooldownTimer.Start();
         }
 
-        public virtual void Attack(List<Enemies> target, Canvas gameCanvas)
-        {
-            //if (target == null || !IsInRange(target[0])) return;
-
-            //// Berechne den Abstand zwischen Turm und Ziel
-            //double distance = Math.Sqrt(Math.Pow(Position.X - target[0].Position.X, 2) + Math.Pow(Position.Y - target[0].Position.Y, 2));
-
-            //// Berechne die Zeit, die das Projektil braucht, um das Ziel zu erreichen
-            //double timeToTarget = distance / ProjectileSpeed;
-
-            //Projectile projectile = new Projectile(Position, target[0].Position, ProjectileSpeed, AttackDamage, ProjectileimagePath, target[0]);
-
-            //projectile.Animate(gameCanvas, (proj) =>
-            //{
-            //    proj.Hit();
-            //});
-        }
+        public abstract void Attack(List<Enemies> target, Canvas gameCanvas);
 
         public bool IsInRange(Enemies enemy)
         {

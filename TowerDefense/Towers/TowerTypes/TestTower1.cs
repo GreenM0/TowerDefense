@@ -16,6 +16,7 @@ namespace TowerDefense.Towers
         public TimeSpan AttackDuration { get; set; }
         public double AttackSlowFactor { get; set; }
         public bool DoDamage { get; set; }
+        private int MaxTargets { get; set; }
         public TestTower1(Point position)
             : base(
                 attackRange: 150,
@@ -40,15 +41,22 @@ namespace TowerDefense.Towers
             AttackDuration = TimeSpan.FromSeconds(3);
             AttackSlowFactor = 0.5;
             DoDamage = false;
+            MaxTargets = 5;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
         {
             if (_isCooldownActive) return;
 
-            foreach (Enemies enemies in target)
+            // Begrenze die Anzahl der gleichzeitig verlangsamten Gegner
+            int targetsApplied = 0;
+
+            foreach (Enemies enemy in target)
             {
-                enemies.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                if (targetsApplied >= MaxTargets) break;
+
+                enemy.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                targetsApplied++;
             }
         }
 
@@ -68,6 +76,7 @@ namespace TowerDefense.Towers
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
                     CooldownTime = 5000;
+                    MaxTargets = 10;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -83,6 +92,7 @@ namespace TowerDefense.Towers
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
                     CooldownTime = 2000;
+                    MaxTargets = 15;  
                 }
             }            
         }

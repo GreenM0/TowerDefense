@@ -78,13 +78,12 @@ namespace TowerDefense
 
                 for (int currentEnemyType = 0; currentEnemyType < waves.GetTotalEnemyTypes(); currentEnemyType++)
                 {
-                    for (int EnemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave); EnemyAmount > 0; EnemyAmount--)
+                    int enemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave);
+                    for (int EnemyAmount = 0; EnemyAmount < enemyAmount; EnemyAmount++)
                     {
                         Enemies currentEnemy = waves.SpawnEnemy(currentEnemyType, GameField, _gameWay);
 
-                        // Füge den Gegner dem Spatial Grid hinzu
                         _enemyGrid.AddObject(currentEnemy);
-
                         GameField.Children.Add(currentEnemy.Image);
                         _ = currentEnemy.Movement(_mainCanvas, _enemyGrid);
                         _enemyList.Add(currentEnemy);
@@ -92,13 +91,14 @@ namespace TowerDefense
                         await Task.Delay(_enemySpawnInterval);
                     }
                 }
+
                 await Task.Delay(_waveSpawnInterval);
 
                 if (currentWave >= 10 && currentWave % 10 == 0)
                 {
                     int speed = (int)Math.Round(currentWave * 0.1);
-                    _waveSpawnInterval = _waveSpawnInterval / speed;
-                    _enemySpawnInterval = _enemySpawnInterval / speed;
+                    _waveSpawnInterval = Math.Max(500, _waveSpawnInterval / speed); // Mindestintervall von 500 ms
+                    _enemySpawnInterval = Math.Max(250, _enemySpawnInterval / speed); // Mindestintervall von 250 ms
                 }
             }
 
