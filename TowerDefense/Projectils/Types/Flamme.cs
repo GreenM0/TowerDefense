@@ -28,13 +28,12 @@ namespace TowerDefense.Projectils
             { 
                 Rect targetRect = new Rect(enemy.Position.X, enemy.Position.Y, enemy.Image.Width / 2, enemy.Image.Height / 2);
 
-                double distance = Math.Sqrt(Math.Pow(impactPoint.X - enemy.Position.X, 2) + Math.Pow(impactPoint.Y - enemy.Position.Y, 2));
-
                 // Prüfe, ob der Pfeil mit einem Gegner kollidiert
                 if (arrowRect.IntersectsWith(targetRect))
                 {
                     foreach (var enemy2 in GameHandler.Instance._enemyList)
                     {
+                        double distance = Math.Sqrt(Math.Pow(impactPoint.X - enemy2.Position.X, 2) + Math.Pow(impactPoint.Y - enemy2.Position.Y, 2));
                         if (distance <= FlameRadius)
                         {
                             // Setze den Gegner in Brand

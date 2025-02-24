@@ -16,10 +16,11 @@ namespace TowerDefense.Towers
         public TimeSpan AttackDuration { get; set; }
         public double AttackSlowFactor { get; set; }
         public bool DoDamage { get; set; }
+        private int MaxTargets { get; set; }
         public TestTower1(Point position)
             : base(
                 attackRange: 150,
-                attackDamage: 0.5,
+                attackDamage: 0.8,
                 position: position,
                 costs: 200,
                 size: 100,
@@ -34,21 +35,28 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 1000
+                cooldownTime: 8000
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
             AttackSlowFactor = 0.5;
             DoDamage = false;
+            MaxTargets = 5;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
         {
             if (_isCooldownActive) return;
 
-            foreach (Enemies enemies in target)
+            // Begrenze die Anzahl der gleichzeitig verlangsamten Gegner
+            int targetsApplied = 0;
+
+            foreach (Enemies enemy in target)
             {
-                enemies.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                if (targetsApplied >= MaxTargets) break;
+
+                enemy.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                targetsApplied++;
             }
         }
 
@@ -63,11 +71,12 @@ namespace TowerDefense.Towers
 
                     UpgradeLevel += 1;
                     AttackRange = 200;
-                    AttackSlowFactor = 0.3;
+                    AttackSlowFactor = 0.7;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
-                    CooldownTime = 800;
+                    CooldownTime = 5000;
+                    MaxTargets = 10;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -78,11 +87,12 @@ namespace TowerDefense.Towers
 
                     UpgradeLevel += 1;
                     AttackRange = 220;
-                    AttackSlowFactor = 0.2;
+                    AttackSlowFactor = 0.5;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
-                    CooldownTime = 500;
+                    CooldownTime = 2000;
+                    MaxTargets = 15;  
                 }
             }            
         }

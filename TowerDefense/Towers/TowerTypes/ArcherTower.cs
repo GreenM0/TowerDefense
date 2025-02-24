@@ -39,7 +39,7 @@ namespace TowerDefense.Towers
                 cooldownTime: 1000
             )
         {
-            Positionoffset = new Point(Position.X + 40, Position.Y - 60);
+            Positionoffset = new Point(Position.X + 55, Position.Y - 60);
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
