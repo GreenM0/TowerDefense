@@ -7,13 +7,11 @@ using TowerDefense.EnemiesModel;
 
 namespace TowerDefense.Projectils
 {
-    public class IceBall : Projectile
+    public class Pfeil : Projectile
     {
-        private const int SlowEffectDuration = 3; 
-        private const double SlowFactor = 0.5; 
 
-        public IceBall(Point startPosition, Point targetPosition, int speed, int damage, string imagePath, Enemies target)
-            : base(startPosition, targetPosition, speed, damage, imagePath, target)
+        public Pfeil(Point startPosition, Point targetPosition, float speed, double damage, List<Enemies> targets, string imagePath)
+            : base(startPosition, targetPosition, speed, damage, targets, imagePath)
         {
         }
 

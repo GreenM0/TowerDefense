@@ -17,7 +17,7 @@ namespace TowerDefense.EnemiesModel.Types
             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\goblin.png");
 
             ImageHelper imageHelper = new();
-            return imageHelper.GetEntityPic(imagePath, this.ImageWidth, this.ImageHeight);
+            return imageHelper.GetEntityPic(imagePath, ImageWidth, ImageHeight);
         }
     }
 }

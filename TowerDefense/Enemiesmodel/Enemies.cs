@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net.NetworkInformation;
 using System.Net.Security;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,136 +9,223 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using TowerDefense.Grid;
+using TowerDefense.Helper;
 
 namespace TowerDefense.EnemiesModel
 {
     public class Enemies : IPositionable
     {
-        public float Speed { get; set; }
-        public int Life { get; set; }
+        public double BaseSpeed { get; set; }
+        public double CurrentSpeed { get; set; }
+        public double Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
+        public (int, int) CurrentCell { get; set; }
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
         public bool ReachedEnd { get; set; }
-        private double _totalLength = 0;
-        private double _lineLength = 0;
-        private double _lineDuration = 0;
-        private bool _movingRight = false;
-        public Vector Velocity { get; set; }
+        private bool _isSlowed = false;
+        private Storyboard storyboard;
+        private bool slowactive = false;
+        private bool _isBurning = false;
+        private bool burnactive = false;
+        public PathGeometry Gamepath { get; set; }
+        public Image FlameOverlay { get; set; }
+        private Storyboard _flameStoryboard;
+        private Canvas EnemyCanvas;
+
         public virtual Image? GetEntityPic() => null;
 
         public Enemies(int speed, int life, int coins, int imagewidth = 0, int imageheight = 0)
         {
-            Speed = speed;
+            CurrentSpeed = speed;
+            BaseSpeed = speed;
             Life = life;
             Coins = coins;
             ImageWidth = imagewidth;
             ImageHeight = imageheight;
-            Velocity = new Vector(0, 0);
         }
 
-        public void UpdateVelocity(Point previousPosition, TimeSpan timeDelta)
+        public async Task Movement(Canvas _gameField, SpatialGrid<Enemies> enemyGrid)
         {
-            // Berechne die Änderung der Position (Geschwindigkeit)
-            Vector deltaPosition = new Vector(Position.X - previousPosition.X, Position.Y - previousPosition.Y);
+            EnemyCanvas = _gameField;
+            double totalPathLength = Gamepath.GetTotalLength(); // Neue Methode zur Berechnung der Pfadlänge
 
-            // Geschwindigkeit = Position Änderung / Zeitänderung
-            Velocity = new Vector(deltaPosition.X / timeDelta.TotalSeconds, deltaPosition.Y / timeDelta.TotalSeconds);
-        }
+            // Berechne die Dauer basierend auf dem aktuellen Speed
+            double adjustedDuration = totalPathLength / CurrentSpeed;
 
-        public async Task Movement(Point[] _gameWay, Canvas _gameField, Image img)
-        {
-            // Die vorherige Position speichern
-            Point previousPosition = Position;
-
-            // Gesamtlänge vom Weg berechnen
-            for (int i = 0; i < _gameWay.Length - 1; i++)
+            // Animationsobjekte erstellen
+            DoubleAnimationUsingPath animationX = new DoubleAnimationUsingPath
             {
-                double dx = _gameWay[i + 1].X - _gameWay[i].X;
-                double dy = _gameWay[i + 1].Y - _gameWay[i].Y;
-                double segmentLength = Math.Sqrt(dx * dx + dy * dy);
+                PathGeometry = Gamepath,
+                Duration = TimeSpan.FromSeconds(adjustedDuration),
+                Source = PathAnimationSource.X
+            };
 
-                _totalLength += segmentLength;
-            }
-
-            // Bild von Punkt zu Punkt animieren
-            for (int i = 0; i < _gameWay.Length - 1; i++)
+            DoubleAnimationUsingPath animationY = new DoubleAnimationUsingPath
             {
-                Point startPoint = _gameWay[i];
-                Point endPoint = _gameWay[i + 1];
+                PathGeometry = Gamepath,
+                Duration = TimeSpan.FromSeconds(adjustedDuration),
+                Source = PathAnimationSource.Y
+            };
 
-                bool movingRight = endPoint.X >= startPoint.X;
+            // Storyboard erstellen und Animationsobjekte hinzufügen
+            storyboard = new Storyboard();
+            Storyboard.SetTarget(animationX, Image);
+            Storyboard.SetTargetProperty(animationX, new PropertyPath(Canvas.LeftProperty));
+            Storyboard.SetTarget(animationY, Image);
+            Storyboard.SetTargetProperty(animationY, new PropertyPath(Canvas.TopProperty));
 
-                _lineLength = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
-                _lineDuration = (_lineLength / _totalLength) * this.Speed;
+            storyboard.Children.Add(animationX);
+            storyboard.Children.Add(animationY);
 
-                DoubleAnimation animationX = new DoubleAnimation
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            storyboard.Completed += (s, e) => tcs.SetResult(true);
+            storyboard.Begin();
+
+            // Track the previous position to detect direction change
+            Point previousPosition = Gamepath.Figures[0].StartPoint;
+            bool isFlipped = false;
+
+            storyboard.CurrentTimeInvalidated += async (s, e) =>
+            {
+                UpdatePositionFromCanvas(Image);
+                enemyGrid.UpdateObjectPosition(this, Position);
+
+                // Compare current position with the previous position to detect direction change
+                if (Position.X < previousPosition.X)
                 {
-                    From = Canvas.GetLeft(img),
-                    To = endPoint.X - img.Width / 2,
-                    Duration = TimeSpan.FromSeconds(_lineDuration)
-                };
-
-                DoubleAnimation animationY = new DoubleAnimation
+                    // If moving left, flip the image
+                    if (!isFlipped)
+                    {
+                        FlipImageDirection(Image, false);
+                        isFlipped = true;
+                    }
+                }
+                else if (Position.X > previousPosition.X)
                 {
-                    From = Canvas.GetTop(img),
-                    To = endPoint.Y - img.Height / 2,
-                    Duration = TimeSpan.FromSeconds(_lineDuration)
-                };
-
-                if (i < 20)
-                {
-                    // Beispiel: Berechnung nach der ersten Bewegung
-                    TimeSpan timeDelta = TimeSpan.FromSeconds(_lineDuration);
-                    UpdateVelocity(previousPosition, timeDelta);
+                    // If moving right, reset flip
+                    if (isFlipped)
+                    {
+                        FlipImageDirection(Image, true);
+                        isFlipped = false;
+                    }
                 }
 
-                // Berechne die Geschwindigkeit des Gegners (beim ersten Schritt)             
+                // Update the previous position for the next frame
+                previousPosition = Position;
 
-                // Update-Logik während der Animation
-                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
-                timer.Tick += (s, e) =>
+                // Wenn der Slow-Effekt aktiv ist, ändere die Geschwindigkeit und starte die Animation mit der aktuellen Position
+                if (_isSlowed && !slowactive)
                 {
-                    UpdatePositionFromCanvas(img); // Position aus Canvas abfragen
+                    slowactive = true;
+                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
+                    Movement(EnemyCanvas, enemyGrid);
+                }
 
-                };
-                timer.Start();
+                if (!_isSlowed && slowactive)
+                {
+                    slowactive = false;
+                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
+                    Movement(EnemyCanvas, enemyGrid);
+                }
 
-                // Erstelle eine TaskCompletionSource für das Ende der Animation
-                TaskCompletionSource<bool> tcsX = new TaskCompletionSource<bool>();
-                TaskCompletionSource<bool> tcsY = new TaskCompletionSource<bool>();
+                if (_isBurning && !burnactive)
+                {
+                    burnactive = true;
+                    FlameMovement();
+                }
 
-                animationX.Completed += (s, e) => tcsX.SetResult(true);
-                animationY.Completed += (s, e) => tcsY.SetResult(true);
+                if (!_isBurning && burnactive)
+                {
+                    burnactive = false;
+                    StopBurning(_gameField);
+                }
+            };
 
-                img.BeginAnimation(Canvas.LeftProperty, animationX);
-                img.BeginAnimation(Canvas.TopProperty, animationY);
+            await tcs.Task; // Wait for the animation to complete
 
-                FlipImageDirection(img, movingRight);
-
-                await Task.WhenAll(tcsX.Task, tcsY.Task);
-
-                // Stoppe den Timer nach Abschluss der Animation
-                timer.Stop();
-
-                // Nach der ersten Bewegung, die Position aktualisieren
-                previousPosition = endPoint;
-            }
-
+            // Check if the enemy has reached the end
             if (Life > 0)
             {
                 ReachedEnd = true;
+                GetKilled();
             }
             else
             {
                 ReachedEnd = false;
             }
 
-            img.Visibility = Visibility.Collapsed;
+            Image.Visibility = Visibility.Collapsed;
         }
 
+        private void RemovePassedSegments(Point newStart, double tolerance = 10.0)
+        {
+            var segments = Gamepath.Figures[0].Segments;
+
+            if (segments.Count == 0) return; // Falls keine Segmente vorhanden sind, nichts tun
+
+            // Berechne die Länge des Pfads bis zum neuen Startpunkt
+            double pathLengthToNewStart = CalculatePathLength(Gamepath.Figures[0].StartPoint, newStart);
+
+            // Liste für zu löschende Segmente
+            List<int> segmentsToRemove = new List<int>();
+
+            // Aktueller Startpunkt des Pfads
+            Point currentStart = Gamepath.Figures[0].StartPoint;
+
+            // Gehe alle Segmente durch
+            for (int i = 0; i < segments.Count; i++)
+            {
+                if (segments[i] is LineSegment lineSegment)
+                {
+                    Point segmentEnd = lineSegment.Point;
+
+                    // Berechne die Länge des aktuellen Segments
+                    double segmentLength = CalculateDistance(currentStart, segmentEnd);
+
+                    // Prüfe, ob die kumulierte Länge kleiner ist als die Länge bis zum neuen Startpunkt (mit Toleranz)
+                    if (pathLengthToNewStart + tolerance > segmentLength)
+                    {
+                        segmentsToRemove.Add(i);
+                        pathLengthToNewStart -= segmentLength; // Reduziere die verbleibende Länge
+                    }
+                    else
+                    {
+                        // Wenn das Segment nicht passiert wurde, breche die Schleife ab
+                        break;
+                    }
+
+                    // Aktualisiere den Startpunkt für die nächste Iteration
+                    currentStart = segmentEnd;
+                }
+            }
+
+            // Entferne Segmente in umgekehrter Reihenfolge (damit die Indizes korrekt bleiben)
+            for (int i = segmentsToRemove.Count - 1; i >= 0; i--)
+            {
+                segments.RemoveAt(segmentsToRemove[i]);
+            }
+
+            // Aktualisiere den Startpunkt des Pfads
+            if (segments.Count > 0)
+            {
+                Gamepath.Figures[0].StartPoint = newStart;
+            }
+        }
+
+        private double CalculatePathLength(Point start, Point end)
+        {
+            // Berechne die Länge des Pfads zwischen zwei Punkten
+            return CalculateDistance(start, end);
+        }
+
+        private double CalculateDistance(Point p1, Point p2)
+        {
+            // Berechne den euklidischen Abstand zwischen zwei Punkten
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+        }
 
         private void FlipImageDirection(Image img, bool movingRight)
         {
@@ -152,7 +241,7 @@ namespace TowerDefense.EnemiesModel
             }
         }
 
-        public void GetHit(int damage)
+        public void GetHit(double damage)
         {
             Life -= damage;
 
@@ -164,13 +253,17 @@ namespace TowerDefense.EnemiesModel
 
         public void GetKilled()
         {
+            if (_isBurning)
+            {
+                StopBurning(GameHandler.Instance._mainCanvas);
+            }
             GameHandler.Instance.RemoveEnemy(this);
         }
 
         public Point GetEnemyPosition()
         {
             Point currentPosition;
-            if(Image != null)
+            if (Image != null)
             {
                 currentPosition.X = Canvas.GetLeft(Image);
                 currentPosition.Y = Canvas.GetTop(Image);
@@ -185,7 +278,203 @@ namespace TowerDefense.EnemiesModel
             double x = Canvas.GetLeft(img);
             double y = Canvas.GetTop(img);
 
-            Position = new Point(x, y); // Synchronisiere die Position des Gegners
+            double centerX = x + (ImageWidth / 2);
+            double centerY = y + (ImageHeight / 2);
+            Position = new Point(centerX, centerY);
+
+            // Aktualisiere die Position im Spatial Grid
+            GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
+        }
+
+        public void ApplySlowEffect(double slowFactor, TimeSpan duration, bool doDamage, double attackDamage)
+        {
+            if (_isSlowed) return; // Verhindere mehrfache Anwendung
+
+            _isSlowed = true;
+            CurrentSpeed = BaseSpeed * slowFactor;
+
+            // Ändere die Farbe des Gegners (z. B. Blauton)
+            Image.Effect = new System.Windows.Media.Effects.DropShadowEffect
+            {
+                Color = Colors.Blue,
+                Opacity = 0.7,
+                ShadowDepth = 0
+            };
+
+            // Timer für die Dauer des Slow-Effekts
+            DispatcherTimer slowTimer = new DispatcherTimer
+            {
+                Interval = duration
+            };
+
+            slowTimer.Tick += (s, e) =>
+            {
+                slowTimer.Stop();
+                CurrentSpeed = BaseSpeed;
+                Image.Effect = null; // Entferne den Farbfilter
+                _isSlowed = false;
+            };
+
+            slowTimer.Start();
+
+            // Füge Schaden hinzu, falls erforderlich
+            if (doDamage)
+            {
+                Life -= attackDamage * slowFactor;
+                if (Life <= 0)
+                {
+                    GetKilled();
+                }
+            }
+        }
+
+        private void StopBurning(Canvas gameCanvas)
+        {
+            // Stoppe die Flamme-Animation
+            _flameStoryboard?.Stop();
+
+            // Überprüfen, ob die Flamme einem Canvas zugeordnet ist
+            if (FlameOverlay.Parent != null)
+            {
+                // Entferne die Flamme aus dem Canvas
+                var parentCanvas = FlameOverlay.Parent as Canvas;
+                parentCanvas?.Children.Remove(FlameOverlay);
+            }
+
+            FlameOverlay.Visibility = Visibility.Collapsed;
+
+            // Setze _isBurning auf false
+            
+        }
+
+        public void InitializeFlameOverlay()
+        {
+            string flamePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Projectils\Types\Assets\Flamme.png");
+
+            BitmapImage flameImage = new BitmapImage(new Uri(flamePath));
+            FlameOverlay = new Image
+            {
+                Source = flameImage,
+                Width = ImageWidth,  // Passen Sie die Größe an das Gegner-Bild an
+                Height = ImageHeight,
+                Opacity = 0.7,       // Leicht transparent
+                Visibility = Visibility.Collapsed, // Standardmäßig unsichtbar
+                RenderTransform = new TranslateTransform() // Initialisiere das TranslateTransform
+            };
+        }
+
+        public async void SetOnFire(Canvas gameCanvas, TimeSpan _burnDuration, double damage)
+        {
+            if (FlameOverlay == null)
+            {
+                InitializeFlameOverlay();
+            }
+            _isBurning = true;
+
+            // Überprüfen, ob die Flamme bereits einem Canvas zugeordnet ist
+            if (FlameOverlay.Parent != null)
+            {
+                // Entferne die Flamme aus dem vorherigen Canvas
+                var parentCanvas = FlameOverlay.Parent as Canvas;
+                parentCanvas?.Children.Remove(FlameOverlay);
+            }
+
+            // Positioniere die Flamme über dem Gegner-Bild
+            Canvas.SetLeft(FlameOverlay, Position.X);
+            Canvas.SetTop(FlameOverlay, Position.Y - ImageHeight / 2); // Leicht über dem Gegner
+
+            // Zeige die Flamme an
+            FlameOverlay.Visibility = Visibility.Visible;
+            gameCanvas.Children.Add(FlameOverlay);
+
+            AnimateFlameFlicker();
+
+            // Starte den Timer für die Brenndauer
+            DispatcherTimer burnTimer = new DispatcherTimer
+            {
+                Interval = _burnDuration // Dauer der Attacke
+            };
+
+            burnTimer.Tick += (s, e) =>
+            {
+                GetHit(damage);
+                // Stoppe den Timer
+                burnTimer.Stop();
+                _isBurning = false;
+            };
+
+            burnTimer.Start();
+        }
+
+        public async Task FlameMovement()
+        {
+            var bufferdstart = Gamepath.Figures[0].StartPoint;
+            Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
+            RemovePassedSegments(bufferdstart);
+
+            double totalPathLength = Gamepath.GetRenderBounds(null).Width + Gamepath.GetRenderBounds(null).Height;
+
+            // Berechne die Dauer basierend auf dem aktuellen Speed
+            double adjustedDuration = totalPathLength / CurrentSpeed;
+
+            // Animationsobjekte erstellen
+            DoubleAnimationUsingPath animationX = new DoubleAnimationUsingPath
+            {
+                PathGeometry = Gamepath,
+                Duration = TimeSpan.FromSeconds(adjustedDuration),
+                Source = PathAnimationSource.X
+            };
+
+            DoubleAnimationUsingPath animationY = new DoubleAnimationUsingPath
+            {
+                PathGeometry = Gamepath,
+                Duration = TimeSpan.FromSeconds(adjustedDuration),
+                Source = PathAnimationSource.Y
+            };
+
+            // Storyboard erstellen und Animationsobjekte hinzufügen
+            _flameStoryboard = new Storyboard();
+            _flameStoryboard.Children.Add(animationX);
+            _flameStoryboard.Children.Add(animationY);
+
+            Storyboard.SetTarget(animationX, FlameOverlay);
+            Storyboard.SetTarget(animationY, FlameOverlay);
+
+            Storyboard.SetTargetProperty(animationX, new PropertyPath(Canvas.LeftProperty));
+            Storyboard.SetTargetProperty(animationY, new PropertyPath(Canvas.TopProperty));
+
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            _flameStoryboard.Completed += (s, e) => tcs.SetResult(true);
+            _flameStoryboard.Begin();
+
+            // Warte auf das Ende der Animation
+            await tcs.Task;
+        }
+
+        private void AnimateFlameFlicker()
+        {
+            // Erstelle ein Storyboard für die Flamme-Animation
+            Storyboard flickerStoryboard = new Storyboard();
+
+            // Erstelle eine zufällige Opacity-Animation
+            Random random = new Random();
+            double targetOpacity = random.NextDouble() * 0.5 + 0.5; // Zufällige Opacity zwischen 0.5 und 1.0
+
+            DoubleAnimation opacityAnimation = new DoubleAnimation
+            {
+                To = targetOpacity,
+                Duration = TimeSpan.FromMilliseconds(random.Next(50, 200)), // Zufällige Dauer zwischen 50ms und 200ms
+                AutoReverse = true, // Animation kehrt sich um
+                RepeatBehavior = RepeatBehavior.Forever // Animation wiederholt sich unendlich
+            };
+
+            // Füge die Animation dem Storyboard hinzu
+            Storyboard.SetTarget(opacityAnimation, FlameOverlay);
+            Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath(UIElement.OpacityProperty));
+            flickerStoryboard.Children.Add(opacityAnimation);
+
+            // Starte die Animation
+            flickerStoryboard.Begin();
         }
     }
 }

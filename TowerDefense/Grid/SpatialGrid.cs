@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -24,11 +25,42 @@ namespace TowerDefense
         public void AddObject(T obj)
         {
             var cell = GetCell(obj.Position);
+            obj.CurrentCell = cell; // Speichere die aktuelle Zelle
+
             if (!grid.ContainsKey(cell))
             {
                 grid[cell] = new List<T>();
             }
             grid[cell].Add(obj);
+        }
+
+        public List<T> GetObjectsInRange(Point position, float range)
+        {
+            var objectsInRange = new List<T>();
+
+            // Bestimme die Zelle des Turms
+            (int centerX, int centerY) = GetCell(position);
+
+            // Berechne, wie viele Zellen im Umkreis des Turms liegen
+            int rangeInCells = (int)Math.Ceiling(range / cellSize);
+
+            // Iteriere über alle Zellen im Umkreis
+            for (int x = -rangeInCells; x <= rangeInCells; x++)
+            {
+                for (int y = -rangeInCells; y <= rangeInCells; y++)
+                {
+                    int neighborX = centerX + x;
+                    int neighborY = centerY + y;
+
+                    var cell = (neighborX, neighborY);
+                    if (grid.ContainsKey(cell))
+                    {
+                        objectsInRange.AddRange(grid[cell]);
+                    }
+                }
+            }
+
+            return objectsInRange.Where(obj => Math.Sqrt(Math.Pow(obj.Position.X - position.X, 2) + Math.Pow(obj.Position.Y - position.Y, 2)) <= range).ToList();
         }
 
         public void RemoveObject(T obj)
@@ -42,19 +74,30 @@ namespace TowerDefense
 
         public void UpdateObjectPosition(T obj, Point newPosition)
         {
-            var oldCell = GetCell(obj.Position);
             var newCell = GetCell(newPosition);
 
-            if (oldCell != newCell)
+            // Überprüfe, ob sich die Zelle geändert hat
+            if (obj.CurrentCell != newCell)
             {
-                RemoveObject(obj);
-                obj.Position = newPosition;
-                AddObject(obj);
+                // Entferne das Objekt aus der alten Zelle
+                if (grid.ContainsKey(obj.CurrentCell))
+                {
+                    grid[obj.CurrentCell].Remove(obj);
+                }
+
+                // Füge das Objekt der neuen Zelle hinzu
+                if (!grid.ContainsKey(newCell))
+                {
+                    grid[newCell] = new List<T>();
+                }
+                grid[newCell].Add(obj);
+
+                // Aktualisiere die gespeicherte Zelle des Objekts
+                obj.CurrentCell = newCell;
             }
-            else
-            {
-                obj.Position = newPosition;
-            }
+
+            // Aktualisiere die Position des Objekts
+            obj.Position = newPosition;
         }
 
         public List<T> GetObjectsInCell((int, int) cell)
@@ -69,33 +112,6 @@ namespace TowerDefense
         public (int, int) GetCell(Point position)
         {
             return ((int)(position.X / cellSize), (int)(position.Y / cellSize));
-        }
-
-        public List<(int, int)> GetCellsInRange(Point towerPosition, float range, int cellSize)
-        {
-            var cellsInRange = new List<(int, int)>();
-
-            // Bestimme die Zelle des Turms
-            (int centerX, int centerY) = GetCell(towerPosition);
-
-            // Berechne, wie viele Zellen im Umkreis des Turms liegen (basierend auf dem Range und der Zellen-Größe)
-            int rangeInCells = (int)Math.Ceiling(range / cellSize);
-
-            // Iteriere über alle Zellen im Umkreis
-            for (int x = -rangeInCells; x <= rangeInCells; x++)
-            {
-                for (int y = -rangeInCells; y <= rangeInCells; y++)
-                {
-                    // Berechne die Koordinaten der benachbarten Zelle
-                    int neighborX = centerX + x;
-                    int neighborY = centerY + y;
-
-                    // Füge die Zelle zum Ergebnis hinzu
-                    cellsInRange.Add((neighborX, neighborY));
-                }
-            }
-
-            return cellsInRange;
         }
     }
 }

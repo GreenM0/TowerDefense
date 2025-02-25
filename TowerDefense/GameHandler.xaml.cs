@@ -21,23 +21,26 @@ namespace TowerDefense
         private DispatcherTimer? _gameTick;
         private DispatcherTimer? _gridHandler;
         private DispatcherTimer? _towerHandler;
-        private Point[] _gameWay = new Point[3];
-        private Canvas _mainCanvas = null!;
+        public PathGeometry _gameWay;
+        public Canvas _mainCanvas = null!;
         public List<Enemies> _enemyList = new List<Enemies>();
         private List<BaseTower> _towers = new List<BaseTower>();
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
         public int cash;
+        private int startchash = 5000;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;
         private Ellipse? _rangeIndicator; // Anzeige für die Angriffsreichweite
         private DispatcherTimer? _dragTimer; // Timer für Drag-and-Drop-Überprüfung
         private Point _currentMousePosition; // Aktuelle Mausposition
+        public SpatialGrid<Enemies> _enemyGrid;
+        public SpatialGrid<BaseTower> _towerGrid;
         public static GameHandler Instance { get; private set; }
 
         //Spieleinstellungen
-        private int _Health = 50;
+        private double _Health = 50;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
         private int _enemySpawnInterval = 750; // Zeit in Millisekunden zwischen Gegner-Spawns
 
@@ -52,8 +55,12 @@ namespace TowerDefense
             LoadTowers();
             DisplayTowerMenu();
             InitializeSpawner();
-            Cashhandler();
+            Cashhandler(startchash);
             Instance = this;
+           
+            _enemyGrid = new SpatialGrid<Enemies>(100);
+            _towerGrid = new SpatialGrid<BaseTower>(50);
+
             _ = SpawnWavesAsync();
             _dragTimer = new DispatcherTimer
             {
@@ -65,39 +72,37 @@ namespace TowerDefense
         {
             Wave waves = new Wave();
 
-            //Geht jede Wave durch
             for (int currentWave = 0; currentWave < waves.GetWaveCount(); currentWave++)
             {
-                //Prüft ob der Spieler schon verloren hat
-                if (_gameOver)
-                    break;
+                if (_gameOver) break;
 
-				wave.Content = "Wave: " + (currentWave + 1) + "/80";
-                
-                //Geht für jede Wave die verschiedenen Enemies durch
+                wave.Content = "Wave: " + (currentWave + 1) + "/80";
+
                 for (int currentEnemyType = 0; currentEnemyType < waves.GetTotalEnemyTypes(); currentEnemyType++)
                 {
-                    //Spawnt den entsprechenden Enemy der Wave
-                    for (int EnemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave); EnemyAmount > 0; EnemyAmount--)
+                    int enemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave);
+                    for (int EnemyAmount = 0; EnemyAmount < enemyAmount; EnemyAmount++)
                     {
                         Enemies currentEnemy = waves.SpawnEnemy(currentEnemyType, GameField, _gameWay);
-						GameField.Children.Add(currentEnemy.Image);
-						_ = currentEnemy.Movement(_gameWay, _mainCanvas, currentEnemy.Image);
-						_enemyList.Add(currentEnemy);
+
+                        _enemyGrid.AddObject(currentEnemy);
+                        GameField.Children.Add(currentEnemy.Image);
+                        _ = currentEnemy.Movement(_mainCanvas, _enemyGrid);
+                        _enemyList.Add(currentEnemy);
 
                         await Task.Delay(_enemySpawnInterval);
                     }
                 }
-				await Task.Delay(_waveSpawnInterval);
 
-                //Alle 10 Waves die Geschwindigkeit erhöhen
+                await Task.Delay(_waveSpawnInterval);
+
                 if (currentWave >= 10 && currentWave % 10 == 0)
                 {
-					int speed = (int)Math.Round(currentWave * 0.1);
-					_waveSpawnInterval = _waveSpawnInterval / speed;
-					_enemySpawnInterval = _enemySpawnInterval / speed;
-				}
-			}
+                    int speed = (int)Math.Round(currentWave * 0.1);
+                    _waveSpawnInterval = Math.Max(500, _waveSpawnInterval / speed); // Mindestintervall von 500 ms
+                    _enemySpawnInterval = Math.Max(250, _enemySpawnInterval / speed); // Mindestintervall von 250 ms
+                }
+            }
 
             _allEnemiesSpawned = true;
         }
@@ -108,9 +113,8 @@ namespace TowerDefense
             GameField.Children.Add(Map1);
 
             _mainCanvas = Map1.MainCanvas;
-            _gameWay = Map1.Way();
+            _gameWay = Map1.GetPathGeometry();
             _rectangles = Map1.Rectangles;
-            cash = 460;
         }
 
         private void InitializeSpawner()
@@ -123,18 +127,7 @@ namespace TowerDefense
 
         private void GameTick(object? sender, EventArgs e)
         {
-            health.Content = _Health;
-
-            //Leben abziehen
-            foreach (var enemy in _enemyList)
-            {
-                if (enemy.ReachedEnd)
-                {
-                    _Health -= enemy.Life;
-                    enemy.ReachedEnd = false;
-                    enemy.Life = 0;
-                }
-            }
+            health.Content = _Health;       
 
             bool won = true;
             foreach (var enemy in _enemyList)
@@ -168,6 +161,8 @@ namespace TowerDefense
             _towers = new List<BaseTower>
             {
                 new TestTower1(new Point(0, 0)),
+                new ArcherTower(new Point(0, 0)),
+                new FireTower(new Point(0, 0))
             };
         }
 
@@ -177,8 +172,8 @@ namespace TowerDefense
             {
                 // Bild des Turms erstellen
                 Image towerImage = tower.GetEntityPic();
-                towerImage.Width = 50;
-                towerImage.Height = 50;
+                towerImage.Width = 100;
+                towerImage.Height = 100;
                 towerImage.Tag = tower;
 
                 towerImage.MouseMove += TowerImage_MouseMove;
@@ -252,45 +247,48 @@ namespace TowerDefense
             }
         }
 
+        public void SetTowerImage(BaseTower tower, Point Position)
+        {
+            Image towerImage = tower.GetEntityPic();
+            towerImage.Width = tower.Size;
+            towerImage.Height = tower.Size;
+
+            Canvas.SetLeft(towerImage, Position.X - (towerImage.Width / 2));
+            Canvas.SetTop(towerImage, Position.Y - towerImage.Height);
+
+            towerImage.Tag = tower;
+            towerImage.MouseEnter += TowerImage_MouseEnter;
+            towerImage.MouseLeave += TowerImage_MouseLeave;
+            towerImage.MouseDown += GameField_MouseDown;
+            tower.Image = towerImage;
+            GameField.Children.Add(towerImage);
+        }
+
         private void GameField_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (ghostTower != null && ghostTower.Tag is BaseTower tower && cash >= tower.Costs)
             {
                 Point dropPosition = e.GetPosition(GameField);
 
-                // Überprüfe die Platzierung
                 if (!tower.IsPositionValid(dropPosition, _deployedTowers, _rectangles))
                 {
-                    // Ungültige Platzierung: Entferne das Geisterbild und den Indikator
                     GameField.Children.Remove(ghostTower);
                     ghostTower = null;
                     RemoveRangeIndicator();
-                    _dragTimer?.Stop(); // Dragging ebenfalls stoppen
+                    _dragTimer?.Stop();
                     return;
                 }
 
-                // Gültige Platzierung
-                BaseTower newTower = TowerFactory.CreateTower("TestTower1", dropPosition);
+                BaseTower newTower = TowerFactory.CreateTower(ghostTower.Tag.GetType().Name, dropPosition);
 
-                Image towerImage = tower.GetEntityPic();
-                towerImage.Width = tower.Size;
-                towerImage.Height = tower.Size;
-
-                Canvas.SetLeft(towerImage, dropPosition.X - (towerImage.Width / 2));
-                Canvas.SetTop(towerImage, dropPosition.Y - towerImage.Height);
-
-                towerImage.Tag = newTower;
-                towerImage.MouseEnter += TowerImage_MouseEnter;
-                towerImage.MouseLeave += TowerImage_MouseLeave;
-                towerImage.MouseDown += GameField_MouseDown;
-                tower.Image = towerImage;
-                GameField.Children.Add(towerImage);
+                SetTowerImage(newTower, dropPosition);
 
                 _deployedTowers.Add(newTower);
-                newTower.StartAttackTimer(GameField);
+                _towerGrid.AddObject(newTower); // Füge den Turm dem Spatial Grid hinzu
+                newTower.StartAttackTimer(GameField, _enemyGrid); // Übergebe das Spatial Grid
 
-                cash -= tower.Costs;
-                Cashhandler();
+                var cashchange = -1 * tower.Costs;
+                Cashhandler(cashchange);
 
                 GameField.Children.Remove(ghostTower);
                 ghostTower = null;
@@ -298,13 +296,12 @@ namespace TowerDefense
             }
             else
             {
-                // Falls keine gültige Platzierung möglich ist, entferne das Geisterbild und den Indikator
                 if (ghostTower != null)
                 {
                     GameField.Children.Remove(ghostTower);
                     ghostTower = null;
                     RemoveRangeIndicator();
-                    _dragTimer?.Stop(); // Dragging ebenfalls stoppen
+                    _dragTimer?.Stop();
                 }
             }
         }
@@ -348,7 +345,7 @@ namespace TowerDefense
 
                 if (upgradeWindow.IsUpgraded)
                 {
-                    Cashhandler(); // Aktualisiere die Geldanzeige
+                    RemoveTowerImage(selectedTower);
                 }
             }
         }
@@ -382,10 +379,13 @@ namespace TowerDefense
             }
         }
 
-        private void Cashhandler()
+        public void Cashhandler(int change)
         {
+            cash += change;
             Cashbar.Content = Convert.ToString(cash);
+            ShowCashChange(change);
             UpdateTowerMenuState(); // Aktualisiere den Zustand des Menü
+
         }
 
         private void GameField_MouseMove(object sender, MouseEventArgs e)
@@ -398,15 +398,23 @@ namespace TowerDefense
 
         public void RemoveEnemy(Enemies enemy)
         {
-            // Entferne den Gegner aus der Liste
             if (_enemyList.Contains(enemy))
             {
                 _enemyList.Remove(enemy);
-                cash += enemy.Coins;
-                Cashhandler();
+                if (enemy.Life <= 0)
+                {
+                    var cashchange = enemy.Coins;
+                    Cashhandler(cashchange);
+                }
+                else
+                {
+                    var _Health = -1 * enemy.Life;
+                    ShowHealthChange(_Health);
+                }
+                // Entferne den Gegner aus dem Spatial Grid
+                _enemyGrid.RemoveObject(enemy);
             }
 
-            // Entferne das Bild des Gegners vom Canvas
             if (GameField.Children.Contains(enemy.Image))
             {
                 GameField.Children.Remove(enemy.Image);
@@ -419,13 +427,11 @@ namespace TowerDefense
             {
                 _waveSpawnInterval = _waveSpawnInterval * 2;
                 _enemySpawnInterval = _enemySpawnInterval * 2;
-                speedo.Content = "speed x2";
             }
             else
             {
                 _waveSpawnInterval = _waveSpawnInterval / 2;
                 _enemySpawnInterval = _enemySpawnInterval / 2;
-                speedo.Content = "speed";
             }
         }
 
@@ -495,16 +501,8 @@ namespace TowerDefense
             }
         }
 
-        public void SellTower(BaseTower tower)
+        public void RemoveTowerImage(BaseTower tower)
         {
-            if (_deployedTowers.Contains(tower))
-            {
-                _deployedTowers.Remove(tower);
-                tower.StopAttackTimer();
-                cash += tower.TowerWorth / 2;
-                Cashhandler();
-            }
-
             Dispatcher.Invoke(() =>
             {
                 Image? imageToRemove = null;
@@ -522,6 +520,71 @@ namespace TowerDefense
                     GameField.Children.Remove(imageToRemove);
                 }
             });
+        }
+
+        public void SellTower(BaseTower tower)
+        {
+            if (_deployedTowers.Contains(tower))
+            {
+                _deployedTowers.Remove(tower);
+                tower.StopAttackTimer();
+                var cashchange = tower.TowerWorth / 2;
+                Cashhandler(cashchange);
+            }
+
+            RemoveTowerImage(tower);
+        }
+
+        private void ShowHealthChange(double change)
+        {
+            if (change < 0)
+            {
+                healthChange.Foreground = Brushes.Red;
+                healthChange.Content = $"{change}";
+            }
+            else
+            {
+                healthChange.Foreground = Brushes.Green;
+                healthChange.Content = $"+{change}";
+            }
+
+            _Health += change;
+            healthChange.Visibility = Visibility.Visible;
+
+            // Animation: Nach 1 Sekunde ausblenden
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (sender, args) =>
+            {
+                healthChange.Visibility = Visibility.Collapsed;
+                timer.Stop();
+            };
+            timer.Start();
+        }
+
+        // Methode zur Anzeige von Geldänderungen
+        private void ShowCashChange(int change)
+        {
+            if (change < 0)
+            {
+                cashChange.Foreground = Brushes.Red;
+                cashChange.Content = $"{change}";
+            }
+            else
+            {
+                cashChange.Foreground = Brushes.Green;
+                cashChange.Content = $"+{change}";
+            }
+
+            cashChange.Visibility = Visibility.Visible;
+
+            // Animation: Nach 1 Sekunde ausblenden
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (sender, args) =>
+            {
+                cashChange.Visibility = Visibility.Collapsed;
+                timer.Stop();
+            };
+            timer.Start();
         }
     }
 }

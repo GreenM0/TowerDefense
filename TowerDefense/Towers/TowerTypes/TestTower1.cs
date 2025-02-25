@@ -7,15 +7,20 @@ using TowerDefense.Projectils;
 using System.Windows.Controls;
 using System.Configuration;
 using System.Windows.Media;
+using System.Security.Cryptography.X509Certificates;
 
 namespace TowerDefense.Towers
 {
     public class TestTower1 : BaseTower
     {
+        public TimeSpan AttackDuration { get; set; }
+        public double AttackSlowFactor { get; set; }
+        public bool DoDamage { get; set; }
+        private int MaxTargets { get; set; }
         public TestTower1(Point position)
             : base(
-                attackRange: 220,
-                attackDamage: 3,
+                attackRange: 150,
+                attackDamage: 0.8,
                 position: position,
                 costs: 200,
                 size: 100,
@@ -25,13 +30,72 @@ namespace TowerDefense.Towers
                 pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
                 towerRadius: 80,
                 attackspeed: 1,
-                upgradeLevel: 0,
-                maxUpgradeLevel: 5,
+                upgradeLevel: 1,
+                maxUpgradeLevel: 3,
                 upgradeCost: 100,
-                towerWorth:  200
+                towerWorth: 200,
+                targetMode: "ALL",
+                cooldownTime: 8000
             )
         {
-
+            AttackDuration = TimeSpan.FromSeconds(3);
+            AttackSlowFactor = 0.5;
+            DoDamage = false;
+            MaxTargets = 5;
         }
+
+        public override void Attack(List<Enemies> target, Canvas gameCanvas)
+        {
+            if (_isCooldownActive) return;
+
+            // Begrenze die Anzahl der gleichzeitig verlangsamten Gegner
+            int targetsApplied = 0;
+
+            foreach (Enemies enemy in target)
+            {
+                if (targetsApplied >= MaxTargets) break;
+
+                enemy.ApplySlowEffect(AttackSlowFactor, AttackDuration, DoDamage, AttackDamage);
+                targetsApplied++;
+            }
+        }
+
+        public override void UpgradeTower()
+        {
+            if (UpgradeLevel < MaxUpgradeLevel)
+            {
+                if (UpgradeLevel == 1)
+                {
+                    PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
+                    GameHandler.Instance.SetTowerImage(this, Position);
+
+                    UpgradeLevel += 1;
+                    AttackRange = 200;
+                    AttackSlowFactor = 0.7;
+                    TowerWorth = TowerWorth + UpgradeCost;
+                    AttackDuration = TimeSpan.FromSeconds(5);
+                    AttackSpeed = 2;
+                    CooldownTime = 5000;
+                    MaxTargets = 10;
+
+                }
+                else if (UpgradeLevel == 2)
+                {
+                    PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
+                    Image newTowerImage = GetEntityPic();
+                    GameHandler.Instance.SetTowerImage(this, Position);
+
+                    UpgradeLevel += 1;
+                    AttackRange = 220;
+                    AttackSlowFactor = 0.5;
+                    TowerWorth = TowerWorth + UpgradeCost;
+                    AttackDuration = TimeSpan.FromSeconds(7);
+                    AttackSpeed = 3;
+                    CooldownTime = 2000;
+                    MaxTargets = 15;  
+                }
+            }            
+        }
+
     }
 }

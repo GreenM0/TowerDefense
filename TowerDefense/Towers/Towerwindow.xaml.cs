@@ -14,14 +14,15 @@ namespace TowerDefense.Towers
             InitializeComponent();
             _tower = tower;
 
-            UpgradeButton.IsEnabled = GameHandler.Instance.cash >= tower.UpgradeCost;
+            UpgradeButton.IsEnabled = (GameHandler.Instance.cash >= tower.UpgradeCost && _tower.UpgradeLevel < _tower.MaxUpgradeLevel);
         }
 
         private void UpgradeTower_Click(object sender, RoutedEventArgs e)
         {
             if (GameHandler.Instance.cash >= _tower.UpgradeCost)
             {
-                GameHandler.Instance.cash -= _tower.UpgradeCost;
+                var change = -1 * _tower.UpgradeCost;
+                GameHandler.Instance.Cashhandler(change);
                 _tower.UpgradeTower();
                 IsUpgraded = true;
                 MessageBox.Show("Turm erfolgreich aufgerüstet!", "Upgrade", MessageBoxButton.OK, MessageBoxImage.Information);
