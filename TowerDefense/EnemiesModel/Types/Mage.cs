@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Mage : Enemies
     {
-        public Mage() : base(speed: 25, life: 5, coins: 8, imagewidth: 50, imageheight: 75)
+        public Mage() : base(speed: 20000, life: 5, coins: 8, imagewidth: 50, imageheight: 75)
         {
 
         }

@@ -38,9 +38,10 @@ namespace TowerDefense
         public SpatialGrid<Enemies> _enemyGrid;
         public SpatialGrid<BaseTower> _towerGrid;
         public static GameHandler Instance { get; private set; }
+        public event Action GameOver;
 
         //Spieleinstellungen
-        private double _Health = 50;
+        private double _Health = 5;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
         private int _enemySpawnInterval = 750; // Zeit in Millisekunden zwischen Gegner-Spawns
 
@@ -145,14 +146,18 @@ namespace TowerDefense
                 _gameOver = true;
             }
 
-            //Spieler tot
-            if (_Health < 0)
+            if (_Health <= 0) // <= statt <, um 0 einzuschließen
             {
                 _gameTick.Stop();
                 info.Content = "GAME OVER";
                 info.Visibility = Visibility.Visible;
                 health.Content = "0";
                 _gameOver = true;
+
+                Task.Delay(5000).ContinueWith(_ =>
+                {
+                    GameOver?.Invoke(); // Event auslösen
+                }, TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
 
