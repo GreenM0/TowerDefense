@@ -20,6 +20,7 @@ namespace TowerDefense.EnemiesModel
         public double Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
+        public Point ImageCenterPosition { get; set; }
         public (int, int) CurrentCell { get; set; }
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
@@ -92,6 +93,7 @@ namespace TowerDefense.EnemiesModel
             {
                 UpdatePositionFromCanvas(Image);
                 enemyGrid.UpdateObjectPosition(this, Position);
+                RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
 
                 // Compare current position with the previous position to detect direction change
                 if (Position.X < previousPosition.X)
@@ -120,14 +122,12 @@ namespace TowerDefense.EnemiesModel
                 if (_isSlowed && !slowactive)
                 {
                     slowactive = true;
-                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                     Movement(EnemyCanvas, enemyGrid);
                 }
 
                 if (!_isSlowed && slowactive)
                 {
                     slowactive = false;
-                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                     Movement(EnemyCanvas, enemyGrid);
                 }
 
@@ -268,7 +268,7 @@ namespace TowerDefense.EnemiesModel
                 currentPosition.X = Canvas.GetLeft(Image);
                 currentPosition.Y = Canvas.GetTop(Image);
 
-                Position = new Point(currentPosition.X, currentPosition.Y);
+                ImageCenterPosition = new Point(currentPosition.X, currentPosition.Y);
             }
             return currentPosition;
         }
@@ -343,8 +343,8 @@ namespace TowerDefense.EnemiesModel
 
             FlameOverlay.Visibility = Visibility.Collapsed;
 
-            // Setze _isBurning auf false
-            
+            _isBurning = false;
+
         }
 
         public void InitializeFlameOverlay()
@@ -408,11 +408,8 @@ namespace TowerDefense.EnemiesModel
 
         public async Task FlameMovement()
         {
-            var bufferdstart = Gamepath.Figures[0].StartPoint;
-            Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
-            RemovePassedSegments(bufferdstart);
 
-            double totalPathLength = Gamepath.GetRenderBounds(null).Width + Gamepath.GetRenderBounds(null).Height;
+            double totalPathLength = Gamepath.GetTotalLength();
 
             // Berechne die Dauer basierend auf dem aktuellen Speed
             double adjustedDuration = totalPathLength / CurrentSpeed;

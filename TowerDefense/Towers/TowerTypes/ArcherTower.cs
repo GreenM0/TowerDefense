@@ -56,7 +56,7 @@ namespace TowerDefense.Towers
             }
 
             UpdateTowerDirection();
-            Pfeil pfeil1 = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+            Pfeil pfeil1 = new(Positionoffset, currentTarget.ImageCenterPosition, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
             pfeil1.Shoot(gameCanvas, Positionoffset, currentTarget, AttackSpeed, (projectile) =>
             {
             });
@@ -67,7 +67,7 @@ namespace TowerDefense.Towers
                 // Positioniere den zweiten Pfeil unterhalb des ersten Pfeils
                 Point secondArrowStart = new Point(Positionoffset.X, Positionoffset.Y + 20); // 20 Einheiten unterhalb des Turms
 
-                Pfeil pfeil2 = new(secondArrowStart, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+                Pfeil pfeil2 = new(secondArrowStart, currentTarget.ImageCenterPosition, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
                 pfeil2.Shoot(gameCanvas, secondArrowStart, currentTarget, AttackSpeed, (projectile) =>
                 {
                 });
