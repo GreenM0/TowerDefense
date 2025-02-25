@@ -7,7 +7,40 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="1080" Width="1920"
         WindowState="Maximized">
-    <Grid x:Name="MainGrid" Background="Gray">
-        <Button x:Name="Start" Width="400" Height="200" BorderBrush="Black" BorderThickness="3" Background="DarkGreen" Content="Spiel Starten" FontFamily="Arial" FontSize="40" Click="Start_Click"/>
+    <Grid x:Name="MainGrid" Background="Green" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid x:Name="Menu" Panel.ZIndex="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Button x:Name="Start" Grid.Row="1" Grid.Column="1" Width="600" Height="100"
+                BorderBrush="Black" BorderThickness="3" Content="Spiel Starten"
+                FontFamily="Arial" FontSize="40" Click="Start_Click" Panel.ZIndex="5"/>
+
+        <Button x:Name="Tutorial" Grid.Row="3" Grid.Column="1" Width="600" Height="100"
+                BorderBrush="Black" BorderThickness="3" Content="Spielanleitung"
+                FontFamily="Arial" FontSize="40" Panel.ZIndex="5"/>
+
+        <Button x:Name="Credits" Grid.Row="5" Grid.Column="1" Width="600" Height="100"
+                BorderBrush="Black" BorderThickness="3" Content="Credits"
+                FontFamily="Arial" FontSize="40" Panel.ZIndex="5"/>
+
+        <Button x:Name="Leave" Grid.Row="7" Grid.Column="1" Width="600" Height="100"
+                BorderBrush="Black" BorderThickness="3" Content="Verlassen"
+                FontFamily="Arial" FontSize="40" Panel.ZIndex="5"/>
+    </Grid>
     </Grid>
 </Window>

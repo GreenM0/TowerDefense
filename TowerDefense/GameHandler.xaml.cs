@@ -45,6 +45,10 @@ namespace TowerDefense
         {
             InitializeComponent();
             InitializeMap();
+        }
+
+        public void StartGame()
+        {
             LoadTowers();
             DisplayTowerMenu();
             InitializeSpawner();
@@ -56,9 +60,7 @@ namespace TowerDefense
                 Interval = TimeSpan.FromMilliseconds(1) // Aktualisierungsintervall (50 ms)
             };
             _dragTimer.Tick += DragTimer_Tick;
-
         }
-
         private async Task SpawnWavesAsync()
         {
             Wave waves = new Wave();
