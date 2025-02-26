@@ -35,6 +35,7 @@ namespace TowerDefense.EnemiesModel
         public Image FlameOverlay { get; set; }
         private Storyboard _flameStoryboard;
         private Canvas EnemyCanvas;
+        public double length { get; set; }
 
         public virtual Image? GetEntityPic() => null;
 
@@ -51,10 +52,10 @@ namespace TowerDefense.EnemiesModel
         public async Task Movement(Canvas _gameField, SpatialGrid<Enemies> enemyGrid)
         {
             EnemyCanvas = _gameField;
-            double totalPathLength = Gamepath.GetTotalLength(); // Neue Methode zur Berechnung der Pfadlänge
+            length = Gamepath.GetTotalLength(); // Neue Methode zur Berechnung der Pfadlänge
 
             // Berechne die Dauer basierend auf dem aktuellen Speed
-            double adjustedDuration = totalPathLength / CurrentSpeed;
+            double adjustedDuration = length / CurrentSpeed;
 
             // Animationsobjekte erstellen
             DoubleAnimationUsingPath animationX = new DoubleAnimationUsingPath
@@ -363,7 +364,7 @@ namespace TowerDefense.EnemiesModel
             };
         }
 
-        public async void SetOnFire(Canvas gameCanvas, TimeSpan _burnDuration, double damage)
+        public async void SetOnFire(TimeSpan _burnDuration, double damage)
         {
             if (FlameOverlay == null)
             {
@@ -385,7 +386,7 @@ namespace TowerDefense.EnemiesModel
 
             // Zeige die Flamme an
             FlameOverlay.Visibility = Visibility.Visible;
-            gameCanvas.Children.Add(FlameOverlay);
+            EnemyCanvas.Children.Add(FlameOverlay);
 
             AnimateFlameFlicker();
 

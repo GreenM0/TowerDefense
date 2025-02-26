@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.Windows.Controls;
 using TowerDefense.Towers;
 using TowerDefense;
 
@@ -14,7 +16,24 @@ namespace TowerDefense.Towers
             InitializeComponent();
             _tower = tower;
 
+            // Aktiviere den Upgrade-Button nur, wenn genug Geld vorhanden ist und der Turm nicht maximal aufgerüstet ist
             UpgradeButton.IsEnabled = (GameHandler.Instance.cash >= tower.UpgradeCost && _tower.UpgradeLevel < _tower.MaxUpgradeLevel);
+
+            // Setze den ausgewählten Zielmodus im ComboBox
+            SetSelectedTargetMode();
+        }
+
+        private void SetSelectedTargetMode()
+        {
+            // Setze den ausgewählten Modus im ComboBox basierend auf dem aktuellen Zielmodus des Turms
+            foreach (ComboBoxItem item in TargetModeComboBox.Items)
+            {
+                if (item.Tag.ToString() == _tower.TargetMode)
+                {
+                    TargetModeComboBox.SelectedItem = item;
+                    break;
+                }
+            }
         }
 
         private void UpgradeTower_Click(object sender, RoutedEventArgs e)
@@ -25,24 +44,28 @@ namespace TowerDefense.Towers
                 GameHandler.Instance.Cashhandler(change);
                 _tower.UpgradeTower();
                 IsUpgraded = true;
-                MessageBox.Show("Turm erfolgreich aufgerüstet!", "Upgrade", MessageBoxButton.OK, MessageBoxImage.Information);
-                Close();
-            }
-            else
-            {
-                MessageBox.Show("Nicht genug Geld für ein Upgrade!", "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Close(); // Schließe das Fenster ohne Nachricht
             }
         }
 
         private void SellTower_Click(object sender, RoutedEventArgs e)
         {
             GameHandler.Instance.SellTower(_tower);
-            this.Close();
+            Close();
         }
 
         private void CloseWindow_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
+        }
+
+        private void TargetModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Ändere den Zielmodus des Turms basierend auf der Auswahl im ComboBox
+            if (TargetModeComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                _tower.TargetMode = selectedItem.Tag.ToString();
+            }
         }
     }
 }

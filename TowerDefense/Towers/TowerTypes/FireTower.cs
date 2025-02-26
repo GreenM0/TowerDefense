@@ -37,7 +37,7 @@ namespace TowerDefense.Towers
                 maxUpgradeLevel: 3,
                 upgradeCost: 100,
                 towerWorth: 200,
-                targetMode: "ALL",
+                targetMode: "CLOSE",
                 cooldownTime: 1000
             )
         {
@@ -46,30 +46,34 @@ namespace TowerDefense.Towers
             FlameRadius = 1; 
         }
 
-        public override void Attack(List<Enemies> target, Canvas gameCanvas)
+        public override void Attack(List<Enemies> targets, Canvas gameCanvas)
         {
             // Überprüfe, ob das Ziel noch existiert und in Reichweite ist
-            if (target == null || target.Count == 0 || !IsInRange(target[0]))
+            if (targets == null || targets.Count == 0)
             {
                 currentTarget = null; // Setze das aktuelle Ziel zurück
                 return; // Beende die Methode, wenn kein gültiges Ziel vorhanden ist
             }
-            else
+
+            // Filtere nur Gegner, die in Reichweite sind und nicht brennen
+            var validTargets = targets.Where(t => IsInRange(t) && !t._isBurning).ToList();
+
+            if (validTargets.Count == 0)
             {
-                for (int i = 0; i < target.Count; i++)
-                {
-                    currentTarget = null;
-                    if (!target[i]._isBurning)
-                    {
-                        currentTarget = target[i];
-                        break;
-                    }
-                }
+                currentTarget = null;
+                return;
             }
 
+            currentTarget = validTargets[0]; // Wähle das erste Ziel aus der Liste
+            // Wenn kein gültiges Ziel gefunden wurde, beende die Methode
+            if (currentTarget == null)
+                return;
+
+            // Angriffslogik (Flamme schießen)
             Flamme flamme = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath, AttackDuration, FlameRadius);
             flamme.Shoot(gameCanvas, Positionoffset, currentTarget, AttackSpeed, (projectile) =>
             {
+                // Callback nach dem Schießen (optional)
             });
         }
 
@@ -90,6 +94,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 800;
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2;
+                    FlameRadius = 100;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -106,7 +111,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 500;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackDamage = 3;
-                    FlameRadius = 50;
+                    FlameRadius = 200;
                 }
             }
         }

@@ -26,7 +26,7 @@ namespace TowerDefense.Projectils
 
             foreach (var enemy in GameHandler.Instance._enemyList)
             { 
-                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 50, enemy.Image.Width / 2, enemy.Image.Height / 2);
+                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 50, enemy.Image.Width , enemy.Image.Height);
 
                 if (arrowRect.IntersectsWith(targetRect))
                 {
@@ -38,13 +38,13 @@ namespace TowerDefense.Projectils
                             if (distance <= FlameRadius)
                             {
                                 // Setze den Gegner in Brand
-                                enemy2.SetOnFire(GameCanvas, BurnDuration, Damage);
+                                enemy2.SetOnFire(BurnDuration, Damage);
                             }
                         }
                     }      
-                    enemy.SetOnFire(GameCanvas, BurnDuration, Damage);
+                    enemy.SetOnFire(BurnDuration, Damage);
                     GameCanvas.Children.Remove(ProjectileImage);
-                    break;   
+                    return true;   
                 }
             }
             return false;

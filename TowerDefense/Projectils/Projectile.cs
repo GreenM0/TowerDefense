@@ -152,7 +152,7 @@ namespace TowerDefense.Projectils
 
             foreach (var enemy in GameHandler.Instance._enemyList)
             {
-                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 40, enemy.Image.Width / 2, enemy.Image.Height /2);
+                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 40, enemy.Image.Width, enemy.Image.Height);
 
                 // Prüfe, ob der Pfeil mit einem Gegner kollidiert
                 if (arrowRect.IntersectsWith(targetRect))

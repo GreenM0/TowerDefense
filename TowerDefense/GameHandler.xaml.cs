@@ -42,7 +42,7 @@ namespace TowerDefense
         //Spieleinstellungen
         private double _Health = 50;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
-        private int _enemySpawnInterval = 750; // Zeit in Millisekunden zwischen Gegner-Spawns
+        private int _enemySpawnInterval = 2750; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler()
         {
