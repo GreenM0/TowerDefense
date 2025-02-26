@@ -181,7 +181,7 @@ namespace TowerDefense
                 {
                     Text = $"{tower.Costs}$",
                     Foreground = Brushes.Black,
-                    FontSize = 12,
+                    FontSize = 20,
                     TextAlignment = TextAlignment.Center,
                 };
 
