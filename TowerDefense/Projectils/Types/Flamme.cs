@@ -28,7 +28,6 @@ namespace TowerDefense.Projectils
             { 
                 Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 50, enemy.Image.Width / 2, enemy.Image.Height / 2);
 
-                // Prüfe, ob der Pfeil mit einem Gegner kollidiert
                 if (arrowRect.IntersectsWith(targetRect))
                 {
                     if (FlameRadius < 1)
@@ -45,7 +44,7 @@ namespace TowerDefense.Projectils
                     }      
                     enemy.SetOnFire(GameCanvas, BurnDuration, Damage);
                     GameCanvas.Children.Remove(ProjectileImage);
-                    return true;                 
+                    break;   
                 }
             }
             return false;

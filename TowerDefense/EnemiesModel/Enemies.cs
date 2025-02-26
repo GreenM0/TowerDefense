@@ -29,7 +29,7 @@ namespace TowerDefense.EnemiesModel
         private bool _isSlowed = false;
         private Storyboard storyboard;
         private bool slowactive = false;
-        private bool _isBurning = false;
+        public bool _isBurning = false;
         private bool burnactive = false;
         public PathGeometry Gamepath { get; set; }
         public Image FlameOverlay { get; set; }

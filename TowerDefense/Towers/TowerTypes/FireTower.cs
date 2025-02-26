@@ -56,7 +56,15 @@ namespace TowerDefense.Towers
             }
             else
             {
-                currentTarget = target[0];
+                for (int i = 0; i < target.Count; i++)
+                {
+                    currentTarget = null;
+                    if (!target[i]._isBurning)
+                    {
+                        currentTarget = target[i];
+                        break;
+                    }
+                }
             }
 
             Flamme flamme = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath, AttackDuration, FlameRadius);
