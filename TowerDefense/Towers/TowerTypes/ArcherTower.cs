@@ -129,7 +129,7 @@ namespace TowerDefense.Towers
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
 
             ImageHelper imageHelper = new();
-            return imageHelper.GetEntityPic(imagePath, 25, 35);
+            return imageHelper.GetEntityPic(imagePath, 120, 130);
         }
 
     }

@@ -19,8 +19,8 @@ namespace TowerDefense.Projectils
         protected Image ProjectileImage { get; set; }
         private List<Enemies> Targets { get; }
         protected double Damage { get; }
-        public int ImageWidth { get; } = 40;
-        public int ImageHeight { get; } = 25;
+        public int ImageWidth { get; } = 30;
+        public int ImageHeight { get; } = 15;
         public string ImagePath { get; set; }
         public Action<Enemies> OnHit { get; set; }
         private Storyboard storyboard;

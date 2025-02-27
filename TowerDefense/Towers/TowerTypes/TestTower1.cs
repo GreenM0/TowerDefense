@@ -66,7 +66,7 @@ namespace TowerDefense.Towers
             {
                 if (UpgradeLevel == 1)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\icetower2.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
@@ -81,7 +81,7 @@ namespace TowerDefense.Towers
                 }
                 else if (UpgradeLevel == 2)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\icetower3.png";
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
 

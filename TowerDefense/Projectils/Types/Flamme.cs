@@ -20,7 +20,7 @@ namespace TowerDefense.Projectils
 
         public override bool IsCollidingWithAnyTarget(Canvas GameCanvas)
         {
-            Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width, ProjectileImage.Height);
+            Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width /2, ProjectileImage.Height /2);
 
             Point impactPoint = new Point(Canvas.GetLeft(ProjectileImage) + ProjectileImage.Width / 2, Canvas.GetTop(ProjectileImage) + ProjectileImage.Height / 2);
 
