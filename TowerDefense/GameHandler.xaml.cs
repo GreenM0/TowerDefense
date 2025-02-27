@@ -26,7 +26,7 @@ namespace TowerDefense
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
         public int cash;
-        private int startchash = 5000;
+        private int startchash = 200;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;
@@ -98,13 +98,10 @@ namespace TowerDefense
             _deployedTowers.Clear();
 
             // Setze alle Spielvariablen zurück
-            cash = startchash;
+            cash = 0;
             _Health = 50;
             _gameOver = false;
             _allEnemiesSpawned = false;
-
-            // Warte 5 Sekunden
-            await Task.Delay(5000);
 
             // Verstecke die Nachricht
             info.Visibility = Visibility.Collapsed;
