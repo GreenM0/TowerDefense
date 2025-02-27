@@ -6,12 +6,50 @@ namespace TowerDefense
 {
     public partial class MainWindow : Window
     {
-        GameHandler gameHandler;
+        private int currentMapIndex = 0;
+        private string[] maps = { "Map1", "Map2" }; // Liste der verfügbaren Karten
+        private GameHandler gameHandler;
 
         public MainWindow()
         {
             InitializeComponent();
-            gameHandler = new();
+            gameHandler = new GameHandler(maps[currentMapIndex]); // Initialisiere mit der ersten Karte
+            gameHandler.GameOver += OnGameOver;
+            gameHandler.Opacity = 0.5;
+            MainGrid.Children.Add(gameHandler);
+            UpdateArrowButtons();
+        }
+
+        private void UpdateArrowButtons()
+        {
+            LeftArrow.IsEnabled = currentMapIndex > 0;
+            RightArrow.IsEnabled = currentMapIndex < maps.Length - 1;
+        }
+
+        private void LeftArrow_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentMapIndex > 0)
+            {
+                currentMapIndex--;
+                SwitchMap(maps[currentMapIndex]);
+                UpdateArrowButtons();
+            }
+        }
+
+        private void RightArrow_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentMapIndex < maps.Length - 1)
+            {
+                currentMapIndex++;
+                SwitchMap(maps[currentMapIndex]);
+                UpdateArrowButtons();
+            }
+        }
+
+        private void SwitchMap(string mapName)
+        {
+            MainGrid.Children.Remove(gameHandler);
+            gameHandler = new GameHandler(mapName); // Initialisiere den GameHandler mit der neuen Karte
             gameHandler.GameOver += OnGameOver;
             gameHandler.Opacity = 0.5;
             MainGrid.Children.Add(gameHandler);
@@ -128,7 +166,7 @@ namespace TowerDefense
                 gameHandler = null;
 
                 // Neuen GameHandler erstellen
-                gameHandler = new GameHandler();
+                gameHandler = new GameHandler(new(maps[currentMapIndex]));
                 gameHandler.GameOver += OnGameOver;
                 gameHandler.Opacity = 0;
                 MainGrid.Children.Add(gameHandler);

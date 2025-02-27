@@ -15,6 +15,7 @@
     <None Remove="EnemiesModel\Types\Assets\werwolf.png" />
     <None Remove="Maps\Assets\Hintergrund.png" />
     <None Remove="Maps\Assets\Map1.png" />
+	<None Remove="Maps\Assets\Map2.png" />
     <None Remove="Projectils\Types\Assets\IceBall.png" />
   </ItemGroup>
 
@@ -24,6 +25,7 @@
     <Resource Include="EnemiesModel\Types\Assets\werwolf.png" />
     <Resource Include="Maps\Assets\Hintergrund.png" />
     <Resource Include="Maps\Assets\Map1.png" />
+	<Resource Include="Maps\Assets\Map2.png" />
   </ItemGroup>
 
 </Project>

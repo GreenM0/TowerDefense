@@ -19,8 +19,6 @@ namespace TowerDefense
     public partial class GameHandler : UserControl
     {
         private DispatcherTimer? _gameTick;
-        private DispatcherTimer? _gridHandler;
-        private DispatcherTimer? _towerHandler;
         public PathGeometry _gameWay;
         public Canvas _mainCanvas = null!;
         public List<Enemies> _enemyList = new List<Enemies>();
@@ -39,15 +37,17 @@ namespace TowerDefense
         public SpatialGrid<BaseTower> _towerGrid;
         public static GameHandler Instance { get; private set; }
         public event Action GameOver;
+        private string currentMap;
 
         //Spieleinstellungen
         private double _Health = 50;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
         private int _enemySpawnInterval = 3000; // Zeit in Millisekunden zwischen Gegner-Spawns
 
-        public GameHandler()
+        public GameHandler(string mapName)
         {
             InitializeComponent();
+            currentMap = mapName;
             InitializeMap();
         }
 
@@ -110,13 +110,30 @@ namespace TowerDefense
 
         private void InitializeMap()
         {
-            Map1 Map1 = new Map1();
-            GameField.Children.Add(Map1);
+            // Entferne vorhandene Karte, falls vorhanden
+            GameField.Children.Clear();
 
-            _mainCanvas = Map1.MainCanvas;
-            _gameWay = Map1.GetPathGeometry();
-            _rectangles = Map1.Rectangles;
+            switch (currentMap)
+            {
+                case "Map1":
+                    Map1 map1 = new Map1();
+                    GameField.Children.Add(map1);
+                    _mainCanvas = map1.MainCanvas;
+                    _gameWay = map1.GetPathGeometry();
+                    _rectangles = map1.Rectangles;
+                    break;
+                case "Map2":
+                    Map2 map2 = new Map2();
+                    GameField.Children.Add(map2);
+                    _mainCanvas = map2.MainCanvas;
+                    _gameWay = map2.GetPathGeometry();
+                    _rectangles = map2.Rectangles;
+                    break;
+                default:
+                    throw new ArgumentException("Ungültige Karte: " + currentMap);
+            }
         }
+
 
         private void InitializeSpawner()
         {
