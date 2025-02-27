@@ -36,7 +36,7 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 1000
+                cooldownTime: 1
             )
         {
             Positionoffset = new Point(Position.X + 55, Position.Y - 60);
@@ -105,7 +105,7 @@ namespace TowerDefense.Towers
                     AttackRange = 270;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
-                    CooldownTime = 800;
+                    CooldownTime = 5;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -119,7 +119,7 @@ namespace TowerDefense.Towers
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
-                    CooldownTime = 500;
+                    CooldownTime = 3;
                 }
             }
         }

@@ -34,6 +34,12 @@ namespace TowerDefense.Towers
                     break;
                 }
             }
+
+            // Falls kein Zielmodus gesetzt ist, setze den Standardwert auf "Nächster Gegner"
+            if (TargetModeComboBox.SelectedItem == null)
+            {
+                TargetModeComboBox.SelectedIndex = 0; // Erster Eintrag ("Nächster Gegner")
+            }
         }
 
         private void UpgradeTower_Click(object sender, RoutedEventArgs e)

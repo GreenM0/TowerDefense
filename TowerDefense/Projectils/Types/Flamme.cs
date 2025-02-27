@@ -30,7 +30,7 @@ namespace TowerDefense.Projectils
 
                 if (arrowRect.IntersectsWith(targetRect))
                 {
-                    if (FlameRadius < 1)
+                    if (FlameRadius > 1)
                     {
                         foreach (var enemy2 in GameHandler.Instance._enemyList)
                         {

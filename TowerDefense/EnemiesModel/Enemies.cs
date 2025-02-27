@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using TowerDefense.Grid;
@@ -475,9 +476,50 @@ namespace TowerDefense.EnemiesModel
             flickerStoryboard.Begin();
         }
 
-        public void HandleBitzBallAtack()
+        public void HandleBitzBallAtack(TimeSpan _burnDuration, double damage)
         {
+            ApplySlowEffect(0.1, _burnDuration, true, damage);
+            ApplyLightningEffect();
+        }
 
+        public void ApplyLightningEffect()
+        {
+            // Erstelle das Storyboard
+            Storyboard lightningStoryboard = new Storyboard();
+
+            // 1. Glow-Effekt
+            DropShadowEffect glowEffect = new DropShadowEffect
+            {
+                Color = Colors.Cyan,
+                BlurRadius = 20,
+                Opacity = 0.8,
+                ShadowDepth = 0
+            };
+            Image.Effect = glowEffect;
+
+            // 2. Schüttel-Effekt (kleine Bewegung links/rechts)
+            DoubleAnimation shakeAnimation = new DoubleAnimation
+            {
+                From = -5,
+                To = 5,
+                Duration = TimeSpan.FromMilliseconds(50),
+                AutoReverse = true,
+                RepeatBehavior = new RepeatBehavior(5) // 5-mal wiederholen
+            };
+            TranslateTransform shakeTransform = new TranslateTransform();
+            Image.RenderTransform = shakeTransform;
+            Storyboard.SetTarget(shakeAnimation, Image);
+            Storyboard.SetTargetProperty(shakeAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
+            lightningStoryboard.Children.Add(shakeAnimation);
+
+            // Animation starten
+            lightningStoryboard.Begin();
+
+            // Entferne den Effekt nach der Animation
+            lightningStoryboard.Completed += (s, e) =>
+            {
+                Image.Effect = null;
+            };
         }
     }
 }
