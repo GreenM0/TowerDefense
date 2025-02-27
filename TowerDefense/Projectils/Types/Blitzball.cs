@@ -7,15 +7,15 @@ using TowerDefense.EnemiesModel;
 
 namespace TowerDefense.Projectils
 {
-    public class Flamme : Projectile
+    public class Blitzball : Projectile
     {
-        protected TimeSpan BurnDuration;
-        protected int FlameRadius;
-        public Flamme(Point startPosition, Point targetPosition, float speed, double damage, List<Enemies> targets, string imagePath, TimeSpan burnDuration, int flameRadius)
+        protected TimeSpan ShockDuraion;
+        protected int ShockRadius;
+        public Blitzball(Point startPosition, Point targetPosition, float speed, double damage, List<Enemies> targets, string imagePath, TimeSpan shockduration, int shockRadius)
             : base(startPosition, targetPosition, speed, damage, targets, imagePath)
         {
-            BurnDuration = burnDuration;
-            FlameRadius = flameRadius;
+            ShockDuraion = shockduration;
+            ShockRadius = shockRadius;
         }
 
         public override bool IsCollidingWithAnyTarget(Canvas GameCanvas)
@@ -25,26 +25,26 @@ namespace TowerDefense.Projectils
             Point impactPoint = new Point(Canvas.GetLeft(ProjectileImage) + ProjectileImage.Width / 2, Canvas.GetTop(ProjectileImage) + ProjectileImage.Height / 2);
 
             foreach (var enemy in GameHandler.Instance._enemyList)
-            { 
-                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 50, enemy.Image.Width , enemy.Image.Height);
+            {
+                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 50, enemy.Image.Width, enemy.Image.Height);
 
                 if (arrowRect.IntersectsWith(targetRect))
                 {
-                    if (FlameRadius > 1)
+                    if (ShockRadius > 1)
                     {
                         foreach (var enemy2 in GameHandler.Instance._enemyList)
                         {
                             double distance = Math.Sqrt(Math.Pow(impactPoint.X - enemy2.Position.X, 2) + Math.Pow(impactPoint.Y - enemy2.Position.Y, 2));
-                            if (distance <= FlameRadius)
+                            if (distance <= ShockRadius)
                             {
                                 // Setze den Gegner in Brand
-                                enemy2.SetOnFire(BurnDuration, Damage);
+                                enemy2.HandleBitzBallAtack(ShockDuraion, Damage);
                             }
                         }
-                    }      
-                    enemy.SetOnFire(BurnDuration, Damage);
+                    }
+                    enemy.HandleBitzBallAtack(ShockDuraion, Damage);
                     GameCanvas.Children.Remove(ProjectileImage);
-                    return true;   
+                    return true;
                 }
             }
             return false;

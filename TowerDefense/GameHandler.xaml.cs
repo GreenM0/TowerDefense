@@ -41,9 +41,9 @@ namespace TowerDefense
         public event Action GameOver;
 
         //Spieleinstellungen
-        private double _Health = 5;
+        private double _Health = 50;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
-        private int _enemySpawnInterval = 2750; // Zeit in Millisekunden zwischen Gegner-Spawns
+        private int _enemySpawnInterval = 3000; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler()
         {
@@ -59,7 +59,7 @@ namespace TowerDefense
             Cashhandler(startchash);
             Instance = this;
            
-            _enemyGrid = new SpatialGrid<Enemies>(100);
+            _enemyGrid = new SpatialGrid<Enemies>(150);
             _towerGrid = new SpatialGrid<BaseTower>(50);
 
             _ = SpawnWavesAsync();
@@ -167,7 +167,8 @@ namespace TowerDefense
             {
                 new TestTower1(new Point(0, 0)),
                 new ArcherTower(new Point(0, 0)),
-                new FireTower(new Point(0, 0))
+                new FireTower(new Point(0, 0)),
+                new MageTower(new Point(0, 0))
             };
         }
 

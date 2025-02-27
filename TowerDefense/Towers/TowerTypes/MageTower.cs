@@ -14,21 +14,23 @@ using TowerDefense.Helper;
 
 namespace TowerDefense.Towers
 {
-    public class ArcherTower : BaseTower
+    public class MageTower : BaseTower
     {
         private Enemies currentTarget;
         private Point Positionoffset;
-        public ArcherTower(Point position)
+        private TimeSpan ShockDuration;
+        private int ShockRadius;
+        public MageTower(Point position)
             : base(
                 attackRange: 250,
-                attackDamage: 5,
+                attackDamage: 2,
                 position: position,
                 costs: 200,
                 size: 100,
-                projectileimagePath: @"..\..\..\Projectils\Types\Assets\Pfeil.png",
+                projectileimagePath: @"..\..\..\Projectils\Types\Assets\Blitzball.png",
                 projectilespeed: 800,
                 towerName: "ArcherTower",
-                pathtoImage: @"..\..\..\Towers\Assets\Archer.png",
+                pathtoImage: @"..\..\..\Towers\Assets\Mage.png",
                 towerRadius: 80,
                 attackspeed: 100,
                 upgradeLevel: 1,
@@ -36,10 +38,12 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 1
+                cooldownTime: 5
             )
         {
             Positionoffset = new Point(Position.X + 55, Position.Y - 60);
+            ShockDuration = TimeSpan.FromSeconds(5);
+            ShockRadius = 100;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -56,28 +60,16 @@ namespace TowerDefense.Towers
             }
 
             UpdateTowerDirection();
-            Pfeil pfeil1 = new(Positionoffset, currentTarget.ImageCenterPosition, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+            Blitzball pfeil1 = new(Positionoffset, currentTarget.Position, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath, ShockDuration, ShockRadius);
             pfeil1.Shoot(gameCanvas, Positionoffset, currentTarget, AttackSpeed, (projectile) =>
             {
             });
-
-            // Wenn der Turm auf Level 3 ist, schieße einen zweiten Pfeil
-            if (UpgradeLevel == 3)
-            {
-                // Positioniere den zweiten Pfeil unterhalb des ersten Pfeils
-                Point secondArrowStart = new Point(Positionoffset.X, Positionoffset.Y + 20); // 20 Einheiten unterhalb des Turms
-
-                Pfeil pfeil2 = new(secondArrowStart, currentTarget.ImageCenterPosition, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
-                pfeil2.Shoot(gameCanvas, secondArrowStart, currentTarget, AttackSpeed, (projectile) =>
-                {
-                });
-            }
         }
 
         public void UpdateTowerDirection()
         {
             bool isTargetOnRight = currentTarget.Position.X > this.Position.X;
-            
+
             if (Image.RenderTransform is ScaleTransform flipTransform)
             {
                 flipTransform.ScaleX = isTargetOnRight ? 1 : -1;
@@ -87,7 +79,7 @@ namespace TowerDefense.Towers
                 Positionoffset.X -= 40;
                 flipTransform = new ScaleTransform(isTargetOnRight ? 1 : -1, 1);
                 Image.RenderTransform = flipTransform;
-                Image.RenderTransformOrigin = new Point(0.5, 0.5);    
+                Image.RenderTransformOrigin = new Point(0.5, 0.5);
             }
         }
 
@@ -97,8 +89,7 @@ namespace TowerDefense.Towers
             {
                 if (UpgradeLevel == 1)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\Archer2.png";
-                    ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\Mage2.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
@@ -106,12 +97,13 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
                     CooldownTime = 5;
+                    ShockDuration = TimeSpan.FromSeconds(10);
+                    ShockRadius = 200;
 
                 }
                 else if (UpgradeLevel == 2)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\Archer3.png";
-                    ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\Mage3.png";
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
 
@@ -119,7 +111,9 @@ namespace TowerDefense.Towers
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
-                    CooldownTime = 3;
+                    CooldownTime = 5;
+                    ShockDuration = TimeSpan.FromSeconds(15);
+                    ShockRadius = 300;
                 }
             }
         }

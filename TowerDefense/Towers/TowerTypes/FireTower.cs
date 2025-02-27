@@ -38,7 +38,7 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "CLOSE",
-                cooldownTime: 1000
+                cooldownTime: 4
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
@@ -91,7 +91,7 @@ namespace TowerDefense.Towers
                     AttackRange = 270;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
-                    CooldownTime = 800;
+                    CooldownTime = 3;
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2;
                     FlameRadius = 100;
@@ -108,7 +108,7 @@ namespace TowerDefense.Towers
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
-                    CooldownTime = 500;
+                    CooldownTime = 2;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackDamage = 3;
                     FlameRadius = 200;

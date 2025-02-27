@@ -32,7 +32,7 @@ namespace TowerDefense.Towers
         public int MaxUpgradeLevel { get; protected set; }
         public int UpgradeCost { get; protected set; }
         public int TowerWorth {  get; protected set; }
-        public string TargetMode { get; protected set; }
+        public string TargetMode { get; set; }
         public int CooldownTime { get; protected set; }
         public Enemies? currentTarget { get; protected set; }
 
@@ -203,27 +203,67 @@ namespace TowerDefense.Towers
         public List<Enemies> GetTarget(List<Enemies> enemiesInRange)
         {
             List<Enemies> targets = new List<Enemies>();
-            if (TargetMode == "CLOSE")
-            { 
-                Enemies closestEnemy = enemiesInRange[0];
 
-                foreach (var enemy in enemiesInRange)
-                {
-                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
-                        
-                    if (currentDistance < closestDistance)
-                    {
-                        closestEnemy = enemy;
-                    }
-                }
-                targets[0] = closestEnemy;
-                return targets;
-            }
-            else
+            if (enemiesInRange == null || enemiesInRange.Count == 0)
+                return targets; // Keine Gegner in Reichweite
+
+            switch (TargetMode)
             {
-                return enemiesInRange;
+                case "CLOSE": // Nächster Gegner (geringste Entfernung zum Turm)
+                        Enemies closestEnemy = enemiesInRange[0];
+
+                        foreach (var enemy in enemiesInRange)
+                        {
+                            double currentDistance = Point.Subtract(Position, enemy.Position).Length;
+                            double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+
+                            if (currentDistance < closestDistance)
+                            {
+                                closestEnemy = enemy;
+                            }
+                        }
+                        if (closestEnemy != null)
+                        {
+                            targets.Add(closestEnemy);
+                            return targets;
+                        }
+                    break;
+                case "STRONG": // Stärkster Gegner (höchstes Leben)
+                    Enemies strongestEnemy = enemiesInRange[0];
+                    double maxLife = strongestEnemy.Life;
+
+                    foreach (var enemy in enemiesInRange)
+                    {
+                        if (enemy.Life > maxLife)
+                        {
+                            strongestEnemy = enemy;
+                            maxLife = enemy.Life;
+                        }
+                    }
+                    targets.Add(strongestEnemy);
+                    break;
+
+                case "NEAR_END": // Gegner, der am nächsten am Ziel ist (höchste Weglänge)
+                    Enemies nearestToEndEnemy = enemiesInRange[0];
+                    double maxPathLength = nearestToEndEnemy.length;
+
+                    foreach (var enemy in enemiesInRange)
+                    {
+                        if (enemy.length > maxPathLength)
+                        {
+                            nearestToEndEnemy = enemy;
+                            maxPathLength = enemy.length;
+                        }
+                    }
+                    targets.Add(nearestToEndEnemy);
+                    break;
+
+                default: // Standard: Alle Gegner in Reichweite
+                    targets = enemiesInRange;
+                    break;
             }
+
+            return targets;
         }
     }
 }
