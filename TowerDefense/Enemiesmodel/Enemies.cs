@@ -474,6 +474,11 @@ namespace TowerDefense.EnemiesModel
             // Starte die Animation
             flickerStoryboard.Begin();
         }
+
+        public void HandleBitzBallAtack()
+        {
+
+        }
     }
 }
 
