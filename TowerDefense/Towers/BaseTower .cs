@@ -210,23 +210,24 @@ namespace TowerDefense.Towers
             switch (TargetMode)
             {
                 case "CLOSE": // Nächster Gegner (geringste Entfernung zum Turm)
-                        Enemies closestEnemy = enemiesInRange[0];
+                    Enemies closestEnemy = enemiesInRange[0];
+                    double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
 
-                        foreach (var enemy in enemiesInRange)
-                        {
-                            double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                            double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
+                    foreach (var enemy in enemiesInRange)
+                    {
+                        double currentDistance = Point.Subtract(Position, enemy.Position).Length;
 
-                            if (currentDistance < closestDistance)
-                            {
-                                closestEnemy = enemy;
-                            }
-                        }
-                        if (closestEnemy != null)
+                        if (currentDistance < closestDistance && enemy.Life > 0)
                         {
-                            targets.Add(closestEnemy);
-                            return targets;
+                            closestEnemy = enemy;
+                            closestDistance = currentDistance;
                         }
+                    }
+
+                    if (closestEnemy != null && closestEnemy.Life > 0)
+                    {
+                        targets.Add(closestEnemy);
+                    }
                     break;
                 case "STRONG": // Stärkster Gegner (höchstes Leben)
                     Enemies strongestEnemy = enemiesInRange[0];
