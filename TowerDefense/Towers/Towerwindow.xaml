@@ -51,10 +51,12 @@
         <!-- Zielmodus-Auswahl -->
         <ComboBox Name="TargetModeComboBox" Grid.Row="4"
                   Background="#4A90E2" Foreground="Green"
+                  HorizontalContentAlignment="Center"
                   FontSize="16" FontFamily="Georgia"
                   Padding="12,6" Width="250"
                   BorderBrush="#357ABD" BorderThickness="2"
-                  SelectionChanged="TargetModeComboBox_SelectionChanged">
+                  SelectionChanged="TargetModeComboBox_SelectionChanged"
+                  SelectedIndex="0">
             <ComboBox.Resources>
                 <!-- Stil für die Dropdown-Liste -->
                 <Style TargetType="ComboBoxItem">

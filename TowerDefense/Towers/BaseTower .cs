@@ -32,7 +32,7 @@ namespace TowerDefense.Towers
         public int MaxUpgradeLevel { get; protected set; }
         public int UpgradeCost { get; protected set; }
         public int TowerWorth {  get; protected set; }
-        public string TargetMode { get; set; }
+        public string TargetMode { get; protected set; }
         public int CooldownTime { get; protected set; }
         public Enemies? currentTarget { get; protected set; }
 
@@ -104,6 +104,7 @@ namespace TowerDefense.Towers
                 _renderingHandler = null;
             }
         }
+
         public void StartCooldown()
         {
             if (_isCooldownActive) return;  // Wenn der Cooldown bereits läuft, nichts tun
@@ -113,7 +114,7 @@ namespace TowerDefense.Towers
             // Cooldown-Timer
             _cooldownTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(CooldownTime)
+                Interval = TimeSpan.FromSeconds(CooldownTime)
             };
 
             _cooldownTimer.Tick += (s, e) =>
@@ -202,64 +203,27 @@ namespace TowerDefense.Towers
         public List<Enemies> GetTarget(List<Enemies> enemiesInRange)
         {
             List<Enemies> targets = new List<Enemies>();
+            if (TargetMode == "CLOSE")
+            { 
+                Enemies closestEnemy = enemiesInRange[0];
 
-            if (enemiesInRange == null || enemiesInRange.Count == 0)
-                return targets; // Keine Gegner in Reichweite
-
-            switch (TargetMode)
-            {
-                case "CLOSE": // Nächster Gegner (geringste Entfernung zum Turm)
-                    Enemies closestEnemy = enemiesInRange[0];
+                foreach (var enemy in enemiesInRange)
+                {
+                    double currentDistance = Point.Subtract(Position, enemy.Position).Length;
                     double closestDistance = Point.Subtract(Position, closestEnemy.Position).Length;
-
-                    foreach (var enemy in enemiesInRange)
+                        
+                    if (currentDistance < closestDistance)
                     {
-                        double currentDistance = Point.Subtract(Position, enemy.Position).Length;
-                        if (currentDistance < closestDistance)
-                        {
-                            closestEnemy = enemy;
-                            closestDistance = currentDistance;
-                        }
+                        closestEnemy = enemy;
                     }
-                    targets.Add(closestEnemy);
-                    break;
-
-                case "STRONG": // Stärkster Gegner (höchstes Leben)
-                    Enemies strongestEnemy = enemiesInRange[0];
-                    double maxLife = strongestEnemy.Life;
-
-                    foreach (var enemy in enemiesInRange)
-                    {
-                        if (enemy.Life > maxLife)
-                        {
-                            strongestEnemy = enemy;
-                            maxLife = enemy.Life;
-                        }
-                    }
-                    targets.Add(strongestEnemy);
-                    break;
-
-                case "NEAR_END": // Gegner, der am nächsten am Ziel ist (höchste Weglänge)
-                    Enemies nearestToEndEnemy = enemiesInRange[0];
-                    double maxPathLength = nearestToEndEnemy.length;
-
-                    foreach (var enemy in enemiesInRange)
-                    {
-                        if (enemy.length > maxPathLength)
-                        {
-                            nearestToEndEnemy = enemy;
-                            maxPathLength = enemy.length;
-                        }
-                    }
-                    targets.Add(nearestToEndEnemy);
-                    break;
-
-                default: // Standard: Alle Gegner in Reichweite
-                    targets = enemiesInRange;
-                    break;
+                }
+                targets[0] = closestEnemy;
+                return targets;
             }
-
-            return targets;
+            else
+            {
+                return enemiesInRange;
+            }
         }
     }
 }
