@@ -38,6 +38,7 @@ namespace TowerDefense
         public static GameHandler Instance { get; private set; }
         public event Action GameOver;
         private string currentMap;
+        public bool isPaused = false;
 
         //Spieleinstellungen
         private double _Health = 50;
@@ -65,10 +66,61 @@ namespace TowerDefense
             _ = SpawnWavesAsync();
             _dragTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(1) // Aktualisierungsintervall (50 ms)
+                Interval = TimeSpan.FromMilliseconds(50) // Aktualisierungsintervall (50 ms)
             };
             _dragTimer.Tick += DragTimer_Tick;
         }
+
+        public async void ResetGame()
+        {
+            // Stoppe alle Timer
+            _gameTick?.Stop();
+            _dragTimer?.Stop();
+
+            // Entferne alle Gegner
+            foreach (var enemy in _enemyList)
+            {
+                if (GameField.Children.Contains(enemy.Image))
+                {
+                    GameField.Children.Remove(enemy.Image);
+                }
+            }
+            _enemyList.Clear();
+
+            // Entferne alle Türme
+            foreach (var tower in _deployedTowers)
+            {
+                if (GameField.Children.Contains(tower.Image))
+                {
+                    GameField.Children.Remove(tower.Image);
+                }
+            }
+            _deployedTowers.Clear();
+
+            // Setze alle Spielvariablen zurück
+            cash = startchash;
+            _Health = 50;
+            _gameOver = false;
+            _allEnemiesSpawned = false;
+
+            // Warte 5 Sekunden
+            await Task.Delay(5000);
+
+            // Verstecke die Nachricht
+            info.Visibility = Visibility.Collapsed;
+
+            // Initialisiere die Karte neu
+            InitializeMap();
+
+            // Setze das Tower-Menü zurück
+            TowerMenu.Children.Clear();
+            LoadTowers();
+            DisplayTowerMenu();
+
+            // Starte das Spiel neu
+            StartGame();
+        }
+
         private async Task SpawnWavesAsync()
         {
             Wave waves = new Wave();
@@ -191,6 +243,9 @@ namespace TowerDefense
 
         private void DisplayTowerMenu()
         {
+            // Leere das Tower-Menü
+            TowerMenu.Children.Clear();
+
             foreach (var tower in _towers)
             {
                 // Bild des Turms erstellen

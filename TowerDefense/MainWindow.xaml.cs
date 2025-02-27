@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media.Animation;
 using System.Windows.Media;
+using System.Windows.Input;
 
 namespace TowerDefense
 {
@@ -13,6 +14,9 @@ namespace TowerDefense
         public MainWindow()
         {
             InitializeComponent();
+
+            this.KeyDown += MainWindow_KeyDown; 
+
             gameHandler = new GameHandler(maps[currentMapIndex]); // Initialisiere mit der ersten Karte
             gameHandler.GameOver += OnGameOver;
             gameHandler.Opacity = 0.5;
@@ -61,7 +65,10 @@ namespace TowerDefense
                 FadeOutButton(Start),
                 FadeOutButton(Tutorial),
                 FadeOutButton(Credits),
-                FadeOutButton(Leave)
+                FadeOutButton(Leave),
+                FadeOutButton(LeftArrow),
+                FadeOutButton(RightArrow),
+                FadeOutButton(Restart)
             );
             
             await FadeInElement(gameHandler);
@@ -183,7 +190,10 @@ namespace TowerDefense
                     FadeInButton(Start),
                     FadeInButton(Tutorial),
                     FadeInButton(Credits),
-                    FadeInButton(Leave)
+                    FadeInButton(Leave),
+                    FadeInButton(LeftArrow),
+                    FadeInButton(RightArrow),
+                    FadeInButton(Restart)
                 );
             });
         }
@@ -199,6 +209,60 @@ namespace TowerDefense
             anim.Completed += (_, __) => tcs.SetResult(true);
             button.BeginAnimation(UIElement.OpacityProperty, anim);
             return tcs.Task;
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Überprüfe, ob die ESC-Taste gedrückt wurde
+            if (e.Key == Key.Escape)
+            {
+                OpenMenu();
+            }
+        }
+
+        private void OpenMenu()
+        {
+            // Verstecke das Spielfeld
+            gameHandler.Opacity = 0.5;
+            gameHandler.IsEnabled = false;
+
+            // Zeige das Menü an
+            Menu.Visibility = Visibility.Visible;
+
+            // Fade-In-Animation für die Menü-Buttons
+            FadeInButtons();
+        }
+
+        private void CloseMenu()
+        {
+            // Verstecke das Menü
+            Menu.Visibility = Visibility.Collapsed;
+
+            // Zeige das Spielfeld an
+            gameHandler.Opacity = 1;
+            gameHandler.IsEnabled = true;
+        }
+
+        private async void FadeInButtons()
+        {
+            await Task.WhenAll(
+                FadeInButton(Start),
+                FadeInButton(Tutorial),
+                FadeInButton(Credits),
+                FadeInButton(Leave),
+                FadeInButton(LeftArrow),
+                FadeInButton(RightArrow),
+                FadeInButton(Restart)
+            );
+        }
+
+        private void Restart_Click(object sender, RoutedEventArgs e)
+        {
+            // Schließe das Menü
+            CloseMenu();
+
+            // Setze das Spiel zurück
+            gameHandler.ResetGame();
         }
     }
 }
