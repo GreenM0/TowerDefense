@@ -33,7 +33,7 @@ namespace TowerDefense.Towers
         public int UpgradeCost { get; protected set; }
         public int TowerWorth {  get; protected set; }
         public string TargetMode { get; set; }
-        public int CooldownTime { get; protected set; }
+        public double CooldownTime { get; protected set; }
         public Enemies? currentTarget { get; protected set; }
 
         private DispatcherTimer? _attackTimer;

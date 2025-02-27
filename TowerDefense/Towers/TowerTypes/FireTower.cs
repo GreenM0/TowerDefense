@@ -38,12 +38,12 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "CLOSE",
-                cooldownTime: 4
+                cooldownTime: 5
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
             Positionoffset = new Point(Position.X, Position.Y - 70);
-            FlameRadius = 1; 
+            FlameRadius = 30; 
         }
 
         public override void Attack(List<Enemies> targets, Canvas gameCanvas)
@@ -94,7 +94,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 3;
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2;
-                    FlameRadius = 100;
+                    FlameRadius = 60;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -111,7 +111,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 2;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackDamage = 3;
-                    FlameRadius = 200;
+                    FlameRadius = 150;
                 }
             }
         }

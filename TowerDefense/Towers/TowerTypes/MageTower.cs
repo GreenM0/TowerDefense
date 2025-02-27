@@ -25,7 +25,7 @@ namespace TowerDefense.Towers
                 attackRange: 250,
                 attackDamage: 2,
                 position: position,
-                costs: 200,
+                costs: 300,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Blitzball.png",
                 projectilespeed: 800,
@@ -38,12 +38,12 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 5
+                cooldownTime: 7
             )
         {
             Positionoffset = new Point(Position.X + 55, Position.Y - 60);
-            ShockDuration = TimeSpan.FromSeconds(5);
-            ShockRadius = 100;
+            ShockDuration = TimeSpan.FromSeconds(1);
+            ShockRadius = 30;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -97,8 +97,8 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
                     CooldownTime = 5;
-                    ShockDuration = TimeSpan.FromSeconds(10);
-                    ShockRadius = 200;
+                    ShockDuration = TimeSpan.FromSeconds(5);
+                    ShockRadius = 80;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -111,9 +111,9 @@ namespace TowerDefense.Towers
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
-                    CooldownTime = 5;
-                    ShockDuration = TimeSpan.FromSeconds(15);
-                    ShockRadius = 300;
+                    CooldownTime = 3;
+                    ShockDuration = TimeSpan.FromSeconds(7);
+                    ShockRadius = 150;
                 }
             }
         }

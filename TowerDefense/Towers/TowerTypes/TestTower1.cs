@@ -35,7 +35,7 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 8000
+                cooldownTime: 10
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
@@ -75,7 +75,7 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
-                    CooldownTime = 5000;
+                    CooldownTime = 6;
                     MaxTargets = 10;
 
                 }
@@ -91,7 +91,7 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
-                    CooldownTime = 2000;
+                    CooldownTime = 4;
                     MaxTargets = 15;  
                 }
             }            
