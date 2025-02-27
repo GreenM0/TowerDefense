@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TowerDefense.Towers.Towerwindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Turm Optionen" Height="182" Width="300"
+        Title="Turm Optionen" Height="300" Width="300"
         WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         Background="#3E2A47" Foreground="White">
 
@@ -9,15 +9,19 @@
         <!-- Grid-Definition für Buttons -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Für Upgrade-Button -->
+            <!-- Upgrade-Button -->
             <RowDefinition Height="20"/>
             <!-- Abstand -->
             <RowDefinition Height="Auto"/>
-            <!-- Für Sell-Button -->
+            <!-- Sell-Button -->
             <RowDefinition Height="20"/>
             <!-- Abstand -->
             <RowDefinition Height="Auto"/>
-            <!-- Für Close-Button -->
+            <!-- Zielmodus-Auswahl -->
+            <RowDefinition Height="20"/>
+            <!-- Abstand -->
+            <RowDefinition Height="Auto"/>
+            <!-- Close-Button -->
         </Grid.RowDefinitions>
 
         <!-- Upgrade Button -->
@@ -44,6 +48,54 @@
         <!-- Abstand zwischen Buttons -->
         <Rectangle Height="20" Grid.Row="3"/>
 
+        <!-- Zielmodus-Auswahl -->
+        <ComboBox Name="TargetModeComboBox" Grid.Row="4"
+                  Background="#4A90E2" Foreground="Green"
+                  HorizontalContentAlignment="Center"
+                  FontSize="16" FontFamily="Georgia"
+                  Padding="12,6" Width="250"
+                  BorderBrush="#357ABD" BorderThickness="2"
+                  SelectionChanged="TargetModeComboBox_SelectionChanged"
+                  SelectedIndex="0">
+            <ComboBox.Resources>
+                <!-- Stil für die Dropdown-Liste -->
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Background" Value="#4A90E2"/>
+                    <!-- Hintergrundfarbe -->
+                    <Setter Property="Foreground" Value="Black"/>
+                    <!-- Textfarbe -->
+                    <Setter Property="FontSize" Value="16"/>
+                    <!-- Schriftgröße -->
+                    <Setter Property="FontFamily" Value="Georgia"/>
+                    <!-- Schriftart -->
+                    <Setter Property="Padding" Value="12,6"/>
+                    <!-- Innenabstand -->
+                    <Setter Property="BorderBrush" Value="#357ABD"/>
+                    <!-- Rahmenfarbe -->
+                    <Setter Property="BorderThickness" Value="2"/>
+                    <!-- Rahmendicke -->
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ComboBox.Resources>
+            <ComboBoxItem Content="🎯 Nächster Gegner" Tag="CLOSE"/>
+            <ComboBoxItem Content="🎯 Stärkster Gegner" Tag="STRONG"/>
+            <ComboBoxItem Content="🎯 Gegner am Ziel" Tag="NEAR_END"/>
+        </ComboBox>
+
+        <!-- Abstand zwischen Buttons -->
+        <Rectangle Height="20" Grid.Row="5"/>
+
         <!-- Close Button -->
         <Button Content="❌ Schließen"
                 Click="CloseWindow_Click"
@@ -51,6 +103,6 @@
                 FontSize="16" FontFamily="Georgia"
                 Padding="12,6" Width="250"
                 BorderBrush="#9E1B1B" BorderThickness="2" Cursor="Hand"
-                Grid.Row="4"/>
+                Grid.Row="6"/>
     </Grid>
 </Window>

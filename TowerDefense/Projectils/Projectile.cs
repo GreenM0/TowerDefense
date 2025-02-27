@@ -61,8 +61,8 @@ namespace TowerDefense.Projectils
             Canvas.SetTop(ProjectileImage, startPosition.Y);
 
             // Berechne die Richtung zum Ziel
-            double directionX = target.Position.X - startPosition.X;
-            double directionY = target.Position.Y - startPosition.Y;
+            double directionX = target.ImageCenterPosition.X - startPosition.X;
+            double directionY = target.ImageCenterPosition.Y + 50  - startPosition.Y;
 
             // Normalisiere die Richtung (Einheitsvektor)
             double distanceToTarget = Math.Sqrt(directionX * directionX + directionY * directionY);
@@ -75,8 +75,8 @@ namespace TowerDefense.Projectils
             // Lege einen Punkt weit hinter dem Ziel fest (z. B. 1000 Einheiten entfernt)
             double extendedDistance = 5000; // Entfernung hinter dem Ziel
             Point extendedTarget = new Point(
-                target.Position.X + directionX * extendedDistance,
-                target.Position.Y + directionY * extendedDistance
+                target.ImageCenterPosition.X + directionX * extendedDistance,
+                target.ImageCenterPosition.Y + directionY * extendedDistance
             );
 
             // Berechne die Entfernung und die Dauer der Animation
@@ -152,7 +152,7 @@ namespace TowerDefense.Projectils
 
             foreach (var enemy in GameHandler.Instance._enemyList)
             {
-                Rect targetRect = new Rect(enemy.Position.X, enemy.Position.Y, enemy.Image.Width / 2, enemy.Image.Height / 2 );
+                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y + 40, enemy.Image.Width, enemy.Image.Height);
 
                 // Prüfe, ob der Pfeil mit einem Gegner kollidiert
                 if (arrowRect.IntersectsWith(targetRect))

@@ -20,6 +20,7 @@ namespace TowerDefense.EnemiesModel
         public double Life { get; set; }
         public int Coins { get; set; }
         public Point Position { get; set; }
+        public Point ImageCenterPosition { get; set; }
         public (int, int) CurrentCell { get; set; }
         public Image Image { get; set; }
         public int ImageWidth { get; set; }
@@ -28,12 +29,13 @@ namespace TowerDefense.EnemiesModel
         private bool _isSlowed = false;
         private Storyboard storyboard;
         private bool slowactive = false;
-        private bool _isBurning = false;
+        public bool _isBurning = false;
         private bool burnactive = false;
         public PathGeometry Gamepath { get; set; }
         public Image FlameOverlay { get; set; }
         private Storyboard _flameStoryboard;
         private Canvas EnemyCanvas;
+        public double length { get; set; }
 
         public virtual Image? GetEntityPic() => null;
 
@@ -50,10 +52,10 @@ namespace TowerDefense.EnemiesModel
         public async Task Movement(Canvas _gameField, SpatialGrid<Enemies> enemyGrid)
         {
             EnemyCanvas = _gameField;
-            double totalPathLength = Gamepath.GetTotalLength(); // Neue Methode zur Berechnung der Pfadlänge
+            length = Gamepath.GetTotalLength(); // Neue Methode zur Berechnung der Pfadlänge
 
             // Berechne die Dauer basierend auf dem aktuellen Speed
-            double adjustedDuration = totalPathLength / CurrentSpeed;
+            double adjustedDuration = length / CurrentSpeed;
 
             // Animationsobjekte erstellen
             DoubleAnimationUsingPath animationX = new DoubleAnimationUsingPath
@@ -92,6 +94,7 @@ namespace TowerDefense.EnemiesModel
             {
                 UpdatePositionFromCanvas(Image);
                 enemyGrid.UpdateObjectPosition(this, Position);
+                RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
 
                 // Compare current position with the previous position to detect direction change
                 if (Position.X < previousPosition.X)
@@ -120,14 +123,12 @@ namespace TowerDefense.EnemiesModel
                 if (_isSlowed && !slowactive)
                 {
                     slowactive = true;
-                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                     Movement(EnemyCanvas, enemyGrid);
                 }
 
                 if (!_isSlowed && slowactive)
                 {
                     slowactive = false;
-                    RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                     Movement(EnemyCanvas, enemyGrid);
                 }
 
@@ -268,7 +269,7 @@ namespace TowerDefense.EnemiesModel
                 currentPosition.X = Canvas.GetLeft(Image);
                 currentPosition.Y = Canvas.GetTop(Image);
 
-                Position = new Point(currentPosition.X, currentPosition.Y);
+                ImageCenterPosition = new Point(currentPosition.X, currentPosition.Y);
             }
             return currentPosition;
         }
@@ -343,8 +344,8 @@ namespace TowerDefense.EnemiesModel
 
             FlameOverlay.Visibility = Visibility.Collapsed;
 
-            // Setze _isBurning auf false
-            
+            _isBurning = false;
+
         }
 
         public void InitializeFlameOverlay()
@@ -363,7 +364,7 @@ namespace TowerDefense.EnemiesModel
             };
         }
 
-        public async void SetOnFire(Canvas gameCanvas, TimeSpan _burnDuration, double damage)
+        public async void SetOnFire(TimeSpan _burnDuration, double damage)
         {
             if (FlameOverlay == null)
             {
@@ -385,7 +386,7 @@ namespace TowerDefense.EnemiesModel
 
             // Zeige die Flamme an
             FlameOverlay.Visibility = Visibility.Visible;
-            gameCanvas.Children.Add(FlameOverlay);
+            EnemyCanvas.Children.Add(FlameOverlay);
 
             AnimateFlameFlicker();
 
@@ -408,11 +409,8 @@ namespace TowerDefense.EnemiesModel
 
         public async Task FlameMovement()
         {
-            var bufferdstart = Gamepath.Figures[0].StartPoint;
-            Gamepath.Figures[0].StartPoint = GetEnemyPosition(); // Setze den Startpunkt auf die aktuelle Position
-            RemovePassedSegments(bufferdstart);
 
-            double totalPathLength = Gamepath.GetRenderBounds(null).Width + Gamepath.GetRenderBounds(null).Height;
+            double totalPathLength = Gamepath.GetTotalLength();
 
             // Berechne die Dauer basierend auf dem aktuellen Speed
             double adjustedDuration = totalPathLength / CurrentSpeed;

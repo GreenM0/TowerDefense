@@ -104,6 +104,7 @@ namespace TowerDefense.Towers
                 _renderingHandler = null;
             }
         }
+
         public void StartCooldown()
         {
             if (_isCooldownActive) return;  // Wenn der Cooldown bereits läuft, nichts tun
@@ -113,7 +114,7 @@ namespace TowerDefense.Towers
             // Cooldown-Timer
             _cooldownTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(CooldownTime)
+                Interval = TimeSpan.FromSeconds(CooldownTime)
             };
 
             _cooldownTimer.Tick += (s, e) =>

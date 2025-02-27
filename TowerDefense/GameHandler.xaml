@@ -13,8 +13,10 @@
         </Grid.ColumnDefinitions>
 
         <Image Source="Maps/Assets/Hintergrund.png" Width="480" Height="1080" Grid.Column="1"/>
-        <UniformGrid Name="TowerMenu" Grid.Column="2" Margin="10,0,0,0" Rows="2" Columns="2">
-        </UniformGrid>
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <WrapPanel Name="TowerMenu" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Top">
+            </WrapPanel>
+        </ScrollViewer>
 
         <Canvas x:Name="GameField" Grid.Column="0" AllowDrop="True" MouseMove="GameField_MouseMove" MouseUp="GameField_MouseUp" MouseDown="GameField_MouseDown" MouseLeave="GameField_MouseLeave"></Canvas>
         <Border Width="1440" Height="50" VerticalAlignment="Top" CornerRadius="10">
