@@ -28,7 +28,7 @@ namespace TowerDefense.EnemiesModel
         public int ImageHeight { get; set; }
         public bool ReachedEnd { get; set; }
         private bool _isSlowed = false;
-        private Storyboard storyboard;
+        public Storyboard storyboard;
         private bool slowactive = false;
         public bool _isBurning = false;
         private bool burnactive = false;
@@ -93,8 +93,8 @@ namespace TowerDefense.EnemiesModel
 
             storyboard.CurrentTimeInvalidated += async (s, e) =>
             {
-                UpdatePositionFromCanvas(Image);
-                enemyGrid.UpdateObjectPosition(this, Position);
+                UpdatePositionFromCanvas();
+                GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
                 RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
                 length = Gamepath.GetTotalLength();
 
@@ -270,23 +270,19 @@ namespace TowerDefense.EnemiesModel
             {
                 currentPosition.X = Canvas.GetLeft(Image);
                 currentPosition.Y = Canvas.GetTop(Image);
-
-                ImageCenterPosition = new Point(currentPosition.X, currentPosition.Y);
             }
             return currentPosition;
         }
 
-        private void UpdatePositionFromCanvas(Image img)
+        private void UpdatePositionFromCanvas()
         {
-            double x = Canvas.GetLeft(img);
-            double y = Canvas.GetTop(img);
+            double x = Canvas.GetLeft(Image);
+            double y = Canvas.GetTop(Image);
 
-            double centerX = x + (ImageWidth / 2);
-            double centerY = y + (ImageHeight / 2);
+            double centerX = x + (ImageWidth /2);
+            double centerY = y + (ImageHeight/2);
             Position = new Point(centerX, centerY);
-
-            // Aktualisiere die Position im Spatial Grid
-            GameHandler.Instance._enemyGrid.UpdateObjectPosition(this, Position);
+            ImageCenterPosition = new Point(centerX, centerY  - 30);
         }
 
         public void ApplySlowEffect(double slowFactor, TimeSpan duration, bool doDamage, double attackDamage)
@@ -300,7 +296,7 @@ namespace TowerDefense.EnemiesModel
             Image.Effect = new System.Windows.Media.Effects.DropShadowEffect
             {
                 Color = Colors.Blue,
-                Opacity = 0.7,
+                Opacity = 0.5,
                 ShadowDepth = 0
             };
 
@@ -531,6 +527,22 @@ namespace TowerDefense.EnemiesModel
             {
                 Image.Effect = null;
             };
+        }
+
+        public void PauseAnimation()
+        {
+            if (storyboard != null)
+            {
+                storyboard.Pause();
+            }
+        }
+
+        public void ResumeAnimation()
+        {
+            if (storyboard != null)
+            {
+                storyboard.Resume();
+            }
         }
     }
 }

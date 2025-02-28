@@ -13,6 +13,7 @@
     <None Remove="EnemiesModel\Types\Assets\goblin.png" />
     <None Remove="EnemiesModel\Types\Assets\mage.png" />
     <None Remove="EnemiesModel\Types\Assets\werwolf.png" />
+    <None Remove="Maps\Assets\folk-round-kevin-macleod-main-version-18634-03-03.mp3" />
     <None Remove="Maps\Assets\Hintergrund.png" />
     <None Remove="Maps\Assets\Map1.png" />
 	<None Remove="Maps\Assets\Map2.png" />

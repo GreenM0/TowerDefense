@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TowerDefense.EnemiesModel;
 using TowerDefense.EnemiesModel.Types;
+using TowerDefense.Helper;
 using TowerDefense.Maps;
 using TowerDefense.Towers;
 using TowerDefense.Waves;
@@ -50,6 +51,7 @@ namespace TowerDefense
             InitializeComponent();
             currentMap = mapName;
             InitializeMap();
+
         }
 
         public void StartGame()
@@ -69,6 +71,7 @@ namespace TowerDefense
                 Interval = TimeSpan.FromMilliseconds(50) // Aktualisierungsintervall (50 ms)
             };
             _dragTimer.Tick += DragTimer_Tick;
+            BackgroundMusic.Play();
         }
 
         public async void ResetGame()
@@ -160,10 +163,7 @@ namespace TowerDefense
 
             // Pausiere die Projektile
             PauseProjectiles();
-
-            // Zeige eine Pause-Nachricht an
-            info.Content = "Spiel pausiert";
-            info.Visibility = Visibility.Visible;
+            BackgroundMusic.Pause();
         }
 
         public void ResumeGame()
@@ -190,6 +190,7 @@ namespace TowerDefense
 
             // Setze die Projektile fort
             ResumeProjectiles();
+            BackgroundMusic.Play();
 
             // Verstecke die Pause-Nachricht
             info.Visibility = Visibility.Collapsed;
@@ -809,6 +810,13 @@ namespace TowerDefense
                     projectile.ResumeAnimation();
                 }
             }
+        }
+
+        private void BackgroundMusic_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            // Musik wiederholen, wenn sie endet
+            BackgroundMusic.Position = TimeSpan.Zero;
+            BackgroundMusic.Play();
         }
     }
 }
