@@ -2,6 +2,7 @@
 using System.Windows.Media.Animation;
 using System.Windows.Media;
 using System.Windows.Input;
+using TowerDefense.Helper;
 
 namespace TowerDefense
 {
@@ -21,7 +22,16 @@ namespace TowerDefense
             gameHandler.GameOver += OnGameOver;
             gameHandler.Opacity = 0.5;
             MainGrid.Children.Add(gameHandler);
+            BackgroundMusic.Play();
+
             UpdateArrowButtons();
+        }
+
+        private void BackgroundMusic_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            // Musik wiederholen, wenn sie endet
+            BackgroundMusic.Position = TimeSpan.Zero;
+            BackgroundMusic.Play();
         }
 
         private void UpdateArrowButtons()
@@ -73,6 +83,7 @@ namespace TowerDefense
             
             await FadeInElement(gameHandler);
             Menu.Visibility = Visibility.Hidden;
+            BackgroundMusic.Stop();
             Thread.Sleep(500);
             gameHandler.StartGame();
         }
@@ -216,12 +227,22 @@ namespace TowerDefense
             // Überprüfe, ob die ESC-Taste gedrückt wurde
             if (e.Key == Key.Escape)
             {
-                OpenMenu();
+                if (gameHandler.isPaused)
+                {
+                    gameHandler.ResumeGame(); // Fortsetzen, wenn das Spiel pausiert ist
+                    CloseMenu();
+                }
+                else
+                {
+                    gameHandler.PauseGame(); // Pausieren, wenn das Spiel läuft
+                    OpenMenu();
+                }
             }
         }
 
         private void OpenMenu()
         {
+            BackgroundMusic.Play();
             // Verstecke das Spielfeld
             gameHandler.Opacity = 0.5;
             gameHandler.IsEnabled = false;
@@ -241,6 +262,7 @@ namespace TowerDefense
             // Zeige das Spielfeld an
             gameHandler.Opacity = 1;
             gameHandler.IsEnabled = true;
+            BackgroundMusic.Stop();
         }
 
         private async void FadeInButtons()

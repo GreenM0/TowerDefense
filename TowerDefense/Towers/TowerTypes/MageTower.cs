@@ -25,10 +25,9 @@ namespace TowerDefense.Towers
                 attackRange: 250,
                 attackDamage: 2,
                 position: position,
-                costs: 200,
+                costs: 300,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Blitzball.png",
-                projectilespeed: 800,
                 towerName: "ArcherTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Mage.png",
                 towerRadius: 80,
@@ -38,12 +37,12 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 5
+                cooldownTime: 7
             )
         {
             Positionoffset = new Point(Position.X + 55, Position.Y - 60);
-            ShockDuration = TimeSpan.FromSeconds(5);
-            ShockRadius = 100;
+            ShockDuration = TimeSpan.FromSeconds(1);
+            ShockRadius = 30;
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -72,12 +71,12 @@ namespace TowerDefense.Towers
 
             if (Image.RenderTransform is ScaleTransform flipTransform)
             {
-                flipTransform.ScaleX = isTargetOnRight ? 1 : -1;
+                flipTransform.ScaleX = isTargetOnRight ? -1 : 1;
             }
             else
             {
                 Positionoffset.X -= 40;
-                flipTransform = new ScaleTransform(isTargetOnRight ? 1 : -1, 1);
+                flipTransform = new ScaleTransform(isTargetOnRight ? -1 : 1, 1);
                 Image.RenderTransform = flipTransform;
                 Image.RenderTransformOrigin = new Point(0.5, 0.5);
             }
@@ -97,8 +96,8 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
                     CooldownTime = 5;
-                    ShockDuration = TimeSpan.FromSeconds(10);
-                    ShockRadius = 200;
+                    ShockDuration = TimeSpan.FromSeconds(5);
+                    ShockRadius = 80;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -111,9 +110,9 @@ namespace TowerDefense.Towers
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
-                    CooldownTime = 5;
-                    ShockDuration = TimeSpan.FromSeconds(15);
-                    ShockRadius = 300;
+                    CooldownTime = 3;
+                    ShockDuration = TimeSpan.FromSeconds(7);
+                    ShockRadius = 150;
                 }
             }
         }
@@ -123,7 +122,7 @@ namespace TowerDefense.Towers
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
 
             ImageHelper imageHelper = new();
-            return imageHelper.GetEntityPic(imagePath, 25, 35);
+            return imageHelper.GetEntityPic(imagePath, 120, 130);
         }
 
     }

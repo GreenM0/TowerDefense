@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Configuration;
 using System.Windows.Media;
 using System.Security.Cryptography.X509Certificates;
+using TowerDefense.Helper;
 
 namespace TowerDefense.Towers
 {
@@ -25,7 +26,6 @@ namespace TowerDefense.Towers
                 costs: 200,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\IceBall.png",
-                projectilespeed: 800,
                 towerName: "TestTower",
                 pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
                 towerRadius: 80,
@@ -35,7 +35,7 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 8000
+                cooldownTime: 10
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
@@ -66,7 +66,7 @@ namespace TowerDefense.Towers
             {
                 if (UpgradeLevel == 1)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\icetower2.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
@@ -75,13 +75,13 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
-                    CooldownTime = 5000;
+                    CooldownTime = 6;
                     MaxTargets = 10;
 
                 }
                 else if (UpgradeLevel == 2)
                 {
-                    PathtoImage = @"..\..\..\Towers\Assets\icetower.png";
+                    PathtoImage = @"..\..\..\Towers\Assets\icetower3.png";
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
 
@@ -91,11 +91,18 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
-                    CooldownTime = 2000;
+                    CooldownTime = 4;
                     MaxTargets = 15;  
                 }
             }            
         }
 
+        public override Image GetEntityPic()
+        {
+            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
+
+            ImageHelper imageHelper = new();
+            return imageHelper.GetEntityPic(imagePath, 120, 130);
+        }
     }
 }

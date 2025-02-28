@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TowerDefense.EnemiesModel;
 using TowerDefense.EnemiesModel.Types;
+using TowerDefense.Helper;
 using TowerDefense.Maps;
 using TowerDefense.Towers;
 using TowerDefense.Waves;
@@ -26,7 +27,7 @@ namespace TowerDefense
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
         public int cash;
-        private int startchash = 200;
+        private int startchash = 2000;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;
@@ -50,6 +51,7 @@ namespace TowerDefense
             InitializeComponent();
             currentMap = mapName;
             InitializeMap();
+
         }
 
         public void StartGame()
@@ -69,15 +71,23 @@ namespace TowerDefense
                 Interval = TimeSpan.FromMilliseconds(50) // Aktualisierungsintervall (50 ms)
             };
             _dragTimer.Tick += DragTimer_Tick;
+            BackgroundMusic.Play();
         }
 
         public async void ResetGame()
         {
+            // Pausiere das Spiel
+            isPaused = true;
+
             // Stoppe alle Timer
             _gameTick?.Stop();
             _dragTimer?.Stop();
 
-            // Entferne alle Gegner
+            // Stoppe das Spawnen von Gegnern
+            _spawnCancellationTokenSource.Cancel();
+            _spawnCancellationTokenSource = new CancellationTokenSource(); // Reset für den Neustart
+
+            // Entferne alle Gegner und Türme
             foreach (var enemy in _enemyList)
             {
                 if (GameField.Children.Contains(enemy.Image))
@@ -87,7 +97,6 @@ namespace TowerDefense
             }
             _enemyList.Clear();
 
-            // Entferne alle Türme
             foreach (var tower in _deployedTowers)
             {
                 if (GameField.Children.Contains(tower.Image))
@@ -103,6 +112,18 @@ namespace TowerDefense
             _gameOver = false;
             _allEnemiesSpawned = false;
 
+            // Zeige die Nachricht an
+            info.Visibility = Visibility.Visible;
+
+            // Timer für den Neustart
+            int countdown = 5;
+            while (countdown > 0)
+            {
+                info.Content = $"Neustart in {countdown}";
+                await Task.Delay(1000); // Warte 1 Sekunde
+                countdown--;
+            }
+
             // Verstecke die Nachricht
             info.Visibility = Visibility.Collapsed;
 
@@ -115,8 +136,67 @@ namespace TowerDefense
             DisplayTowerMenu();
 
             // Starte das Spiel neu
+            isPaused = false;
             StartGame();
         }
+
+        public void PauseGame()
+        {
+            // Pausiere das Spiel
+            isPaused = true;
+
+            // Stoppe alle Timer
+            _gameTick?.Stop();
+            _dragTimer?.Stop();
+
+            // Stoppe das Spawnen von Gegnern
+            _spawnCancellationTokenSource.Cancel();
+
+            // Pausiere die Gegneranimationen
+            PauseEnemyAnimations();
+
+            // Pausiere die Turmlogik
+            foreach (var tower in _deployedTowers)
+            {
+                tower.PauseTowerLogic();
+            }
+
+            // Pausiere die Projektile
+            PauseProjectiles();
+            BackgroundMusic.Pause();
+        }
+
+        public void ResumeGame()
+        {
+            // Setze das Spiel fort
+            isPaused = false;
+
+            // Starte alle Timer neu
+            _gameTick?.Start();
+            _dragTimer?.Start();
+
+            // Starte das Spawnen von Gegnern neu
+            _spawnCancellationTokenSource = new CancellationTokenSource();
+            _ = SpawnWavesAsync();
+
+            // Setze die Gegneranimationen fort
+            ResumeEnemyAnimations();
+
+            // Setze die Turmlogik fort
+            foreach (var tower in _deployedTowers)
+            {
+                tower.ResumeTowerLogic();
+            }
+
+            // Setze die Projektile fort
+            ResumeProjectiles();
+            BackgroundMusic.Play();
+
+            // Verstecke die Pause-Nachricht
+            info.Visibility = Visibility.Collapsed;
+        }
+
+        private CancellationTokenSource _spawnCancellationTokenSource = new CancellationTokenSource();
 
         private async Task SpawnWavesAsync()
         {
@@ -124,7 +204,8 @@ namespace TowerDefense
 
             for (int currentWave = 0; currentWave < waves.GetWaveCount(); currentWave++)
             {
-                if (_gameOver) break;
+                if (_gameOver || _spawnCancellationTokenSource.Token.IsCancellationRequested || isPaused)
+                    break;
 
                 wave.Content = "Wave: " + (currentWave + 1) + "/80";
 
@@ -133,6 +214,9 @@ namespace TowerDefense
                     int enemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave);
                     for (int EnemyAmount = 0; EnemyAmount < enemyAmount; EnemyAmount++)
                     {
+                        if (_spawnCancellationTokenSource.Token.IsCancellationRequested || isPaused)
+                            break;
+
                         Enemies currentEnemy = waves.SpawnEnemy(currentEnemyType, GameField, _gameWay);
 
                         _enemyGrid.AddObject(currentEnemy);
@@ -140,17 +224,17 @@ namespace TowerDefense
                         _ = currentEnemy.Movement(_mainCanvas, _enemyGrid);
                         _enemyList.Add(currentEnemy);
 
-                        await Task.Delay(_enemySpawnInterval);
+                        await Task.Delay(_enemySpawnInterval, _spawnCancellationTokenSource.Token);
                     }
                 }
 
-                await Task.Delay(_waveSpawnInterval);
+                await Task.Delay(_waveSpawnInterval, _spawnCancellationTokenSource.Token);
 
                 if (currentWave >= 10 && currentWave % 10 == 0)
                 {
                     int speed = (int)Math.Round(currentWave * 0.1);
-                    _waveSpawnInterval = Math.Max(500, _waveSpawnInterval / speed); // Mindestintervall von 500 ms
-                    _enemySpawnInterval = Math.Max(250, _enemySpawnInterval / speed); // Mindestintervall von 250 ms
+                    _waveSpawnInterval = Math.Max(500, _waveSpawnInterval / speed);
+                    _enemySpawnInterval = Math.Max(250, _enemySpawnInterval / speed);
                 }
             }
 
@@ -475,6 +559,8 @@ namespace TowerDefense
         {
             if (_enemyList.Contains(enemy))
             {
+                enemy.storyboard.Stop();
+                enemy.storyboard.Remove();
                 _enemyList.Remove(enemy);
                 if (enemy.Life <= 0)
                 {
@@ -602,6 +688,8 @@ namespace TowerDefense
             if (_deployedTowers.Contains(tower))
             {
                 _deployedTowers.Remove(tower);
+                if(tower._cooldownTimer != null)
+                    tower._cooldownTimer.Stop();
                 tower.StopAttackTimer();
                 var cashchange = tower.TowerWorth / 2;
                 Cashhandler(cashchange);
@@ -660,6 +748,75 @@ namespace TowerDefense
                 timer.Stop();
             };
             timer.Start();
+        }
+
+        public void ResumeTowerLogic()
+        {
+            foreach (var tower in _deployedTowers)
+            {
+                tower.CooldownTime = 100000;
+                tower.StartAttackTimer(GameField, _enemyGrid);
+            }
+        }
+
+        public void PauseTowerLogic()
+        {
+            foreach (var tower in _deployedTowers)
+            {
+                tower.CooldownTime = 100000;
+                tower.StartCooldown();
+            }
+        }
+
+        public void ResumeEnemyAnimations()
+        {
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy.storyboard != null)
+                {
+                    enemy.storyboard.Resume();
+                }
+            }
+        }
+
+        public void PauseEnemyAnimations()
+        {
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy.storyboard != null)
+                {
+                    enemy.storyboard.Pause();
+                }
+            }
+        }
+
+        public void PauseProjectiles()
+        {
+            foreach (var tower in _deployedTowers)
+            {
+                foreach (var projectile in tower.ActiveProjectiles)
+                {
+                    projectile.PauseAnimation();
+                }
+            }
+        }
+
+        public void ResumeProjectiles()
+        {
+            foreach (var tower in _deployedTowers)
+            {
+                foreach (var projectile in tower.ActiveProjectiles)
+                {
+                    projectile.ResumeAnimation();
+                }
+            }
+        }
+
+        private void BackgroundMusic_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            // Musik wiederholen, wenn sie endet
+            BackgroundMusic.Position = TimeSpan.Zero;
+            BackgroundMusic.Play();
         }
     }
 }

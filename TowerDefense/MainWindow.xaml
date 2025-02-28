@@ -123,5 +123,7 @@
                     Style="{StaticResource ArrowButtonStyle}" Click="RightArrow_Click"
                     IsEnabled="True" Margin="280,20,280,0" Grid.RowSpan="2"/>
         </Grid>
+        <MediaElement x:Name="BackgroundMusic" Source="..\..\..\Helper\Assets\Musik.mp3" LoadedBehavior="Manual" UnloadedBehavior="Stop" MediaEnded="BackgroundMusic_MediaEnded" />
     </Grid>
+
 </Window>

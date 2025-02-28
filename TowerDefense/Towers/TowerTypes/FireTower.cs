@@ -28,7 +28,6 @@ namespace TowerDefense.Towers
                 costs: 200,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Flamme.png",
-                projectilespeed: 800,
                 towerName: "FireTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Firetower.png",
                 towerRadius: 80,
@@ -38,12 +37,12 @@ namespace TowerDefense.Towers
                 upgradeCost: 100,
                 towerWorth: 200,
                 targetMode: "CLOSE",
-                cooldownTime: 4
+                cooldownTime: 5
             )
         {
             AttackDuration = TimeSpan.FromSeconds(3);
             Positionoffset = new Point(Position.X, Position.Y - 70);
-            FlameRadius = 1; 
+            FlameRadius = 50; 
         }
 
         public override void Attack(List<Enemies> targets, Canvas gameCanvas)
@@ -94,7 +93,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 3;
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2;
-                    FlameRadius = 100;
+                    FlameRadius = 70;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -111,7 +110,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 2;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackDamage = 3;
-                    FlameRadius = 200;
+                    FlameRadius = 150;
                 }
             }
         }
@@ -121,7 +120,7 @@ namespace TowerDefense.Towers
             string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
 
             ImageHelper imageHelper = new();
-            return imageHelper.GetEntityPic(imagePath, 25, 35);
+            return imageHelper.GetEntityPic(imagePath, 120, 130);
         }
 
     }
