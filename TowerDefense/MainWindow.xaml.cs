@@ -3,6 +3,8 @@ using System.Windows.Media.Animation;
 using System.Windows.Media;
 using System.Windows.Input;
 using TowerDefense.Helper;
+using TowerDefense.Settings;
+using System.ComponentModel.Design;
 
 namespace TowerDefense
 {
@@ -22,16 +24,16 @@ namespace TowerDefense
             gameHandler.GameOver += OnGameOver;
             gameHandler.Opacity = 0.5;
             MainGrid.Children.Add(gameHandler);
-            BackgroundMusic.Play();
+            MenuMusic.Play();
 
             UpdateArrowButtons();
         }
 
-        private void BackgroundMusic_MediaEnded(object sender, RoutedEventArgs e)
+        private void MenuMusic_MediaEnded(object sender, RoutedEventArgs e)
         {
-            // Musik wiederholen, wenn sie endet
-            BackgroundMusic.Position = TimeSpan.Zero;
-            BackgroundMusic.Play();
+            // Menü-Musik in einer Schleife abspielen
+            MenuMusic.Position = TimeSpan.Zero;
+            MenuMusic.Play();
         }
 
         private void UpdateArrowButtons()
@@ -78,14 +80,23 @@ namespace TowerDefense
                 FadeOutButton(Leave),
                 FadeOutButton(LeftArrow),
                 FadeOutButton(RightArrow),
-                FadeOutButton(Restart)
+                FadeOutButton(Restart),
+                FadeOutButton(SettingsButton)
             );
             
             await FadeInElement(gameHandler);
             Menu.Visibility = Visibility.Hidden;
-            BackgroundMusic.Stop();
+            MenuMusic.Stop();
+            gameHandler.IngameMusic.Play();
             Thread.Sleep(500);
-            gameHandler.StartGame();
+            if (gameHandler.isPaused)
+            {
+                gameHandler.ResumeGame();
+            }
+            else
+            {
+                gameHandler.StartGame();
+            }
         }
 
         private Task FadeOutButton(UIElement button)
@@ -204,7 +215,8 @@ namespace TowerDefense
                     FadeInButton(Leave),
                     FadeInButton(LeftArrow),
                     FadeInButton(RightArrow),
-                    FadeInButton(Restart)
+                    FadeInButton(Restart),
+                    FadeInButton(SettingsButton)
                 );
             });
         }
@@ -240,9 +252,18 @@ namespace TowerDefense
             }
         }
 
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Öffne das Soundeinstellungsfenster und übergebe die MediaElement-Instanzen
+            SoundSettingsWindow soundSettingsWindow = new SoundSettingsWindow(MenuMusic, gameHandler.IngameMusic);
+            soundSettingsWindow.Owner = this; // Setze das Hauptfenster als Besitzer
+            soundSettingsWindow.ShowDialog(); // Zeige das Fenster modal an
+        }
+
         private void OpenMenu()
         {
-            BackgroundMusic.Play();
+            gameHandler.IngameMusic.Stop();
+            MenuMusic.Play();
             // Verstecke das Spielfeld
             gameHandler.Opacity = 0.5;
             gameHandler.IsEnabled = false;
@@ -256,13 +277,14 @@ namespace TowerDefense
 
         private void CloseMenu()
         {
+            MenuMusic.Stop();
+            gameHandler.IngameMusic.Play();
             // Verstecke das Menü
             Menu.Visibility = Visibility.Collapsed;
 
             // Zeige das Spielfeld an
             gameHandler.Opacity = 1;
             gameHandler.IsEnabled = true;
-            BackgroundMusic.Stop();
         }
 
         private async void FadeInButtons()
@@ -274,7 +296,8 @@ namespace TowerDefense
                 FadeInButton(Leave),
                 FadeInButton(LeftArrow),
                 FadeInButton(RightArrow),
-                FadeInButton(Restart)
+                FadeInButton(Restart),
+                FadeInButton(SettingsButton)
             );
         }
 

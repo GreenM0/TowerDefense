@@ -1,0 +1,20 @@
+﻿<Window x:Class="TowerDefense.Settings.SoundSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sound Settings" Height="300" Width="400"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="Menü-Musik Lautstärke" FontSize="16" Margin="0 0 0 10" />
+            <Slider x:Name="MenuVolumeSlider" Minimum="0" Maximum="1" Value="0.5" TickFrequency="0.01" IsSnapToTickEnabled="True" ValueChanged="MenuVolumeSlider_ValueChanged" />
+
+            <!-- Ingame-Musik-Lautstärke -->
+            <TextBlock Text="Ingame-Musik Lautstärke" FontSize="16" Margin="0 20 0 10" />
+            <Slider x:Name="IngameVolumeSlider" Minimum="0" Maximum="1" Value="0.5" TickFrequency="0.01" IsSnapToTickEnabled="True" ValueChanged="IngameVolumeSlider_ValueChanged" />
+
+            <!-- Schließen-Button -->
+            <Button Content="Schließen" HorizontalAlignment="Center" Margin="0 20 0 0" Padding="10 5" Click="CloseButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
