@@ -29,6 +29,17 @@ namespace TowerDefense.Towers
                 // Setze den ausgewählten Zielmodus im ComboBox
                 SetSelectedTargetMode();
             }
+            UpdateButtonLabels();
+        }
+
+        private void UpdateButtonLabels()
+        {
+            // Upgrade-Button: Zeige die Upgrade-Kosten an
+            UpgradeButton.Content = $"🛡️ Upgrade ({_tower.UpgradeCost}$)";
+
+            // Verkaufen-Button: Zeige die Einnahmen an (z. B. 50% des Turmwertes)
+            int sellValue = _tower.TowerWorth / 2;
+            SellButton.Content = $"💰 Verkaufen ({sellValue}$)";
         }
 
         private void SetSelectedTargetMode()
@@ -58,6 +69,7 @@ namespace TowerDefense.Towers
                 GameHandler.Instance.Cashhandler(change);
                 _tower.UpgradeTower();
                 IsUpgraded = true;
+                UpdateButtonLabels();
                 Close(); // Schließe das Fenster ohne Nachricht
             }
         }
