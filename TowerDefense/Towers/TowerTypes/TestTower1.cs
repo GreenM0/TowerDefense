@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Configuration;
 using System.Windows.Media;
 using System.Security.Cryptography.X509Certificates;
+using TowerDefense.Helper;
 
 namespace TowerDefense.Towers
 {
@@ -25,7 +26,6 @@ namespace TowerDefense.Towers
                 costs: 200,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\IceBall.png",
-                projectilespeed: 800,
                 towerName: "TestTower",
                 pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
                 towerRadius: 80,
@@ -97,5 +97,12 @@ namespace TowerDefense.Towers
             }            
         }
 
+        public override Image GetEntityPic()
+        {
+            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PathtoImage);
+
+            ImageHelper imageHelper = new();
+            return imageHelper.GetEntityPic(imagePath, 120, 130);
+        }
     }
 }

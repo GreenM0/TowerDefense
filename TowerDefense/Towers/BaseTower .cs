@@ -24,7 +24,6 @@ namespace TowerDefense.Towers
         public int Costs { get; protected set; }
         public float Size { get; protected set; }
         public string ProjectileimagePath { get; protected set; }
-        public int ProjectileSpeed { get; protected set; }
         public string TowerName { get; protected set; }
         public string PathtoImage { get; protected set; }
         public double TowerRadius { get; protected set; }
@@ -33,14 +32,15 @@ namespace TowerDefense.Towers
         public int UpgradeCost { get; protected set; }
         public int TowerWorth {  get; protected set; }
         public string TargetMode { get; set; }
-        public double CooldownTime { get; protected set; }
+        public double CooldownTime { get; set; }
         public Enemies? currentTarget { get; protected set; }
+        public List<Projectile> ActiveProjectiles { get; } = new List<Projectile>();
 
         private DispatcherTimer? _attackTimer;
-        private DispatcherTimer? _cooldownTimer;  // Neu: Cooldown-Timer
+        public DispatcherTimer? _cooldownTimer;  // Neu: Cooldown-Timer
         protected bool _isCooldownActive = false;  // Flag, um zu prüfen, ob der Cooldown läuft
 
-        public BaseTower(float attackRange, double attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, int projectilespeed, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth, string targetMode, int cooldownTime)
+        public BaseTower(float attackRange, double attackDamage, Point position,float attackspeed, int costs, float size, string projectileimagePath, string towerName, string pathtoImage, double towerRadius, int upgradeLevel, int maxUpgradeLevel, int upgradeCost, int towerWorth, string targetMode, int cooldownTime)
         {
             AttackDamage = attackDamage;
             AttackRange = attackRange;
@@ -49,7 +49,6 @@ namespace TowerDefense.Towers
             Costs = costs;
             Size = size;
             ProjectileimagePath = projectileimagePath;
-            ProjectileSpeed = projectilespeed;
             TowerName = towerName;
             PathtoImage = pathtoImage;
             TowerRadius = towerRadius;
@@ -66,7 +65,7 @@ namespace TowerDefense.Towers
         {
             _renderingHandler = (s, e) =>
             {
-                if (_isCooldownActive) return;
+                if (_isCooldownActive || GameHandler.Instance.isPaused) return;
 
                 var enemiesInRange = GetEnemiesInRange(enemyGrid);
 
@@ -123,6 +122,8 @@ namespace TowerDefense.Towers
                 _cooldownTimer.Stop();
                 _cooldownTimer = null;
                 _isCooldownActive = false;  // Cooldown beendet
+
+
                 StartAttackTimer(GameHandler.Instance.GameField, GameHandler.Instance._enemyGrid);
             };
 
@@ -260,13 +261,24 @@ namespace TowerDefense.Towers
                     }
                     targets.Add(nearestToEndEnemy);
                     break;
-
+                case "ALL": // Alle lebenden Gegner in Reichweite
+                    targets = enemiesInRange;
+                    break;
                 default: // Standard: Alle Gegner in Reichweite
                     targets = enemiesInRange;
                     break;
             }
 
             return targets;
+        }
+        public void PauseTowerLogic()
+        {
+            StopAttackTimer();
+        }
+
+        public void ResumeTowerLogic()
+        {
+            StartAttackTimer(GameHandler.Instance.GameField, GameHandler.Instance._enemyGrid);
         }
     }
 }

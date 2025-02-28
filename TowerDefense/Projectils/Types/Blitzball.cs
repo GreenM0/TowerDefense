@@ -26,7 +26,7 @@ namespace TowerDefense.Projectils
 
             foreach (var enemy in GameHandler.Instance._enemyList)
             {
-                Rect targetRect = new Rect(enemy.ImageCenterPosition.X + 20, enemy.ImageCenterPosition.Y, enemy.Image.Width, enemy.Image.Height);
+                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y, enemy.Image.Width, enemy.Image.Height);
 
                 if (arrowRect.IntersectsWith(targetRect))
                 {

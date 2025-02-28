@@ -28,7 +28,6 @@ namespace TowerDefense.Towers
                 costs: 300,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Blitzball.png",
-                projectilespeed: 800,
                 towerName: "ArcherTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Mage.png",
                 towerRadius: 80,

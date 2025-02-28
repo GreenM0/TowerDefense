@@ -148,11 +148,11 @@ namespace TowerDefense.Projectils
 
         public virtual bool IsCollidingWithAnyTarget(Canvas GameCanvas)
         {
-            Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width /2, ProjectileImage.Height /2);
+            Rect arrowRect = new Rect(Canvas.GetLeft(ProjectileImage), Canvas.GetTop(ProjectileImage), ProjectileImage.Width /6, ProjectileImage.Height /6);
 
             foreach (var enemy in GameHandler.Instance._enemyList)
             {
-                Rect targetRect = new Rect(enemy.ImageCenterPosition.X + 20, enemy.ImageCenterPosition.Y , enemy.Image.Width, enemy.Image.Height);
+                Rect targetRect = new Rect(enemy.ImageCenterPosition.X, enemy.ImageCenterPosition.Y , enemy.Image.Width, enemy.Image.Height);
 
                 // Prüfe, ob der Pfeil mit einem Gegner kollidiert
                 if (arrowRect.IntersectsWith(targetRect))
@@ -180,6 +180,22 @@ namespace TowerDefense.Projectils
             else
                 return false;
 
+        }
+
+        public void PauseAnimation()
+        {
+            if (storyboard != null)
+            {
+                storyboard.Pause();
+            }
+        }
+
+        public void ResumeAnimation()
+        {
+            if (storyboard != null)
+            {
+                storyboard.Resume();
+            }
         }
     }
 }

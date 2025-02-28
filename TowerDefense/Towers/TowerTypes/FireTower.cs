@@ -28,7 +28,6 @@ namespace TowerDefense.Towers
                 costs: 200,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Flamme.png",
-                projectilespeed: 800,
                 towerName: "FireTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Firetower.png",
                 towerRadius: 80,

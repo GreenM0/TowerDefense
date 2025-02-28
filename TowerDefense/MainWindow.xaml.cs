@@ -216,7 +216,16 @@ namespace TowerDefense
             // Überprüfe, ob die ESC-Taste gedrückt wurde
             if (e.Key == Key.Escape)
             {
-                OpenMenu();
+                if (gameHandler.isPaused)
+                {
+                    gameHandler.ResumeGame(); // Fortsetzen, wenn das Spiel pausiert ist
+                    CloseMenu();
+                }
+                else
+                {
+                    gameHandler.PauseGame(); // Pausieren, wenn das Spiel läuft
+                    OpenMenu();
+                }
             }
         }
 

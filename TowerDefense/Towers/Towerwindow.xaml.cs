@@ -18,9 +18,17 @@ namespace TowerDefense.Towers
 
             // Aktiviere den Upgrade-Button nur, wenn genug Geld vorhanden ist und der Turm nicht maximal aufgerüstet ist
             UpgradeButton.IsEnabled = (GameHandler.Instance.cash >= tower.UpgradeCost && _tower.UpgradeLevel < _tower.MaxUpgradeLevel);
-
-            // Setze den ausgewählten Zielmodus im ComboBox
-            SetSelectedTargetMode();
+            // Deaktiviere den ComboBox, wenn der Turm vom Typ AllTargetTower ist
+            if (_tower is TestTower1)
+            {
+                TargetModeComboBox.IsEnabled = false; // Deaktiviere den ComboBox
+                TargetModeComboBox.Visibility = Visibility.Collapsed; // Verstecke den ComboBox
+            }
+            else
+            {
+                // Setze den ausgewählten Zielmodus im ComboBox
+                SetSelectedTargetMode();
+            }
         }
 
         private void SetSelectedTargetMode()

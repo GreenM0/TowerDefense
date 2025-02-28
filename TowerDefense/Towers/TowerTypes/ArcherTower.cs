@@ -26,11 +26,10 @@ namespace TowerDefense.Towers
                 costs: 100,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Pfeil.png",
-                projectilespeed: 1200,
                 towerName: "ArcherTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Archer.png",
                 towerRadius: 80,
-                attackspeed: 100,
+                attackspeed: 200,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
                 upgradeCost: 100,
@@ -39,7 +38,7 @@ namespace TowerDefense.Towers
                 cooldownTime: 1
             )
         {
-            Positionoffset = new Point(Position.X + 55, Position.Y - 70);
+            Positionoffset = new Point(Position.X + 55, Position.Y - 80);
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -57,8 +56,11 @@ namespace TowerDefense.Towers
 
             UpdateTowerDirection();
             Pfeil pfeil1 = new(Positionoffset, currentTarget.ImageCenterPosition, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+            ActiveProjectiles.Add(pfeil1);
+
             pfeil1.Shoot(gameCanvas, Positionoffset, currentTarget, AttackSpeed, (projectile) =>
             {
+                ActiveProjectiles.Remove(projectile);
             });
 
             // Wenn der Turm auf Level 3 ist, schieße einen zweiten Pfeil
@@ -68,8 +70,10 @@ namespace TowerDefense.Towers
                 Point secondArrowStart = new Point(Positionoffset.X, Positionoffset.Y + 20); // 20 Einheiten unterhalb des Turms
 
                 Pfeil pfeil2 = new(secondArrowStart, currentTarget.ImageCenterPosition, AttackSpeed, AttackDamage, GameHandler.Instance._enemyList, ProjectileimagePath);
+                ActiveProjectiles.Add(pfeil2);
                 pfeil2.Shoot(gameCanvas, secondArrowStart, currentTarget, AttackSpeed, (projectile) =>
                 {
+                    ActiveProjectiles.Remove(projectile);
                 });
             }
         }
@@ -100,11 +104,10 @@ namespace TowerDefense.Towers
                     PathtoImage = @"..\..\..\Towers\Assets\Archer2.png";
                     ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
-                    ProjectileSpeed = 1500;
                     UpgradeLevel += 1;
                     AttackRange = 270;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackSpeed = 150;
+                    AttackSpeed = 250;
                     CooldownTime = 0.8;
 
                 }
@@ -114,11 +117,10 @@ namespace TowerDefense.Towers
                     ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
-                    ProjectileSpeed = 2000;
                     UpgradeLevel += 1;
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackSpeed = 200;
+                    AttackSpeed = 300;
                     CooldownTime = 0.5;
                 }
             }
