@@ -22,10 +22,10 @@ namespace TowerDefense.Towers
         private int ShockRadius;
         public MageTower(Point position)
             : base(
-                attackRange: 250,
-                attackDamage: 2,
+                attackRange: 150,
+                attackDamage: 1,
                 position: position,
-                costs: 300,
+                costs: 400,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Blitzball.png",
                 towerName: "ArcherTower",
@@ -34,10 +34,10 @@ namespace TowerDefense.Towers
                 attackspeed: 150,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
-                upgradeCost: 100,
+                upgradeCost: 200,
                 towerWorth: 200,
                 targetMode: "ALL",
-                cooldownTime: 7
+                cooldownTime: 8
             )
         {
             Positionoffset = new Point(Position.X + 55, Position.Y - 60);
@@ -92,12 +92,13 @@ namespace TowerDefense.Towers
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
-                    AttackRange = 270;
+                    AttackRange = 200;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 150;
                     CooldownTime = 5;
                     ShockDuration = TimeSpan.FromSeconds(5);
                     ShockRadius = 80;
+                    UpgradeCost = 300;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -107,12 +108,13 @@ namespace TowerDefense.Towers
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
-                    AttackRange = 300;
+                    AttackRange = 250;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 200;
                     CooldownTime = 3;
                     ShockDuration = TimeSpan.FromSeconds(7);
                     ShockRadius = 150;
+                    UpgradeCost = 0;
                 }
             }
         }

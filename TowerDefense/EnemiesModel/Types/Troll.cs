@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Troll : Enemies
     {
-        public Troll() : base(speed: 30, life: 25, coins: 25, imagewidth: 60, imageheight: 95)
+        public Troll() : base(speed: 30, life: 50, coins: 14, imagewidth: 60, imageheight: 95)
         {
 
         }

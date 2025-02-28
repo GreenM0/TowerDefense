@@ -25,7 +25,7 @@ namespace TowerDefense.Towers
                 attackRange: 200,
                 attackDamage: 1,
                 position: position,
-                costs: 400,
+                costs: 300,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Flamme.png",
                 towerName: "FireTower",
@@ -94,7 +94,7 @@ namespace TowerDefense.Towers
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2.5;
                     FlameRadius = 90;
-                    UpgradeCost = 250;
+                    UpgradeCost = 300;
                 }
                 else if (UpgradeLevel == 2)
                 {
@@ -111,6 +111,7 @@ namespace TowerDefense.Towers
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackDamage = 3;
                     FlameRadius = 160;
+                    UpgradeCost = 0;
                 }
             }
         }

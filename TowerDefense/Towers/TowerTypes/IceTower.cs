@@ -32,7 +32,7 @@ namespace TowerDefense.Towers
                 attackspeed: 1,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
-                upgradeCost: 100,
+                upgradeCost: 200,
                 towerWorth: 200,
                 targetMode: "ALL",
                 cooldownTime: 10
@@ -92,7 +92,8 @@ namespace TowerDefense.Towers
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
                     CooldownTime = 4;
-                    MaxTargets = 15;  
+                    MaxTargets = 15;
+                    UpgradeCost = 0;
                 }
             }            
         }

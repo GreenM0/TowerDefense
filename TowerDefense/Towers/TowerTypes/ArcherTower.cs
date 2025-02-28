@@ -20,10 +20,10 @@ namespace TowerDefense.Towers
         private Point Positionoffset;
         public ArcherTower(Point position)
             : base(
-                attackRange: 250,
+                attackRange: 180,
                 attackDamage: 2,
                 position: position,
-                costs: 150,
+                costs: 250,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Pfeil.png",
                 towerName: "ArcherTower",
@@ -32,7 +32,7 @@ namespace TowerDefense.Towers
                 attackspeed: 300,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
-                upgradeCost: 150,
+                upgradeCost: 200,
                 towerWorth: 200,
                 targetMode: "ALL",
                 cooldownTime: 1
@@ -105,10 +105,11 @@ namespace TowerDefense.Towers
                     ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
                     UpgradeLevel += 1;
-                    AttackRange = 270;
+                    AttackRange = 230;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = 350;
                     CooldownTime = 0.8;
+                    UpgradeCost = 350;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -118,10 +119,11 @@ namespace TowerDefense.Towers
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
                     UpgradeLevel += 1;
-                    AttackRange = 300;
+                    AttackRange = 280;
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackSpeed = AttackSpeed;
                     CooldownTime = 0.5;
+                    UpgradeCost = 0;
                 }
             }
         }

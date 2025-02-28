@@ -38,6 +38,7 @@ namespace TowerDefense.Waves
             _singleWave[0] = _waveData[waveNumber, 0];
             _singleWave[1] = _waveData[waveNumber, 1];
             _singleWave[2] = _waveData[waveNumber, 2];
+            _singleWave[3] = _waveData[waveNumber, 3];
             return _singleWave;
         }
 
@@ -63,6 +64,7 @@ namespace TowerDefense.Waves
                 Troll troll = new Troll();
                 return CreateEnemy(troll);
             }
+
 			Enemies CreateEnemy(Enemies enemy)
             {
                 PathGeometry pathCopy = path.Clone();
