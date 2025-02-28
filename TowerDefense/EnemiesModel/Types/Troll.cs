@@ -14,7 +14,7 @@ namespace TowerDefense.EnemiesModel.Types
 
         public override Image GetEntityPic()
         {
-            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\Bertroll.png");
+            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\Bergtroll.png");
 
             ImageHelper imageHelper = new();
             return imageHelper.GetEntityPic(imagePath, ImageWidth, ImageHeight);
