@@ -40,6 +40,7 @@ namespace TowerDefense
         public event Action GameOver;
         private string currentMap;
         public bool isPaused = false;
+        private int _Wave = 0;
 
         //Spieleinstellungen
         private double _Health = 50;
@@ -115,7 +116,7 @@ namespace TowerDefense
             // Zeige die Nachricht an
             info.Visibility = Visibility.Visible;
 
-            // Timer für den Neustart
+            // Timerw für den Neustart
             int countdown = 5;
             while (countdown > 0)
             {
@@ -198,20 +199,20 @@ namespace TowerDefense
 
         private CancellationTokenSource _spawnCancellationTokenSource = new CancellationTokenSource();
 
-        private async Task SpawnWavesAsync()
+        private async Task SpawnWavesAsync() 
         {
             Wave waves = new Wave();
-
-            for (int currentWave = 0; currentWave < waves.GetWaveCount(); currentWave++)
+            
+            while (_Wave < waves.GetWaveCount())
             {
                 if (_gameOver || _spawnCancellationTokenSource.Token.IsCancellationRequested || isPaused)
                     break;
 
-                wave.Content = "Wave: " + (currentWave + 1) + "/80";
+                wave.Content = "Wave: " + (_Wave + 1) + "/80";
 
                 for (int currentEnemyType = 0; currentEnemyType < waves.GetTotalEnemyTypes(); currentEnemyType++)
                 {
-                    int enemyAmount = waves.GetAmountOfEnemies(currentEnemyType, currentWave);
+                    int enemyAmount = waves.GetAmountOfEnemies(currentEnemyType, _Wave);
                     for (int EnemyAmount = 0; EnemyAmount < enemyAmount; EnemyAmount++)
                     {
                         if (_spawnCancellationTokenSource.Token.IsCancellationRequested || isPaused)
@@ -230,12 +231,13 @@ namespace TowerDefense
 
                 await Task.Delay(_waveSpawnInterval, _spawnCancellationTokenSource.Token);
 
-                if (currentWave >= 10 && currentWave % 10 == 0)
+                if (_Wave >= 10 && _Wave % 10 == 0)
                 {
-                    int speed = (int)Math.Round(currentWave * 0.1);
+                    int speed = (int)Math.Round(_Wave * 0.1);
                     _waveSpawnInterval = Math.Max(500, _waveSpawnInterval / speed);
                     _enemySpawnInterval = Math.Max(250, _enemySpawnInterval / speed);
                 }
+                _Wave ++;
             }
 
             _allEnemiesSpawned = true;
