@@ -41,20 +41,6 @@ namespace TowerDefense
             MenuMusic.Play();
         }
 
-        private void LeftArrow_Click(object sender, RoutedEventArgs e)
-        {
-            if (currentMapIndex > 0)
-            {
-                currentMapIndex--;
-                SwitchMap(maps[currentMapIndex]);
-            }
-            else
-            {
-                currentMapIndex++;
-                SwitchMap(maps[currentMapIndex]);
-            }
-        }
-
         private void RightArrow_Click(object sender, RoutedEventArgs e)
         {
             if (currentMapIndex < maps.Length - 1)

@@ -111,8 +111,8 @@
                     Foreground="Black" Content="←"
                     FontFamily="Georgia" FontSize="40"
                     Cursor="Hand" Panel.ZIndex="5"
-                    Style="{StaticResource ArrowButtonStyle}" Click="LeftArrow_Click"
-                    IsEnabled="False" Margin="280,20,280,0" Grid.RowSpan="2"/>
+                    Style="{StaticResource ArrowButtonStyle}" Click="RightArrow_Click"
+                    IsEnabled="True" Margin="280,20,280,0" Grid.RowSpan="2"/>
 
             <!-- Pfeil nach rechts -->
             <Button x:Name="RightArrow" Grid.Row="4" Grid.Column="2" Width="100" Height="100"
