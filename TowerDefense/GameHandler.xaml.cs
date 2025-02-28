@@ -560,7 +560,6 @@ namespace TowerDefense
             if (_enemyList.Contains(enemy))
             {
                 enemy.storyboard.Stop();
-                enemy.storyboard.Remove();
                 _enemyList.Remove(enemy);
                 if (enemy.Life <= 0)
                 {

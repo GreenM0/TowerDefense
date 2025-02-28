@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Slimne : Enemies
     {
-        public Slimne() : base(speed: 20, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
+        public Slimne() : base(speed: 500, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
         {
 
         }
