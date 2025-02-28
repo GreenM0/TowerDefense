@@ -32,8 +32,6 @@ namespace TowerDefense
             MenuMusic.Volume = menuVolume;
             gameHandler.IngameMusic.Volume = ingameVolume;
             MenuMusic.Play();
-
-            UpdateArrowButtons();
         }
 
         private void MenuMusic_MediaEnded(object sender, RoutedEventArgs e)
