@@ -45,7 +45,7 @@ namespace TowerDefense.Waves
         {
             if (EnemyType == 0)
             {
-                Slimne mage = new Slimne();
+                Slime mage = new Slime();
 				return CreateEnemy(mage);
             }
             else if (EnemyType == 1)

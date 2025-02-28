@@ -23,8 +23,6 @@ namespace TowerDefense
             gameHandler.Opacity = 0.5;
             MainGrid.Children.Add(gameHandler);
             BackgroundMusic.Play();
-
-            UpdateArrowButtons();
         }
 
         private void BackgroundMusic_MediaEnded(object sender, RoutedEventArgs e)
@@ -34,19 +32,17 @@ namespace TowerDefense
             BackgroundMusic.Play();
         }
 
-        private void UpdateArrowButtons()
-        {
-            LeftArrow.IsEnabled = currentMapIndex > 0;
-            RightArrow.IsEnabled = currentMapIndex < maps.Length - 1;
-        }
-
         private void LeftArrow_Click(object sender, RoutedEventArgs e)
         {
             if (currentMapIndex > 0)
             {
                 currentMapIndex--;
                 SwitchMap(maps[currentMapIndex]);
-                UpdateArrowButtons();
+            }
+            else
+            {
+                currentMapIndex++;
+                SwitchMap(maps[currentMapIndex]);
             }
         }
 
@@ -56,7 +52,11 @@ namespace TowerDefense
             {
                 currentMapIndex++;
                 SwitchMap(maps[currentMapIndex]);
-                UpdateArrowButtons();
+            }
+            else
+            {
+                currentMapIndex--;
+                SwitchMap(maps[currentMapIndex]);
             }
         }
 
