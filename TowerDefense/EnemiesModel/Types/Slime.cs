@@ -5,9 +5,9 @@ using TowerDefense.Helper;
 
 namespace TowerDefense.EnemiesModel.Types
 {
-    internal class Slimne : Enemies
+    internal class Slime : Enemies
     {
-        public Slimne() : base(speed: 500, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
+        public Slime() : base(speed: 30, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
         {
 
         }
