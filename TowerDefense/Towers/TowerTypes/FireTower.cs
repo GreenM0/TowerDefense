@@ -94,7 +94,6 @@ namespace TowerDefense.Towers
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2;
                     FlameRadius = 70;
-
                 }
                 else if (UpgradeLevel == 2)
                 {

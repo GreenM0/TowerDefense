@@ -42,6 +42,7 @@
             </StackPanel>
         </Border>
         <Label x:Name="info"  Width="600" Height="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="80" Panel.ZIndex="5" Visibility="Hidden"/>
-        <MediaElement x:Name="BackgroundMusic" Source="..\..\..\Helper\Assets\HauptMusik.mp3" LoadedBehavior="Manual" UnloadedBehavior="Manual" MediaEnded="BackgroundMusic_MediaEnded" />
+        <!-- Ingame-Musik -->
+        <MediaElement x:Name="IngameMusic" Source="..\..\..\Helper\Assets\HauptMusik.mp3" LoadedBehavior="Manual" UnloadedBehavior="Manual" MediaEnded="IngameMusic_MediaEnded" />
     </Grid>
 </UserControl>
