@@ -31,7 +31,7 @@ namespace TowerDefense.Towers
                 towerName: "ArcherTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Mage.png",
                 towerRadius: 80,
-                attackspeed: 100,
+                attackspeed: 150,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
                 upgradeCost: 100,

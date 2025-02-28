@@ -12,23 +12,23 @@ using TowerDefense.Helper;
 
 namespace TowerDefense.Towers
 {
-    public class TestTower1 : BaseTower
+    public class IceTower : BaseTower
     {
         public TimeSpan AttackDuration { get; set; }
         public double AttackSlowFactor { get; set; }
         public bool DoDamage { get; set; }
         private int MaxTargets { get; set; }
-        public TestTower1(Point position)
+        public IceTower(Point position)
             : base(
                 attackRange: 150,
-                attackDamage: 0.8,
+                attackDamage: 0.5,
                 position: position,
-                costs: 200,
+                costs: 300,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\IceBall.png",
                 towerName: "TestTower",
                 pathtoImage: @"..\..\..\Towers\Assets\icetower.png",
-                towerRadius: 80,
+                towerRadius: 60,
                 attackspeed: 1,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,

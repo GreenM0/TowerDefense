@@ -27,7 +27,7 @@ namespace TowerDefense
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
         public int cash;
-        private int startchash = 2000;
+        private int startchash = 800;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;
@@ -44,7 +44,7 @@ namespace TowerDefense
         //Spieleinstellungen
         private double _Health = 50;
         private int _waveSpawnInterval = 4000; // Zeit in Millisekunden zwischen Waves
-        private int _enemySpawnInterval = 3000; // Zeit in Millisekunden zwischen Gegner-Spawns
+        private int _enemySpawnInterval = 2000; // Zeit in Millisekunden zwischen Gegner-Spawns
 
         public GameHandler(string mapName)
         {
@@ -315,7 +315,7 @@ namespace TowerDefense
         {
             _towers = new List<BaseTower>
             {
-                new TestTower1(new Point(0, 0)),
+                new IceTower(new Point(0, 0)),
                 new ArcherTower(new Point(0, 0)),
                 new FireTower(new Point(0, 0)),
                 new MageTower(new Point(0, 0))

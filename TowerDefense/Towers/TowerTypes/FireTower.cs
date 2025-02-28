@@ -22,19 +22,19 @@ namespace TowerDefense.Towers
         private int FlameRadius; 
         public FireTower(Point position)
             : base(
-                attackRange: 250,
+                attackRange: 200,
                 attackDamage: 1,
                 position: position,
-                costs: 200,
+                costs: 400,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Flamme.png",
                 towerName: "FireTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Firetower.png",
                 towerRadius: 80,
-                attackspeed: 100,
+                attackspeed: 200,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
-                upgradeCost: 100,
+                upgradeCost: 200,
                 towerWorth: 200,
                 targetMode: "CLOSE",
                 cooldownTime: 5
@@ -87,13 +87,14 @@ namespace TowerDefense.Towers
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
-                    AttackRange = 270;
+                    AttackRange = 230;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackSpeed = 150;
+                    AttackSpeed = 250;
                     CooldownTime = 3;
                     AttackDuration = TimeSpan.FromSeconds(4); 
-                    AttackDamage = 2;
-                    FlameRadius = 70;
+                    AttackDamage = 2.5;
+                    FlameRadius = 90;
+                    UpgradeCost = 250;
                 }
                 else if (UpgradeLevel == 2)
                 {
@@ -103,13 +104,13 @@ namespace TowerDefense.Towers
                     GameHandler.Instance.SetTowerImage(this, Position);
 
                     UpgradeLevel += 1;
-                    AttackRange = 300;
+                    AttackRange = 260;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackSpeed = 200;
+                    AttackSpeed = 300;
                     CooldownTime = 2;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackDamage = 3;
-                    FlameRadius = 150;
+                    FlameRadius = 160;
                 }
             }
         }

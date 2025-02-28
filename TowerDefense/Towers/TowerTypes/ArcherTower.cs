@@ -23,16 +23,16 @@ namespace TowerDefense.Towers
                 attackRange: 250,
                 attackDamage: 2,
                 position: position,
-                costs: 100,
+                costs: 150,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Pfeil.png",
                 towerName: "ArcherTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Archer.png",
                 towerRadius: 80,
-                attackspeed: 200,
+                attackspeed: 300,
                 upgradeLevel: 1,
                 maxUpgradeLevel: 3,
-                upgradeCost: 100,
+                upgradeCost: 150,
                 towerWorth: 200,
                 targetMode: "ALL",
                 cooldownTime: 1
@@ -107,7 +107,7 @@ namespace TowerDefense.Towers
                     UpgradeLevel += 1;
                     AttackRange = 270;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackSpeed = 250;
+                    AttackSpeed = 350;
                     CooldownTime = 0.8;
 
                 }
@@ -120,7 +120,7 @@ namespace TowerDefense.Towers
                     UpgradeLevel += 1;
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;
-                    AttackSpeed = 300;
+                    AttackSpeed = AttackSpeed;
                     CooldownTime = 0.5;
                 }
             }

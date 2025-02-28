@@ -50,7 +50,7 @@
 
         <!-- Zielmodus-Auswahl -->
         <ComboBox Name="TargetModeComboBox" Grid.Row="4"
-          Background="Brown" Foreground="Green"
+          Background="Brown" Foreground="Black"
           FontSize="16" FontFamily="Georgia"
           Padding="12,6" Width="250"
           BorderBrush="#357ABD" BorderThickness="2"
@@ -60,7 +60,7 @@
                 <!-- Stil für die Dropdown-Liste -->
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="Background" Value="Brown"/>
-                    <Setter Property="Foreground" Value="Green"/>
+                    <Setter Property="Foreground" Value="Black"/>
                     <Setter Property="FontSize" Value="16"/>
                     <Setter Property="FontFamily" Value="Georgia"/>
                     <Setter Property="Padding" Value="12,6"/>
@@ -80,7 +80,7 @@
                     </Setter>
                 </Style>
             </ComboBox.Resources>
-            <ComboBoxItem Content="🎯 Nächster Gegner" Tag="CLOSE"/>
+            <ComboBoxItem Content="🎯 Nähester Gegner" Tag="CLOSE"/>
             <ComboBoxItem Content="🎯 Stärkster Gegner" Tag="STRONG"/>
             <ComboBoxItem Content="🎯 Gegner am Ziel" Tag="NEAR_END"/>
         </ComboBox>
