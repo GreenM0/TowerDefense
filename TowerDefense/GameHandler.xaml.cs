@@ -65,13 +65,13 @@ namespace TowerDefense
             _enemyGrid = new SpatialGrid<Enemies>(150);
             _towerGrid = new SpatialGrid<BaseTower>(50);
 
+            IngameMusic.Play();
             _ = SpawnWavesAsync();
             _dragTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(50) // Aktualisierungsintervall (50 ms)
             };
             _dragTimer.Tick += DragTimer_Tick;
-            BackgroundMusic.Play();
         }
 
         public async void ResetGame()
@@ -142,6 +142,7 @@ namespace TowerDefense
 
         public void PauseGame()
         {
+            IngameMusic.Pause();
             // Pausiere das Spiel
             isPaused = true;
 
@@ -163,11 +164,11 @@ namespace TowerDefense
 
             // Pausiere die Projektile
             PauseProjectiles();
-            BackgroundMusic.Pause();
         }
 
         public void ResumeGame()
         {
+            IngameMusic.Play();
             // Setze das Spiel fort
             isPaused = false;
 
@@ -190,7 +191,6 @@ namespace TowerDefense
 
             // Setze die Projektile fort
             ResumeProjectiles();
-            BackgroundMusic.Play();
 
             // Verstecke die Pause-Nachricht
             info.Visibility = Visibility.Collapsed;
@@ -560,7 +560,6 @@ namespace TowerDefense
             if (_enemyList.Contains(enemy))
             {
                 enemy.storyboard.Stop();
-                enemy.storyboard.Remove();
                 _enemyList.Remove(enemy);
                 if (enemy.Life <= 0)
                 {
@@ -812,11 +811,11 @@ namespace TowerDefense
             }
         }
 
-        private void BackgroundMusic_MediaEnded(object sender, RoutedEventArgs e)
+        public void IngameMusic_MediaEnded(object sender, RoutedEventArgs e)
         {
-            // Musik wiederholen, wenn sie endet
-            BackgroundMusic.Position = TimeSpan.Zero;
-            BackgroundMusic.Play();
+            // Ingame-Musik in einer Schleife abspielen
+            IngameMusic.Position = TimeSpan.Zero;
+            IngameMusic.Play();
         }
     }
 }

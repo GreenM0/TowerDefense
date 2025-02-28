@@ -9,6 +9,8 @@ namespace TowerDefense
     /// </summary>
     public partial class App : Application
     {
+        public double MenuVolume { get; set; } = 0.5;
+        public double IngameVolume { get; set; } = 0.5;
     }
 
 }
