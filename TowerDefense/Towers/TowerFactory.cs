@@ -11,7 +11,7 @@ public class TowerFactory
         switch (towerType)
         {
             case "TestTower1":
-                return new TestTower1(position);
+                return new IceTower(position);
             case "ArcherTower":
                 return new ArcherTower(position);
             case "FireTower":
