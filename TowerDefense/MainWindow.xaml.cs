@@ -18,12 +18,19 @@ namespace TowerDefense
         {
             InitializeComponent();
 
+            double menuVolume = Properties.Settings.Default.MenuVolume;
+            double ingameVolume = Properties.Settings.Default.IngameVolume;
+
+            // Wende die Lautstärke auf die MediaElement-Instanzen an
+
             this.KeyDown += MainWindow_KeyDown; 
 
             gameHandler = new GameHandler(maps[currentMapIndex]); // Initialisiere mit der ersten Karte
             gameHandler.GameOver += OnGameOver;
             gameHandler.Opacity = 0.5;
             MainGrid.Children.Add(gameHandler);
+            MenuMusic.Volume = menuVolume;
+            gameHandler.IngameMusic.Volume = ingameVolume;
             MenuMusic.Play();
 
             UpdateArrowButtons();

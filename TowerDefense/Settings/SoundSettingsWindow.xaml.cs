@@ -27,6 +27,9 @@ namespace TowerDefense.Settings
             {
                 _menuMusic.Volume = MenuVolumeSlider.Value;
             }
+
+            // Speichere die Einstellung
+            Properties.Settings.Default.MenuVolume = MenuVolumeSlider.Value;
         }
 
         private void IngameVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -36,10 +39,16 @@ namespace TowerDefense.Settings
             {
                 _ingameMusic.Volume = IngameVolumeSlider.Value;
             }
+
+            // Speichere die Einstellung
+            Properties.Settings.Default.IngameVolume = IngameVolumeSlider.Value;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            // Speichere alle Einstellungen
+            Properties.Settings.Default.Save();
+
             // Schließe das Fenster
             this.Close();
         }
