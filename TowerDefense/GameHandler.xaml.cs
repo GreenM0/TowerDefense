@@ -26,7 +26,7 @@ namespace TowerDefense
         private List<BaseTower> _deployedTowers = new List<BaseTower>();
         public List<Rectangle> _rectangles = new List<Rectangle>();
         public int cash;
-        private int startchash = 200;
+        private int startchash = 2000;
         private Image? ghostTower;
         private bool _gameOver = false;
         private bool _allEnemiesSpawned = false;

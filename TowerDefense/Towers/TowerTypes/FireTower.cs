@@ -43,7 +43,7 @@ namespace TowerDefense.Towers
         {
             AttackDuration = TimeSpan.FromSeconds(3);
             Positionoffset = new Point(Position.X, Position.Y - 70);
-            FlameRadius = 30; 
+            FlameRadius = 50; 
         }
 
         public override void Attack(List<Enemies> targets, Canvas gameCanvas)
@@ -94,7 +94,7 @@ namespace TowerDefense.Towers
                     CooldownTime = 3;
                     AttackDuration = TimeSpan.FromSeconds(4); 
                     AttackDamage = 2;
-                    FlameRadius = 60;
+                    FlameRadius = 70;
 
                 }
                 else if (UpgradeLevel == 2)

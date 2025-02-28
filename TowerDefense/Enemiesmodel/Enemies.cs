@@ -96,6 +96,7 @@ namespace TowerDefense.EnemiesModel
                 UpdatePositionFromCanvas(Image);
                 enemyGrid.UpdateObjectPosition(this, Position);
                 RemovePassedSegments(GetEnemyPosition(), tolerance: 10.0);
+                length = Gamepath.GetTotalLength();
 
                 // Compare current position with the previous position to detect direction change
                 if (Position.X < previousPosition.X)
@@ -385,9 +386,19 @@ namespace TowerDefense.EnemiesModel
             Canvas.SetLeft(FlameOverlay, Position.X);
             Canvas.SetTop(FlameOverlay, Position.Y - ImageHeight / 2); // Leicht über dem Gegner
 
+            // Debugging: Zeige die Z-Index-Werte an
+            int enemyZIndex = Panel.GetZIndex(Image);
+            int flameZIndex = enemyZIndex + 1;
+            Console.WriteLine($"Enemy Z-Index: {enemyZIndex}, Flame Z-Index: {flameZIndex}");
+
+            // Setze den Z-Index der Flamme höher als den des Gegners
+            Panel.SetZIndex(FlameOverlay, flameZIndex);
+
             // Zeige die Flamme an
             FlameOverlay.Visibility = Visibility.Visible;
-            EnemyCanvas.Children.Add(FlameOverlay);
+
+            // Füge die Flamme zum Canvas hinzu (nach dem Gegner-Bild)
+            GameHandler.Instance.GameField.Children.Add(FlameOverlay);
 
             AnimateFlameFlicker();
 

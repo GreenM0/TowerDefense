@@ -26,7 +26,7 @@ namespace TowerDefense.Towers
                 costs: 100,
                 size: 100,
                 projectileimagePath: @"..\..\..\Projectils\Types\Assets\Pfeil.png",
-                projectilespeed: 1000,
+                projectilespeed: 1200,
                 towerName: "ArcherTower",
                 pathtoImage: @"..\..\..\Towers\Assets\Archer.png",
                 towerRadius: 80,
@@ -39,7 +39,7 @@ namespace TowerDefense.Towers
                 cooldownTime: 1
             )
         {
-            Positionoffset = new Point(Position.X + 55, Position.Y - 60);
+            Positionoffset = new Point(Position.X + 55, Position.Y - 70);
         }
 
         public override void Attack(List<Enemies> target, Canvas gameCanvas)
@@ -100,7 +100,7 @@ namespace TowerDefense.Towers
                     PathtoImage = @"..\..\..\Towers\Assets\Archer2.png";
                     ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     GameHandler.Instance.SetTowerImage(this, Position);
-
+                    ProjectileSpeed = 1500;
                     UpgradeLevel += 1;
                     AttackRange = 270;
                     TowerWorth = TowerWorth + UpgradeCost;
@@ -114,7 +114,7 @@ namespace TowerDefense.Towers
                     ProjectileimagePath = @"..\..\..\Projectils\Types\Assets\Pfeil3.png";
                     Image newTowerImage = GetEntityPic();
                     GameHandler.Instance.SetTowerImage(this, Position);
-
+                    ProjectileSpeed = 2000;
                     UpgradeLevel += 1;
                     AttackRange = 300;
                     TowerWorth = TowerWorth + UpgradeCost;

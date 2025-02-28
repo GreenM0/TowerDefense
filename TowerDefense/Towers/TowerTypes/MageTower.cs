@@ -72,12 +72,12 @@ namespace TowerDefense.Towers
 
             if (Image.RenderTransform is ScaleTransform flipTransform)
             {
-                flipTransform.ScaleX = isTargetOnRight ? 1 : -1;
+                flipTransform.ScaleX = isTargetOnRight ? -1 : 1;
             }
             else
             {
                 Positionoffset.X -= 40;
-                flipTransform = new ScaleTransform(isTargetOnRight ? 1 : -1, 1);
+                flipTransform = new ScaleTransform(isTargetOnRight ? -1 : 1, 1);
                 Image.RenderTransform = flipTransform;
                 Image.RenderTransformOrigin = new Point(0.5, 0.5);
             }

@@ -110,6 +110,7 @@ namespace TowerDefense.Towers
             if (_isCooldownActive) return;  // Wenn der Cooldown bereits läuft, nichts tun
 
             _isCooldownActive = true;
+            StopAttackTimer();
 
             // Cooldown-Timer
             _cooldownTimer = new DispatcherTimer
@@ -122,6 +123,7 @@ namespace TowerDefense.Towers
                 _cooldownTimer.Stop();
                 _cooldownTimer = null;
                 _isCooldownActive = false;  // Cooldown beendet
+                StartAttackTimer(GameHandler.Instance.GameField, GameHandler.Instance._enemyGrid);
             };
 
             _cooldownTimer.Start();
@@ -250,7 +252,7 @@ namespace TowerDefense.Towers
 
                     foreach (var enemy in enemiesInRange)
                     {
-                        if (enemy.length > maxPathLength)
+                        if (enemy.length < maxPathLength)
                         {
                             nearestToEndEnemy = enemy;
                             maxPathLength = enemy.length;
