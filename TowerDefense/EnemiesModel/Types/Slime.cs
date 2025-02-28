@@ -7,7 +7,7 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Slime : Enemies
     {
-        public Slime() : base(speed: 60, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
+        public Slime() : base(speed: 60, life: 5, coins: 4, imagewidth: 50, imageheight: 55)
         {
 
         }

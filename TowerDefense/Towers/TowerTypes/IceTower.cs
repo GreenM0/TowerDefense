@@ -75,8 +75,9 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(5);
                     AttackSpeed = 2;
-                    CooldownTime = 6;
+                    CooldownTime = 8;
                     MaxTargets = 10;
+                    UpgradeCost = 300;
 
                 }
                 else if (UpgradeLevel == 2)
@@ -91,7 +92,7 @@ namespace TowerDefense.Towers
                     TowerWorth = TowerWorth + UpgradeCost;
                     AttackDuration = TimeSpan.FromSeconds(7);
                     AttackSpeed = 3;
-                    CooldownTime = 4;
+                    CooldownTime = 6;
                     MaxTargets = 15;
                     UpgradeCost = 0;
                 }
