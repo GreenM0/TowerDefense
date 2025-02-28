@@ -7,11 +7,10 @@ namespace TowerDefense.EnemiesModel.Types
 {
     internal class Slimne : Enemies
     {
-        public Slimne() : base(speed: 500, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
+        public Slimne() : base(speed: 30, life: 5, coins: 3, imagewidth: 50, imageheight: 55)
         {
 
         }
-
         public override Image GetEntityPic()
         {
             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\EnemiesModel\Types\Assets\slime.png");

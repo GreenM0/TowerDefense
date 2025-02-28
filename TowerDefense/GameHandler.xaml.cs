@@ -775,6 +775,10 @@ namespace TowerDefense
                 {
                     enemy.storyboard.Resume();
                 }
+                if (enemy._flameStoryboard != null)
+                {
+                    enemy._flameStoryboard.Pause();
+                }
             }
         }
 
@@ -785,6 +789,10 @@ namespace TowerDefense
                 if (enemy.storyboard != null)
                 {
                     enemy.storyboard.Pause();
+                }
+                if (enemy._flameStoryboard != null)
+                {
+                    enemy._flameStoryboard.Pause();
                 }
             }
         }

@@ -34,7 +34,7 @@ namespace TowerDefense.EnemiesModel
         private bool burnactive = false;
         public PathGeometry Gamepath { get; set; }
         public Image FlameOverlay { get; set; }
-        private Storyboard _flameStoryboard;
+        public Storyboard _flameStoryboard;
         private Canvas EnemyCanvas;
         public double length { get; set; }
 
@@ -126,12 +126,22 @@ namespace TowerDefense.EnemiesModel
                 {
                     slowactive = true;
                     Movement(EnemyCanvas, enemyGrid);
+
+                    if(_isBurning && burnactive)
+                    {
+                        FlameMovement();
+                    }
                 }
 
                 if (!_isSlowed && slowactive)
                 {
                     slowactive = false;
                     Movement(EnemyCanvas, enemyGrid);
+
+                    if (_isBurning && burnactive)
+                    {
+                        FlameMovement();
+                    }
                 }
 
                 if (_isBurning && !burnactive)
@@ -382,14 +392,6 @@ namespace TowerDefense.EnemiesModel
             Canvas.SetLeft(FlameOverlay, Position.X);
             Canvas.SetTop(FlameOverlay, Position.Y - ImageHeight / 2); // Leicht über dem Gegner
 
-            // Debugging: Zeige die Z-Index-Werte an
-            int enemyZIndex = Panel.GetZIndex(Image);
-            int flameZIndex = enemyZIndex + 1;
-            Console.WriteLine($"Enemy Z-Index: {enemyZIndex}, Flame Z-Index: {flameZIndex}");
-
-            // Setze den Z-Index der Flamme höher als den des Gegners
-            Panel.SetZIndex(FlameOverlay, flameZIndex);
-
             // Zeige die Flamme an
             FlameOverlay.Visibility = Visibility.Visible;
 
@@ -417,7 +419,6 @@ namespace TowerDefense.EnemiesModel
 
         public async Task FlameMovement()
         {
-
             double totalPathLength = Gamepath.GetTotalLength();
 
             // Berechne die Dauer basierend auf dem aktuellen Speed
@@ -527,22 +528,6 @@ namespace TowerDefense.EnemiesModel
             {
                 Image.Effect = null;
             };
-        }
-
-        public void PauseAnimation()
-        {
-            if (storyboard != null)
-            {
-                storyboard.Pause();
-            }
-        }
-
-        public void ResumeAnimation()
-        {
-            if (storyboard != null)
-            {
-                storyboard.Resume();
-            }
         }
     }
 }
